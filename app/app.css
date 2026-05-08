@@ -1,0 +1,403 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0a0a0a;
+  --color-bone: #f2efe8;
+  --color-paper: #e8e4da;
+  --color-solar: #ff5b1f;
+  --color-line: rgb(10 10 10 / 0.18);
+
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease-solar: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out-solar: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-tick: tick 28s linear infinite;
+  --animate-tick-band: tick 22s linear infinite;
+  --animate-rays: rays 60s linear infinite;
+  --animate-pulse-sun: pulseSun 7s ease-in-out infinite;
+  --animate-rise: rise 0.9s var(--ease-out-solar) forwards;
+}
+
+:root {
+  --solar-glow: 255, 91, 31;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    background: var(--color-bone);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+  body {
+    overflow-x: hidden;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: 0;
+    background: none;
+    color: inherit;
+  }
+  img {
+    max-width: 100%;
+    display: block;
+  }
+}
+
+@layer utilities {
+  @keyframes tick {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes rays {
+    to {
+      transform: translateY(-50%) rotate(360deg);
+    }
+  }
+  @keyframes pulseSun {
+    0%,
+    100% {
+      transform: translateY(-50%) scale(1);
+    }
+    50% {
+      transform: translateY(-50%) scale(1.06);
+    }
+  }
+  @keyframes rise {
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Mono helpers (used as utility classes in Tailwind world too) */
+.mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.tiny {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+.pad {
+  padding-inline: clamp(16px, 3vw, 40px);
+}
+
+/* Grain overlay — fractal noise via inline SVG data URI */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.32;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .25 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s var(--ease-out-solar),
+    transform 0.9s var(--ease-out-solar);
+}
+.reveal.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Solar custom cursor — visible on light AND dark backgrounds.
+   No blend mode: solid solar orange always wins against bone, paper, ink, and dark cards.
+   Subtle outer ring keeps it legible if it ever crosses a same-orange surface. */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--color-solar);
+  box-shadow:
+    0 0 0 1px rgb(10 10 10 / 0.18),
+    0 0 14px rgb(var(--solar-glow) / 0.45);
+  pointer-events: none;
+  z-index: 80;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.25s var(--ease-solar),
+    height 0.25s var(--ease-solar),
+    background 0.2s var(--ease-solar),
+    box-shadow 0.25s var(--ease-solar),
+    opacity 0.2s;
+  will-change: transform, width, height;
+  opacity: 0;
+}
+.cursor.is-on-product {
+  width: 88px;
+  height: 88px;
+  box-shadow:
+    0 0 0 1px rgb(10 10 10 / 0.18),
+    0 0 30px rgb(var(--solar-glow) / 0.55);
+}
+.cursor.is-on-product::after {
+  content: "VER";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--color-ink);
+}
+/* When the cursor is over a dark surface, swap the thin ring to a light one
+   for extra crispness against ink. JS toggles this via the body class. */
+body.cursor-on-dark .cursor {
+  box-shadow:
+    0 0 0 1px rgb(242 239 232 / 0.45),
+    0 0 14px rgb(var(--solar-glow) / 0.55);
+}
+body.cursor-on-dark .cursor.is-on-product {
+  box-shadow:
+    0 0 0 1px rgb(242 239 232 / 0.45),
+    0 0 30px rgb(var(--solar-glow) / 0.65);
+}
+body.no-cursor,
+body.no-cursor * {
+  cursor: none !important;
+}
+@media (hover: none) {
+  .cursor {
+    display: none !important;
+  }
+  body.no-cursor,
+  body.no-cursor * {
+    cursor: auto !important;
+  }
+}
+
+/* Hero wordmark letter rise */
+.wordmark {
+  display: flex;
+  gap: clamp(2px, 0.6vw, 12px);
+  user-select: none;
+  overflow: hidden;
+  font-weight: 900;
+  font-size: clamp(64px, 18vw, 280px);
+  letter-spacing: -0.04em;
+  line-height: 0.85;
+  position: relative;
+  z-index: 2;
+  mix-blend-mode: multiply;
+}
+.wordmark span {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: rise 0.9s var(--ease-out-solar) forwards;
+}
+.wordmark span:nth-child(1) { animation-delay: 0.05s; }
+.wordmark span:nth-child(2) { animation-delay: 0.12s; }
+.wordmark span:nth-child(3) { animation-delay: 0.19s; }
+.wordmark span:nth-child(4) { animation-delay: 0.26s; }
+.wordmark span:nth-child(5) { animation-delay: 0.33s; }
+.wordmark span:nth-child(6) { animation-delay: 0.40s; }
+
+/* Hero sun + rays — these depend on conic-gradient + mask we don't want to inline as Tailwind */
+.hero-sun {
+  position: absolute;
+  right: -6vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 62vmin;
+  height: 62vmin;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(var(--solar-glow), 1) 0%,
+    rgba(var(--solar-glow), 0.85) 38%,
+    rgba(var(--solar-glow), 0) 72%
+  );
+  z-index: 0;
+  pointer-events: none;
+  animation: pulseSun 7s ease-in-out infinite;
+}
+.hero-rays {
+  position: absolute;
+  right: -6vw;
+  top: 50%;
+  transform: translateY(-50%) rotate(0);
+  width: 78vmin;
+  height: 78vmin;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(var(--solar-glow), 0) 0deg,
+    rgba(var(--solar-glow), 0.55) 6deg,
+    rgba(var(--solar-glow), 0) 12deg,
+    rgba(var(--solar-glow), 0) 30deg,
+    rgba(var(--solar-glow), 0.4) 36deg,
+    rgba(var(--solar-glow), 0) 42deg,
+    rgba(var(--solar-glow), 0) 80deg,
+    rgba(var(--solar-glow), 0.5) 86deg,
+    rgba(var(--solar-glow), 0) 92deg,
+    rgba(var(--solar-glow), 0) 130deg,
+    rgba(var(--solar-glow), 0.45) 136deg,
+    rgba(var(--solar-glow), 0) 142deg,
+    rgba(var(--solar-glow), 0) 200deg,
+    rgba(var(--solar-glow), 0.45) 206deg,
+    rgba(var(--solar-glow), 0) 212deg,
+    rgba(var(--solar-glow), 0) 270deg,
+    rgba(var(--solar-glow), 0.5) 276deg,
+    rgba(var(--solar-glow), 0) 282deg,
+    rgba(var(--solar-glow), 0) 360deg
+  );
+  -webkit-mask: radial-gradient(circle, transparent 28%, #000 30%, #000 60%, transparent 78%);
+  mask: radial-gradient(circle, transparent 28%, #000 30%, #000 60%, transparent 78%);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  animation: rays 60s linear infinite;
+}
+
+.manifesto-sun {
+  position: absolute;
+  left: -20vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60vmin;
+  height: 60vmin;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(var(--solar-glow), 0.85) 0%,
+    rgba(var(--solar-glow), 0) 70%
+  );
+  filter: blur(20px);
+  opacity: 0.65;
+}
+
+/* Look mix-blend caption */
+.look-cap {
+  color: var(--color-bone);
+  mix-blend-mode: difference;
+}
+
+/* Dark theme overrides (toggled by TweaksPanel) */
+body.theme-dark {
+  background: var(--color-ink);
+  color: var(--color-bone);
+}
+body.theme-dark .nav {
+  background: rgb(10 10 10 / 0.7);
+  border-color: rgb(242 239 232 / 0.14);
+}
+body.theme-dark .ticker-bar {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .cart-pill {
+  border-color: var(--color-bone);
+}
+body.theme-dark .cart-pill:hover {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .btn {
+  background: transparent;
+  color: var(--color-bone);
+  border-color: var(--color-bone);
+}
+body.theme-dark .btn-solid {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .btn-solar {
+  background: var(--color-solar);
+  color: var(--color-ink);
+  border-color: var(--color-solar);
+}
+body.theme-dark .picker-frame,
+body.theme-dark .splits-grid,
+body.theme-dark .section-head {
+  border-color: rgb(242 239 232 / 0.18);
+}
+body.theme-dark .picker-panel {
+  background: #141414;
+}
+body.theme-dark .size-btn {
+  border-color: var(--color-bone);
+}
+body.theme-dark .size-btn:hover {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .news {
+  border-color: var(--color-bone);
+}
+body.theme-dark .news button {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .card,
+body.theme-dark .picker-media {
+  background: #141414;
+}
+body.theme-dark .picker-big {
+  color: rgb(255 255 255 / 0.05);
+}
+body.theme-dark .grain {
+  display: none;
+}
+body.theme-dark .split:hover {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .quickadd {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .tweaks {
+  background: #141414;
+  color: var(--color-bone);
+  border-color: var(--color-bone);
+}
+body.theme-dark .tweaks-close {
+  border-color: var(--color-bone);
+}
+body.theme-dark .twbtn {
+  border-color: var(--color-bone);
+}
+body.theme-dark .twbtn[aria-checked="true"] {
+  background: var(--color-bone);
+  color: var(--color-ink);
+}
+body.theme-dark .foot {
+  background: var(--color-ink);
+}
+body.theme-dark .wordmark {
+  mix-blend-mode: normal;
+  color: var(--color-bone);
+}
+body.theme-dark .nav-inner,
+body.theme-dark .logo {
+  color: var(--color-bone);
+}
