@@ -1,94 +1,86 @@
-import { useState, type FormEvent } from "react";
+import { Link } from "react-router";
 
 const COLS = [
   {
     title: "Tienda",
-    items: ["Mujer", "Hombre", "Calzado", "Accesorios", "Drops anteriores"],
+    links: [
+      { label: "Mujer", to: "/tienda?cat=mujer" },
+      { label: "Hombre", to: "/tienda?cat=hombre" },
+      { label: "Accesorios", to: "/tienda?cat=accesorios" },
+      { label: "Novedades", to: "/tienda" },
+    ],
   },
   {
-    title: "Servicio",
-    items: ["Envíos", "Devoluciones", "Tallas", "Cuidado", "Contacto"],
+    title: "Ayuda",
+    links: [
+      { label: "Envíos y entregas", to: "/tienda" },
+      { label: "Devoluciones", to: "/tienda" },
+      { label: "Guía de tallas", to: "/tienda" },
+      { label: "Contacto", to: "/tienda" },
+    ],
   },
   {
-    title: "Mundo Kinara",
-    items: [
-      "Sobre nosotras",
-      "Atelier Porto",
-      "Sostenibilidad",
-      "Instagram",
-      "TikTok",
+    title: "Marca",
+    links: [
+      { label: "Nuestra historia", to: "/tienda" },
+      { label: "Sostenibilidad", to: "/tienda" },
+      { label: "Instagram", to: "/tienda" },
+      { label: "TikTok", to: "/tienda" },
     ],
   },
 ];
 
 export function SiteFooter() {
-  const [submitted, setSubmitted] = useState(false);
-  const [email, setEmail] = useState("");
-
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitted(true);
-    setEmail("");
-  };
-
   return (
-    <footer className="foot pad bg-bone py-[clamp(48px,5vw,80px)]">
-      <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr] gap-8 border-b border-line pb-10 max-[980px]:grid-cols-1">
-        <div>
-          <h4 className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[.2em] opacity-70">
-            Newsletter solar
-          </h4>
-          <p className="max-w-[38ch] text-[14px] opacity-80">
-            Avisos de drop, una pieza por mes. Sin promociones, sin ruido.
-          </p>
-          <form
-            onSubmit={onSubmit}
-            className="news mt-3.5 flex max-w-[360px] overflow-hidden rounded-full border border-ink"
-          >
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@brilla.com"
-              className="flex-1 bg-transparent px-4 py-3 font-mono text-[12px] tracking-[.06em] outline-none"
-            />
-            <button
-              type="submit"
-              className="bg-ink px-[18px] font-mono text-[11px] uppercase tracking-[.2em] text-bone transition-colors hover:bg-solar hover:text-ink"
+    <footer className="bg-bone">
+      <div className="pad py-[clamp(48px,6vw,88px)]">
+        <div className="grid gap-10 border-b border-line pb-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div>
+            <Link
+              to="/"
+              className="font-display text-2xl tracking-[0.18em]"
             >
-              {submitted ? "✓ Apuntad@" : "Apuntarme"}
-            </button>
-          </form>
-        </div>
-        {COLS.map((col) => (
-          <div key={col.title}>
-            <h4 className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[.2em] opacity-70">
-              {col.title}
-            </h4>
-            <ul className="flex list-none flex-col gap-1.5">
-              {col.items.map((it) => (
-                <li key={it}>
-                  <a
-                    href="#"
-                    className="text-[14px] transition-colors hover:text-solar"
-                  >
-                    {it}
-                  </a>
-                </li>
-              ))}
-            </ul>
+              KINARA
+            </Link>
+            <p className="mt-4 max-w-[34ch] text-sm text-muted">
+              Athleisure técnico hecho para moverse y para vivir. Tejidos
+              suaves, color cálido, siluetas que acompañan.
+            </p>
           </div>
-        ))}
-      </div>
-      <div className="flex items-end justify-between gap-6 pt-8">
-        <div className="text-[clamp(72px,14vw,220px)] font-black leading-[0.85] tracking-[-0.04em]">
-          KINARA
+          {COLS.map((col) => (
+            <div key={col.title}>
+              <h4 className="label mb-4">{col.title}</h4>
+              <ul className="flex flex-col gap-2.5">
+                {col.links.map((l) => (
+                  <li key={l.label}>
+                    <Link
+                      to={l.to}
+                      className="text-sm text-espresso/80 transition-colors hover:text-clay"
+                    >
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="text-right font-mono text-[11px] uppercase tracking-[.18em] opacity-65">
-          © KINARA 2026 · BRILLA CON FUERZA
-          <br />
-          Made in Porto · Designed for the sun
+
+        <div className="flex flex-col items-start justify-between gap-4 pt-7 sm:flex-row sm:items-center">
+          <p className="text-[13px] text-muted">
+            © {2026} KINARA · Hecho con cuidado en España
+          </p>
+          <div className="flex items-center gap-5 text-[13px] text-muted">
+            <a href="#" className="hover:text-clay">
+              Privacidad
+            </a>
+            <a href="#" className="hover:text-clay">
+              Términos
+            </a>
+            <a href="#" className="hover:text-clay">
+              Cookies
+            </a>
+          </div>
         </div>
       </div>
     </footer>

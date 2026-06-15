@@ -1,11 +1,17 @@
-import { PRODUCTS } from "~/data/products";
+import type { Product } from "~/data/products";
 import { ProductCard } from "./ProductCard";
 
-export function ProductGrid() {
+export function ProductGrid({
+  products,
+  priorityCount = 0,
+}: {
+  products: Product[];
+  priorityCount?: number;
+}) {
   return (
-    <div className="mt-8 grid grid-cols-12 gap-[18px] max-[980px]:grid-cols-6">
-      {PRODUCTS.map((p) => (
-        <ProductCard key={p.id} product={p} />
+    <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+      {products.map((p, i) => (
+        <ProductCard key={p.id} product={p} priority={i < priorityCount} />
       ))}
     </div>
   );

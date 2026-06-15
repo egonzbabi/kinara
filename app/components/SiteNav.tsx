@@ -1,83 +1,180 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router";
 import { useCart } from "~/context/CartContext";
+import { cn } from "~/lib/cn";
 
-const NAV_ITEMS_LEFT = [
-  { label: "Mujer", href: "#mujer" },
-  { label: "Hombre", href: "#hombre" },
-  { label: "Colecciones", href: "#colecciones" },
-  { label: "Lookbook", href: "#lookbook" },
+const LINKS = [
+  { to: "/tienda", label: "Tienda" },
+  { to: "/tienda?cat=mujer", label: "Mujer" },
+  { to: "/tienda?cat=hombre", label: "Hombre" },
+  { to: "/tienda?cat=accesorios", label: "Accesorios" },
 ];
 
-const NAV_ITEMS_RIGHT = [
-  { label: "Buscar", href: "#search" },
-  { label: "Cuenta", href: "#account" },
-];
+export function SiteNav() {
+  const { count, open } = useCart();
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-function NavLink({ href, label }: { href: string; label: string }) {
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   return (
-    <a
-      href={href}
-      className="relative inline-block py-1.5 transition-opacity duration-200 ease-[var(--ease-solar)] after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-solar after:transition-transform after:duration-300 after:ease-[var(--ease-solar)] after:content-[''] hover:after:scale-x-100"
+    <header
+      className={cn(
+        "sticky top-0 z-50 bg-sand/85 backdrop-blur-md transition-shadow",
+        scrolled ? "shadow-[0_1px_0_var(--color-line)]" : "",
+      )}
     >
-      {label}
-    </a>
+      <nav className="pad flex h-16 items-center justify-between gap-4">
+        {/* Left: desktop links / mobile burger */}
+        <div className="flex flex-1 items-center gap-7">
+          <button
+            className="md:hidden"
+            aria-label="Abrir menú"
+            onClick={() => setMenuOpen(true)}
+          >
+            <BurgerIcon />
+          </button>
+          <ul className="hidden items-center gap-7 md:flex">
+            {LINKS.map((l) => (
+              <li key={l.label}>
+                <NavLink
+                  to={l.to}
+                  end={l.to === "/tienda"}
+                  className={({ isActive }) =>
+                    cn(
+                      "text-sm font-medium text-espresso/80 transition-colors hover:text-clay",
+                      isActive && "text-espresso",
+                    )
+                  }
+                >
+                  {l.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Center: wordmark */}
+        <Link
+          to="/"
+          aria-label="KINARA · Inicio"
+          className="font-display text-[26px] font-semibold leading-none tracking-[0.18em]"
+        >
+          KINARA
+        </Link>
+
+        {/* Right: utilities */}
+        <div className="flex flex-1 items-center justify-end gap-5">
+          <button
+            className="hidden text-sm font-medium text-espresso/80 transition-colors hover:text-clay sm:block"
+            aria-label="Buscar"
+          >
+            Buscar
+          </button>
+          <button
+            onClick={open}
+            className="group flex items-center gap-2 text-sm font-medium"
+            aria-label={`Abrir bolsa, ${count} artículos`}
+          >
+            <span className="transition-colors group-hover:text-clay">
+              Bolsa
+            </span>
+            <span className="grid h-6 min-w-6 place-items-center rounded-full bg-espresso px-1.5 text-[12px] font-semibold tabular-nums text-bone">
+              {count}
+            </span>
+          </button>
+        </div>
+      </nav>
+
+      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+    </header>
   );
 }
 
-export function SiteNav() {
-  const { count } = useCart();
-  const countRef = useRef<HTMLElement>(null);
-  const firstRun = useRef(true);
-
-  useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false;
-      return;
-    }
-    const el = countRef.current;
-    if (!el) return;
-    el.animate(
-      [
-        { transform: "scale(1)", color: "var(--color-ink)" },
-        { transform: "scale(1.5)", color: "#FF5B1F" },
-        { transform: "scale(1)", color: "var(--color-ink)" },
-      ],
-      { duration: 600, easing: "cubic-bezier(.16,1,.3,1)" },
-    );
-  }, [count]);
-
+function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
-    <nav className="nav sticky top-0 z-40 border-b border-line bg-bone/85 backdrop-blur-[14px] backdrop-saturate-[1.2]">
-      <div className="nav-inner grid h-16 grid-cols-[1fr_auto_1fr] items-center px-[clamp(16px,3vw,40px)] max-[980px]:grid-cols-[1fr_auto]">
-        <div className="flex items-center gap-[22px] font-mono text-[12px] uppercase tracking-[.18em] max-[980px]:hidden">
-          {NAV_ITEMS_LEFT.map((it) => (
-            <NavLink key={it.href} {...it} />
-          ))}
+    <div
+      aria-hidden={!open}
+      className={cn(
+        "fixed inset-0 z-[60] md:hidden",
+        !open && "pointer-events-none",
+      )}
+    >
+      <button
+        aria-label="Cerrar menú"
+        onClick={onClose}
+        className={cn(
+          "absolute inset-0 bg-espresso/40 transition-opacity",
+          open ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <div
+        className={cn(
+          "absolute left-0 top-0 flex h-full w-[80%] max-w-[320px] flex-col bg-sand p-6 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          open ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        <div className="mb-8 flex items-center justify-between">
+          <span className="font-display text-xl tracking-[0.18em]">KINARA</span>
+          <button onClick={onClose} aria-label="Cerrar">
+            <CloseIcon />
+          </button>
         </div>
-        <a
-          href="#"
-          aria-label="Kinara"
-          className="logo px-3 py-1.5 text-[22px] font-black leading-none tracking-[.32em] text-ink"
-        >
-          KINARA
-        </a>
-        <div className="flex items-center justify-end gap-[22px] font-mono text-[12px] uppercase tracking-[.18em]">
-          {NAV_ITEMS_RIGHT.map((it) => (
-            <NavLink key={it.href} {...it} />
+        <ul className="flex flex-col gap-1">
+          {LINKS.map((l) => (
+            <li key={l.label}>
+              <Link
+                to={l.to}
+                onClick={onClose}
+                className="block border-b border-line py-4 font-display text-2xl"
+              >
+                {l.label}
+              </Link>
+            </li>
           ))}
-          <a
-            href="#cart"
-            className="cart-pill inline-flex items-center gap-2 rounded-full border border-ink px-3 py-2 font-mono text-[11px] uppercase tracking-[.18em] transition-colors duration-200 ease-[var(--ease-solar)] hover:bg-ink hover:text-bone"
-          >
-            <span
-              className="block size-1.5 rounded-full bg-solar"
-              style={{ boxShadow: "0 0 0 4px rgb(255 91 31 / 0.18)" }}
-              aria-hidden
-            />
-            Bolsa · <b ref={countRef} className="inline-block">{count}</b>
-          </a>
-        </div>
+        </ul>
+        <button className="mt-8 text-left text-sm font-medium text-muted">
+          Buscar
+        </button>
       </div>
-    </nav>
+    </div>
+  );
+}
+
+function BurgerIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M3 6h18M3 12h18M3 18h18"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
