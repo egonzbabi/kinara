@@ -8,7 +8,7 @@ import { EditorialSplit } from "~/components/EditorialSplit";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { LookbookBand } from "~/components/LookbookBand";
 import { Newsletter } from "~/components/Newsletter";
-import { PRODUCTS } from "~/data/products";
+import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 
 export function meta(_: Route.MetaArgs) {
@@ -22,10 +22,16 @@ export function meta(_: Route.MetaArgs) {
   ];
 }
 
-export default function Index() {
-  useScrollReveal();
+export async function loader() {
+  const products = await getAllProducts();
+  return { products };
+}
 
-  const novedades = PRODUCTS.filter((p) => p.isNew).slice(0, 4);
+export default function Index({ loaderData }: Route.ComponentProps) {
+  useScrollReveal();
+  const { products } = loaderData;
+
+  const novedades = products.filter((p) => p.isNew).slice(0, 4);
 
   return (
     <>
@@ -53,7 +59,7 @@ export default function Index() {
       </section>
 
       <EditorialSplit />
-      <BestsellerRail />
+      <BestsellerRail products={products} />
       <LookbookBand />
       <Newsletter />
     </>

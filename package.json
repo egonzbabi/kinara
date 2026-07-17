@@ -6,15 +6,23 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "migrate:products": "tsx scripts/migrate-products.ts",
+    "upload:color-images": "tsx scripts/upload-color-images.ts",
+    "upload:color-images-2": "tsx scripts/upload-color-images-batch2.ts",
+    "upload:color-images-3": "tsx scripts/upload-color-images-batch3.ts",
+    "update:color-hex": "tsx scripts/update-color-hex.ts",
+    "create:admin": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
     "@react-router/node": "7.15.0",
     "@react-router/serve": "7.15.0",
+    "@supabase/supabase-js": "^2.110.2",
     "isbot": "^5.1.36",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router": "7.15.0"
+    "react-router": "7.15.0",
+    "stripe": "^22.3.2"
   },
   "devDependencies": {
     "@react-router/dev": "7.15.0",
@@ -22,8 +30,14 @@
     "@types/node": "^22",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "dotenv": "^17.4.2",
+    "supabase": "^2.109.1",
     "tailwindcss": "^4.2.2",
+    "tsx": "^4.23.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.3"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.1.4"
   }
 }

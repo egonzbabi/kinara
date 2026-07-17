@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router";
+import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { useCart } from "~/context/CartContext";
 import { cn } from "~/lib/cn";
 
@@ -14,6 +14,9 @@ export function SiteNav() {
   const { count, open } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isProductDetail = location.pathname.startsWith("/producto/");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -39,6 +42,17 @@ export function SiteNav() {
       <nav className="pad flex h-16 items-center justify-between gap-4">
         {/* Left: desktop links / mobile burger */}
         <div className="flex flex-1 items-center gap-7">
+          {isProductDetail && (
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              aria-label="Volver"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-espresso/80 transition-colors hover:text-clay"
+            >
+              <BackIcon />
+              <span className="hidden sm:inline">Volver</span>
+            </button>
+          )}
           <button
             className="md:hidden"
             aria-label="Abrir menú"
@@ -86,10 +100,10 @@ export function SiteNav() {
           <button
             onClick={open}
             className="group flex items-center gap-2 text-sm font-medium"
-            aria-label={`Abrir bolsa, ${count} artículos`}
+            aria-label={`Abrir carrito de compras, ${count} artículos`}
           >
             <span className="transition-colors group-hover:text-clay">
-              Bolsa
+              Carrito
             </span>
             <span className="grid h-6 min-w-6 place-items-center rounded-full bg-espresso px-1.5 text-[12px] font-semibold tabular-nums text-bone">
               {count}
@@ -150,6 +164,20 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
         </button>
       </div>
     </div>
+  );
+}
+
+function BackIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M19 12H5M5 12l6-6M5 12l6 6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

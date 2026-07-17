@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import type { Route } from "./+types/producto.$slug";
-import {
-  getProduct,
-  relatedProducts,
-  CATEGORY_LABELS,
-} from "~/data/products";
-import { ProductGallery } from "~/components/ProductGallery";
+import { CATEGORY_LABELS } from "~/data/products";
+import { getProductBySlug, getAllProducts, relatedProducts } from "~/lib/catalog";
+import { ProductGallery, type GalleryItem } from "~/components/ProductGallery";
 import { Accordion } from "~/components/Accordion";
 import { ProductCard } from "~/components/ProductCard";
 import { Button } from "~/components/Button";
@@ -15,12 +12,13 @@ import { formatPrice } from "~/lib/formatPrice";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
 
-export function loader({ params }: Route.LoaderArgs) {
-  const product = getProduct(params.slug);
+export async function loader({ params }: Route.LoaderArgs) {
+  const product = await getProductBySlug(params.slug);
   if (!product) {
     throw new Response("No encontrado", { status: 404 });
   }
-  return { product, related: relatedProducts(product) };
+  const all = await getAllProducts();
+  return { product, related: relatedProducts(product, all) };
 }
 
 export function meta({ data }: Route.MetaArgs) {
@@ -36,15 +34,34 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   const { add } = useCart();
   useScrollReveal();
 
-  const [color, setColor] = useState(product.colors[0]?.name ?? "Único");
+  const [color, setColor] = useState<string | null>(
+    product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null,
+  );
   const [size, setSize] = useState<string | null>(
     product.sizes.length === 1 ? product.sizes[0] : null,
   );
-  const [error, setError] = useState(false);
+  const missingSelection = !color || !size;
+  const [attempted, setAttempted] = useState(false);
+
+  const colorImage = color ? product.colorImages?.[color] : undefined;
+
+  // Si el producto tiene foto real por color, la galería muestra una miniatura por
+  // cada color disponible (en vez de solo la del color seleccionado + fotos genéricas),
+  // y seleccionar una miniatura cambia también el color activo.
+  const galleryItems: GalleryItem[] = product.colorImages
+    ? product.colors.map((c) => ({ src: product.colorImages![c.name]!, color: c.name }))
+    : product.gallery.map((src) => ({ src }));
+
+  const activeGalleryIndex = product.colorImages
+    ? Math.max(
+        0,
+        galleryItems.findIndex((item) => item.color === color),
+      )
+    : 0;
 
   const onAdd = () => {
-    if (!size) {
-      setError(true);
+    if (!color || !size) {
+      setAttempted(true);
       return;
     }
     add({
@@ -52,7 +69,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
       slug: product.slug,
       name: product.name,
       price: product.price,
-      image: product.gallery[0],
+      image: colorImage ?? product.gallery[0],
       color,
       size,
     });
@@ -78,7 +95,15 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
 
       <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
         {/* Gallery */}
-        <ProductGallery images={product.gallery} alt={product.name} />
+        <ProductGallery
+          items={galleryItems}
+          active={activeGalleryIndex}
+          onSelect={(i) => {
+            const item = galleryItems[i];
+            if (item.color) setColor(item.color);
+          }}
+          alt={product.name}
+        />
 
         {/* Info */}
         <div className="lg:py-4">
@@ -108,9 +133,17 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
           {/* Color */}
           <div className="mt-7">
             <p className="text-sm font-medium">
-              Color: <span className="text-muted">{color}</span>
+              Color:{" "}
+              <span className="text-muted">
+                {color ?? "Selecciona un color"}
+              </span>
             </p>
-            <div className="mt-2.5 flex flex-wrap gap-2.5">
+            <div
+              className={cn(
+                "mt-2.5 flex flex-wrap gap-2.5 rounded-lg",
+                attempted && !color && "outline outline-2 outline-offset-4 outline-clay",
+              )}
+            >
               {product.colors.map((c) => (
                 <button
                   key={c.name}
@@ -138,14 +171,16 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                 Guía de tallas
               </button>
             </div>
-            <div className="mt-2.5 flex flex-wrap gap-2">
+            <div
+              className={cn(
+                "mt-2.5 flex flex-wrap gap-2 rounded-lg",
+                attempted && !size && "outline outline-2 outline-offset-4 outline-clay",
+              )}
+            >
               {product.sizes.map((s) => (
                 <button
                   key={s}
-                  onClick={() => {
-                    setSize(s);
-                    setError(false);
-                  }}
+                  onClick={() => setSize(s)}
                   aria-pressed={size === s}
                   className={cn(
                     "min-w-12 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
@@ -158,19 +193,28 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                 </button>
               ))}
             </div>
-            {error && (
-              <p className="mt-2 text-[13px] text-clay">
-                Selecciona una talla para continuar.
-              </p>
-            )}
           </div>
 
           {/* Add to cart */}
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <Button variant="clay" size="lg" full onClick={onAdd}>
-              Añadir a la bolsa · {formatPrice(product.price)}
+            <Button
+              variant="clay"
+              size="lg"
+              full
+              onClick={onAdd}
+              aria-disabled={missingSelection}
+              className={cn(missingSelection && "is-inactive")}
+            >
+              {missingSelection
+                ? "Selecciona color y talla"
+                : `Añadir al carrito de compras · ${formatPrice(product.price)}`}
             </Button>
           </div>
+          {attempted && missingSelection && (
+            <p className="mt-2 text-[13px] font-medium text-clay">
+              Selecciona color y talla para continuar.
+            </p>
+          )}
 
           <ul className="mt-5 flex flex-col gap-1.5 text-[13px] text-muted">
             <li>· Envío gratis en pedidos desde 60 €</li>
@@ -186,7 +230,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                   content: <p>{product.description}</p>,
                 },
                 {
-                  title: "Materiales y cuidado",
+                  title: "Especificaciones",
                   content: (
                     <div>
                       <p>{product.materials}</p>

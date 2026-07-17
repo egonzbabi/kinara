@@ -32,6 +32,7 @@ type CartCtx = {
   add: (payload: AddPayload) => void;
   remove: (key: string) => void;
   setQty: (key: string, qty: number) => void;
+  clear: () => void;
 };
 
 const Ctx = createContext<CartCtx | null>(null);
@@ -73,11 +74,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
+  const clear = useCallback(() => {
+    setItems([]);
+  }, []);
+
   const value = useMemo<CartCtx>(() => {
     const count = items.reduce((n, i) => n + i.qty, 0);
     const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
-    return { items, count, subtotal, isOpen, open, close, add, remove, setQty };
-  }, [items, isOpen, open, close, add, remove, setQty]);
+    return { items, count, subtotal, isOpen, open, close, add, remove, setQty, clear };
+  }, [items, isOpen, open, close, add, remove, setQty, clear]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

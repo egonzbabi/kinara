@@ -183,6 +183,15 @@
   .btn-clay:hover {
     background: var(--color-clay-deep);
   }
+  .btn-clay:disabled,
+  .btn-clay.is-inactive {
+    background: var(--color-line-strong);
+    color: var(--color-muted);
+  }
+  .btn-clay:disabled:hover,
+  .btn-clay.is-inactive:hover {
+    background: var(--color-line-strong);
+  }
 
   .btn-ink {
     background: var(--color-espresso);

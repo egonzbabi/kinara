@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
   FREE_SHIPPING_THRESHOLD,
@@ -11,6 +11,8 @@ import { cn } from "~/lib/cn";
 
 export function CartDrawer() {
   const { items, subtotal, count, isOpen, close, remove, setQty } = useCart();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -26,6 +28,28 @@ export function CartDrawer() {
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
   const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
 
+  const onCheckout = async () => {
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setCheckoutError(data.error || "No se pudo iniciar el pago. Intenta de nuevo.");
+    } catch {
+      setCheckoutError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   return (
     <div
       aria-hidden={!isOpen}
@@ -33,7 +57,7 @@ export function CartDrawer() {
     >
       {/* Backdrop */}
       <button
-        aria-label="Cerrar bolsa"
+        aria-label="Cerrar carrito de compras"
         onClick={close}
         className={cn(
           "absolute inset-0 bg-espresso/40 backdrop-blur-[2px] transition-opacity duration-300",
@@ -45,7 +69,7 @@ export function CartDrawer() {
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="Tu bolsa"
+        aria-label="Tu carrito de compras"
         className={cn(
           "absolute right-0 top-0 flex h-full w-full max-w-[440px] flex-col bg-sand shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           isOpen ? "translate-x-0" : "translate-x-full",
@@ -53,7 +77,7 @@ export function CartDrawer() {
       >
         <header className="flex items-center justify-between border-b border-line px-6 py-5">
           <h2 className="font-display text-2xl">
-            Tu bolsa{" "}
+            Tu carrito de compras{" "}
             <span className="text-muted">({count})</span>
           </h2>
           <button
@@ -96,7 +120,7 @@ export function CartDrawer() {
         <div className="flex-1 overflow-y-auto px-6">
           {items.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-              <p className="font-display text-2xl">Tu bolsa está vacía</p>
+              <p className="font-display text-2xl">Tu carrito de compras está vacío</p>
               <p className="max-w-[24ch] text-sm text-muted">
                 Aún no has añadido nada. Descubre la nueva colección.
               </p>
@@ -131,9 +155,12 @@ export function CartDrawer() {
             <p className="mb-4 text-[12px] text-muted">
               Impuestos incluidos. Envío calculado al pagar.
             </p>
-            <Button variant="clay" full size="lg">
-              Finalizar compra
+            <Button variant="clay" full size="lg" onClick={onCheckout} disabled={checkoutLoading}>
+              {checkoutLoading ? "Redirigiendo…" : "Finalizar compra"}
             </Button>
+            {checkoutError && (
+              <p className="mt-2 text-[13px] font-medium text-clay">{checkoutError}</p>
+            )}
             <button
               onClick={close}
               className="mt-3 w-full text-center text-[13px] text-muted underline-offset-4 hover:underline"

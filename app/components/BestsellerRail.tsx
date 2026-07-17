@@ -1,14 +1,14 @@
 import { useRef } from "react";
 import { Link } from "react-router";
-import { PRODUCTS } from "~/data/products";
+import type { Product } from "~/data/products";
 import { ProductCard } from "./ProductCard";
 import { useDragScroll } from "~/hooks/useDragScroll";
 
-export function BestsellerRail() {
+export function BestsellerRail({ products }: { products: Product[] }) {
   const railRef = useRef<HTMLDivElement>(null);
   useDragScroll(railRef);
 
-  const items = PRODUCTS.filter((p) => p.isBestseller);
+  const items = products.filter((p) => p.isBestseller);
 
   return (
     <section className="py-[clamp(48px,7vw,96px)]">

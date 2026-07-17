@@ -1,13 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "react-router";
 import type { Route } from "./+types/tienda";
 import { ProductGrid } from "~/components/ProductGrid";
-import {
-  PRODUCTS,
-  CATEGORY_LABELS,
-  type Category,
-  type Product,
-} from "~/data/products";
+import { CATEGORY_LABELS, type Category, type Product } from "~/data/products";
+import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
 
@@ -33,38 +29,62 @@ const SORTS: { value: Sort; label: string }[] = [
 
 const ALL_SIZES = ["XS", "S", "M", "L", "XL", "Única"];
 
-const ALL_COLORS = Array.from(
-  new Map(
-    PRODUCTS.flatMap((p) => p.colors).map((c) => [c.name, c]),
-  ).values(),
-);
+export async function loader() {
+  const products = await getAllProducts();
+  return { products };
+}
 
-export default function Tienda() {
+export default function Tienda({ loaderData }: Route.ComponentProps) {
   useScrollReveal();
+  const { products } = loaderData;
   const [params, setParams] = useSearchParams();
   const cat = (params.get("cat") as Category | null) ?? "todo";
+  const sort = (params.get("sort") as Sort | null) ?? "destacados";
+  const sizes = useMemo(
+    () => params.get("talla")?.split(",").filter(Boolean) ?? [],
+    [params],
+  );
+  const colors = useMemo(
+    () => params.get("color")?.split(",").filter(Boolean) ?? [],
+    [params],
+  );
+  const types = useMemo(
+    () => params.get("tipo")?.split(",").filter(Boolean) ?? [],
+    [params],
+  );
 
-  const [sort, setSort] = useState<Sort>("destacados");
-  const [sizes, setSizes] = useState<string[]>([]);
-  const [colors, setColors] = useState<string[]>([]);
+  const allColors = useMemo(
+    () => Array.from(new Map(products.flatMap((p) => p.colors).map((c) => [c.name, c])).values()),
+    [products],
+  );
 
-  const setCat = (next: Category | "todo") => {
+  const allTypes = useMemo(
+    () => Array.from(new Set(products.map((p) => p.kind))).sort(),
+    [products],
+  );
+
+  const setParam = (key: string, value: string | null) => {
     const p = new URLSearchParams(params);
-    if (next === "todo") p.delete("cat");
-    else p.set("cat", next);
+    if (value === null) p.delete(key);
+    else p.set(key, value);
     setParams(p, { preventScrollReset: true });
   };
 
-  const toggle = (
-    value: string,
-    list: string[],
-    set: (v: string[]) => void,
-  ) => {
-    set(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+  const setCat = (next: Category | "todo") =>
+    setParam("cat", next === "todo" ? null : next);
+
+  const setSort = (next: Sort) =>
+    setParam("sort", next === "destacados" ? null : next);
+
+  const toggle = (key: string, value: string, list: string[]) => {
+    const next = list.includes(value)
+      ? list.filter((v) => v !== value)
+      : [...list, value];
+    setParam(key, next.length ? next.join(",") : null);
   };
 
   const filtered = useMemo(() => {
-    let list: Product[] = PRODUCTS.slice();
+    let list: Product[] = products.slice();
     if (cat !== "todo") list = list.filter((p) => p.category === cat);
     if (sizes.length)
       list = list.filter((p) => p.sizes.some((s) => sizes.includes(s)));
@@ -72,6 +92,7 @@ export default function Tienda() {
       list = list.filter((p) =>
         p.colors.some((c) => colors.includes(c.name)),
       );
+    if (types.length) list = list.filter((p) => types.includes(p.kind));
 
     switch (sort) {
       case "precio-asc":
@@ -89,19 +110,15 @@ export default function Tienda() {
         );
     }
     return list;
-  }, [cat, sizes, colors, sort]);
+  }, [products, cat, sizes, colors, types, sort]);
 
   const heading =
     cat === "todo" ? "Toda la colección" : CATEGORY_LABELS[cat as Category];
 
-  const clearAll = () => {
-    setSizes([]);
-    setColors([]);
-    setCat("todo");
-    setSort("destacados");
-  };
+  const clearAll = () => setParams(new URLSearchParams(), { preventScrollReset: true });
 
-  const hasFilters = sizes.length > 0 || colors.length > 0 || cat !== "todo";
+  const hasFilters =
+    sizes.length > 0 || colors.length > 0 || types.length > 0 || cat !== "todo";
 
   return (
     <div className="pad py-[clamp(28px,4vw,56px)]">
@@ -136,7 +153,7 @@ export default function Tienda() {
               {ALL_SIZES.map((s) => (
                 <button
                   key={s}
-                  onClick={() => toggle(s, sizes, setSizes)}
+                  onClick={() => toggle("talla", s, sizes)}
                   className={cn(
                     "min-w-8 rounded-md border px-2 py-1 text-[12px] font-medium transition-colors",
                     sizes.includes(s)
@@ -150,14 +167,35 @@ export default function Tienda() {
             </div>
           </div>
 
+          {/* Types */}
+          <div className="flex items-center gap-2">
+            <span className="label">Tipo</span>
+            <div className="flex flex-wrap gap-1.5">
+              {allTypes.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => toggle("tipo", t, types)}
+                  className={cn(
+                    "rounded-md border px-2 py-1 text-[12px] font-medium transition-colors",
+                    types.includes(t)
+                      ? "border-espresso bg-espresso text-bone"
+                      : "border-line hover:border-espresso",
+                  )}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Colors */}
           <div className="flex items-center gap-2">
             <span className="label">Color</span>
             <div className="flex flex-wrap gap-1.5">
-              {ALL_COLORS.map((c) => (
+              {allColors.map((c) => (
                 <button
                   key={c.name}
-                  onClick={() => toggle(c.name, colors, setColors)}
+                  onClick={() => toggle("color", c.name, colors)}
                   title={c.name}
                   aria-label={c.name}
                   aria-pressed={colors.includes(c.name)}

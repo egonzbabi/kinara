@@ -97,7 +97,9 @@ export function ProductCard({
             <h3 className="truncate font-medium leading-tight">
               {product.name}
             </h3>
-            <p className="mt-0.5 text-[13px] text-muted">{product.kind}</p>
+            <p className="mt-0.5 line-clamp-1 text-[13px] text-muted">
+              {product.description}
+            </p>
           </div>
           <div className="shrink-0 text-right">
             <span className="font-medium">{formatPrice(product.price)}</span>

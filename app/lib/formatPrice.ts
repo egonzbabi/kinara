@@ -1,11 +1,11 @@
-const EUR = new Intl.NumberFormat("es-ES", {
+const MXN = new Intl.NumberFormat("es-MX", {
   style: "currency",
-  currency: "EUR",
+  currency: "MXN",
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 
-/** Format a EUR amount the Spanish way, e.g. 78 -> "78 €". */
+/** Format an MXN amount, e.g. 390 -> "$390.00". */
 export function formatPrice(amount: number): string {
-  return EUR.format(amount);
+  return MXN.format(amount);
 }
