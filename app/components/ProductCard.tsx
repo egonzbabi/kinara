@@ -14,23 +14,45 @@ export function ProductCard({
 }) {
   const { add } = useCart();
   const [hover, setHover] = useState(false);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [color, setColor] = useState<string | null>(
+    product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null,
+  );
+  const [size, setSize] = useState<string | null>(
+    product.sizes.length === 1 ? product.sizes[0] : null,
+  );
+  const [attempted, setAttempted] = useState(false);
 
   const hasSecond = product.gallery.length > 1;
-  const defaultColor = product.colors[0]?.name ?? "Único";
-  const defaultSize =
-    product.sizes[Math.floor(product.sizes.length / 2)] ?? product.sizes[0];
 
-  const quickAdd = (e: React.MouseEvent) => {
+  const resetQuickAdd = () => {
+    setQuickAddOpen(false);
+    setAttempted(false);
+    setColor(product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null);
+    setSize(product.sizes.length === 1 ? product.sizes[0] : null);
+  };
+
+  const openQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
+    setQuickAddOpen(true);
+  };
+
+  const confirmQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!color || !size) {
+      setAttempted(true);
+      return;
+    }
     add({
       productId: product.id,
       slug: product.slug,
       name: product.name,
       price: product.price,
-      image: product.gallery[0],
-      color: defaultColor,
-      size: defaultSize,
+      image: product.colorImages?.[color] ?? product.gallery[0],
+      color,
+      size,
     });
+    resetQuickAdd();
   };
 
   return (
@@ -39,7 +61,10 @@ export function ProductCard({
         to={`/producto/${product.slug}`}
         className="block"
         onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+        onMouseLeave={() => {
+          setHover(false);
+          resetQuickAdd();
+        }}
       >
         <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-bone">
           <img
@@ -83,12 +108,96 @@ export function ProductCard({
 
           {/* Quick add */}
           <div className="absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0 group-hover:opacity-100">
-            <button
-              onClick={quickAdd}
-              className="w-full rounded-full bg-sand/95 py-3 text-[13px] font-semibold backdrop-blur transition-colors hover:bg-espresso hover:text-bone"
-            >
-              Añadir rápido
-            </button>
+            {quickAddOpen ? (
+              <div className="rounded-xl bg-sand/95 p-3 backdrop-blur">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-medium text-muted">
+                    {color ?? "Elige color"} · {size ?? "Elige talla"}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      resetQuickAdd();
+                    }}
+                    aria-label="Cerrar"
+                    className="text-muted hover:text-espresso"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {product.colors.length > 1 && (
+                  <div
+                    className={cn(
+                      "mt-2 flex flex-wrap gap-1.5 rounded-full",
+                      attempted && !color && "outline outline-2 outline-offset-2 outline-clay",
+                    )}
+                  >
+                    {product.colors.map((c) => (
+                      <button
+                        key={c.name}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setColor(c.name);
+                        }}
+                        title={c.name}
+                        aria-label={c.name}
+                        aria-pressed={color === c.name}
+                        className={cn(
+                          "h-6 w-6 rounded-full border transition-transform",
+                          color === c.name
+                            ? "ring-2 ring-espresso ring-offset-1 ring-offset-sand"
+                            : "border-line hover:scale-110",
+                        )}
+                        style={{ background: c.hex }}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {product.sizes.length > 1 && (
+                  <div
+                    className={cn(
+                      "mt-2 flex flex-wrap gap-1 rounded-lg",
+                      attempted && !size && "outline outline-2 outline-offset-2 outline-clay",
+                    )}
+                  >
+                    {product.sizes.map((s) => (
+                      <button
+                        key={s}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSize(s);
+                        }}
+                        aria-pressed={size === s}
+                        className={cn(
+                          "min-w-7 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
+                          size === s
+                            ? "border-espresso bg-espresso text-bone"
+                            : "border-line hover:border-espresso",
+                        )}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={confirmQuickAdd}
+                  className="mt-2.5 w-full rounded-full bg-espresso py-2 text-[12px] font-semibold text-bone transition-colors hover:bg-clay"
+                >
+                  Agregar al carrito
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openQuickAdd}
+                className="w-full rounded-full bg-sand/95 py-3 text-[13px] font-semibold backdrop-blur transition-colors hover:bg-espresso hover:text-bone"
+              >
+                Añadir rápido
+              </button>
+            )}
           </div>
         </div>
 
