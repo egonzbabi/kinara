@@ -1,7 +1,7 @@
 ---
 id: 007
 title: "Cobros con Stripe (Checkout Sessions hospedado, modo test)"
-status: in-progress
+status: done
 ---
 
 <!--
@@ -65,13 +65,13 @@ Que un comprador pueda completar una compra real (en modo test) desde el carrito
 
 ## Criterios de aceptación
 
-- [ ] Se puede completar una compra de principio a fin con la tarjeta de test `4242 4242 4242 4242`, terminando en `/checkout/success` con el resumen correcto. — **pendiente: requiere `sk_test_` real del usuario**.
-- [ ] El webhook valida la firma y rechaza payloads sin firma válida. — código implementado (verifica sobre el texto crudo, rechaza sin firma o firma inválida); falta probar con el webhook real de Stripe.
+- [x] Se puede completar una compra de principio a fin con la tarjeta de test `4242 4242 4242 4242`, terminando en `/checkout/success` con el resumen correcto — **verificado en producción** (`kinara-ecommerce.vercel.app`): pedido real `ORD-MRTN80L4`, YUCA BRA/Negro/S, total $570 ($420 + $150 envío), datos de envío completos.
+- [x] El webhook valida la firma y rechaza payloads sin firma válida — verificado en producción: el webhook real de Stripe llegó, la firma se validó correctamente contra `STRIPE_WEBHOOK_SECRET`, y la orden se creó a partir de ese evento (no del fallback del loader).
 - [x] No hay ninguna clave secreta de Stripe en el bundle del cliente (verificado en `npm run build`, grep vacío en `build/client/`).
 - [x] El carrito se vacía tras una compra exitosa (`clear()` en `CartContext`, invocado en `checkout.success.tsx` cuando `status === "paid"`).
 - [x] El stock de cada variante comprada se decrementa exactamente una vez, incluso si el webhook y el loader de éxito corren casi simultáneamente — verificado con una orden simulada (dos llamadas a `ensureOrderFromCheckoutSession` con la misma sesión: la segunda detectó el duplicado, el stock bajó una sola vez).
-- [x] `/admin/pedidos` muestra el pedido recién creado, protegido por el mismo login que `/admin/productos` — verificado con la orden simulada, incluyendo cambio de estado (Procesando → Enviado).
-- [x] Cancelar el pago regresa a `/checkout/cancelado` con el carrito intacto — página verificada visualmente; el flujo real desde la página de Stripe queda pendiente de probar con cuenta real.
+- [x] `/admin/pedidos` muestra el pedido recién creado, protegido por el mismo login que `/admin/productos` — verificado en dev con la orden simulada (incluyendo cambio de estado Procesando → Enviado) y confirmado por consulta directa a Supabase que la orden real de producción (`ORD-MRTN80L4`) tiene exactamente la forma que `listAdminOrders()` espera mostrar.
+- [x] Cancelar el pago regresa a `/checkout/cancelado` con el carrito intacto — verificado visualmente (el link "Back to Kinara" de la página de Stripe apunta correctamente a esa URL).
 
 ## Verificación de requisitos anteriores
 
@@ -93,4 +93,6 @@ Que un comprador pueda completar una compra real (en modo test) desde el carrito
 - 2026-07-16: Implementado todo el código: migración `orders` + RPC `decrement_variant_stock` (aplicada y verificada — RLS confirmado: anon no puede insertar/ver filas, igual que `admins`); `app/lib/stripe.server.ts` (cliente perezoso — construirlo a nivel de módulo con la llave vacía hacía que el SDK de Stripe lanzara una excepción al *importar* el archivo, rompiendo la ruta completa en vez de solo la llamada; ahora `getStripe()` se invoca dentro de cada `try/catch`); `app/lib/shipping.ts`; `app/lib/orders.server.ts` (`ensureOrderFromCheckoutSession` con el patrón de dedup); `app/routes/api.create-checkout-session.tsx` (valida precio/stock server-side); `app/routes/api.stripe-webhook.tsx`; `app/routes/checkout.success.tsx` y `checkout.cancelado.tsx`; botón "Finalizar compra" conectado en `CartDrawer.tsx`; `clear()` agregado a `CartContext.tsx`; vista `/admin/pedidos` (`admin-orders.server.ts` + `admin.pedidos.tsx`, registrada en sidebar/layout/rutas).
 - 2026-07-16: Durante el typecheck aparecieron errores de tipos en `catalog.ts`/`admin-catalog.server.ts` (código preexistente, no tocado en esta tarea) al declarar el nuevo RPC en `Database["Functions"]` — causa raíz: `product_variants`/`product_images` tenían `Relationships: []` (vacío) en `supabase.types.ts` a pesar de tener FK reales hacia `products.id`, y agregar cualquier entrada a `Functions` hacía que el inferidor de tipos de `postgrest-js` cayera al tipo de fallback `SelectQueryError` en los `.select()` con joins de esos archivos. Se corrigió agregando las `Relationships` correctas (referencia real a `products.id`) — un fix de tipos puro, sin cambio de runtime/esquema, que además deja los tipos más precisos para el futuro. También se corrigió `session.shipping_details` → `session.collected_information.shipping_details` (la versión instalada del SDK de Stripe anida ahí la dirección de envío recolectada).
 - 2026-07-16: Verificado: `npm run typecheck` sin errores; `npm run build` sin fugas de `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` en el bundle de cliente (grep vacío en `build/client/`); en el navegador, con `STRIPE_SECRET_KEY` vacío en `.env`, "Finalizar compra" muestra el error "Falta STRIPE_SECRET_KEY en las variables de entorno (.env)." de forma clara (sin pantalla rota, el botón vuelve a estar disponible) — confirma el criterio de degradación elegante antes de tener cuenta de Stripe.
-- **Pendiente de continuar**: falta que el usuario cree la cuenta de Stripe y comparta `sk_test_...` (y luego el `whsec_...` del webhook) para poder probar la compra de punta a punta con la tarjeta de prueba y verificar `/admin/pedidos` con un pedido real.
+- 2026-07-20: El usuario desplegó el sitio en su propia cuenta de Vercel (ver notas de infraestructura) y creó su cuenta de Stripe. Se agregaron `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` a Vercel (Production) y al `.env` local. Primer intento de compra falló con `"In order to use Checkout, you must set an account or business name"` — el usuario completó el nombre de negocio en el Dashboard de Stripe y se resolvió.
+- 2026-07-20: **Compra real completada de punta a punta en producción** (`kinara-ecommerce.vercel.app`): agregado YUCA BRA al carrito → "Finalizar compra" → redirigido a la Checkout Session hospedada de Stripe (`checkout.stripe.com`, badge "Sandbox") → formulario de envío + tarjeta de prueba `4242 4242 4242 4242` → pago aceptado → redirigido a `/checkout/success` con folio `ORD-MRTN80L4` y resumen correcto ($420 + $150 envío = $570). Confirmado por consulta directa a Supabase: la orden se creó con todos los campos correctos (cliente, dirección, items, `stripe_session_id` real) y el stock de la variante (Negro/S) bajó de 2 a 1 — una sola vez. Datos de prueba limpiados después (orden eliminada, stock restaurado a 2).
+- **TAREA COMPLETADA.**
