@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -40,9 +41,41 @@ const Ctx = createContext<CartCtx | null>(null);
 const lineKey = (p: { productId: string; color: string; size: string }) =>
   `${p.productId}::${p.color}::${p.size}`;
 
+// El carrito sale de la página por completo al ir a la Checkout Session
+// hospedada de Stripe (no es un popup/iframe) — sin esto, React se destruye
+// y el carrito vuelve vacío al regresar, sea cual sea el resultado del pago.
+const CART_STORAGE_KEY = "kinara-cart";
+
+function readStoredCart(): CartItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredCart(items: CartItem[]) {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch {
+    // Modo privado, cuota agotada, etc. — el carrito sigue funcionando en memoria.
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Se hidrata una sola vez al montar (después del render inicial, para no
+  // desajustar el HTML de SSR). Cada mutación de abajo ya escribe a
+  // localStorage de forma síncrona, así que esto no compite con, por ejemplo,
+  // el clear() de /checkout/success al volver de Stripe.
+  useEffect(() => {
+    const stored = readStoredCart();
+    if (stored.length > 0) setItems(stored);
+  }, []);
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
@@ -52,30 +85,37 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const qty = payload.qty ?? 1;
     setItems((prev) => {
       const existing = prev.find((i) => i.key === key);
-      if (existing) {
-        return prev.map((i) =>
-          i.key === key ? { ...i, qty: i.qty + qty } : i,
-        );
-      }
-      return [...prev, { ...payload, key, qty }];
+      const next = existing
+        ? prev.map((i) => (i.key === key ? { ...i, qty: i.qty + qty } : i))
+        : [...prev, { ...payload, key, qty }];
+      writeStoredCart(next);
+      return next;
     });
     setIsOpen(true);
   }, []);
 
   const remove = useCallback((key: string) => {
-    setItems((prev) => prev.filter((i) => i.key !== key));
+    setItems((prev) => {
+      const next = prev.filter((i) => i.key !== key);
+      writeStoredCart(next);
+      return next;
+    });
   }, []);
 
   const setQty = useCallback((key: string, qty: number) => {
-    setItems((prev) =>
-      qty <= 0
-        ? prev.filter((i) => i.key !== key)
-        : prev.map((i) => (i.key === key ? { ...i, qty } : i)),
-    );
+    setItems((prev) => {
+      const next =
+        qty <= 0
+          ? prev.filter((i) => i.key !== key)
+          : prev.map((i) => (i.key === key ? { ...i, qty } : i));
+      writeStoredCart(next);
+      return next;
+    });
   }, []);
 
   const clear = useCallback(() => {
     setItems([]);
+    writeStoredCart([]);
   }, []);
 
   const value = useMemo<CartCtx>(() => {
