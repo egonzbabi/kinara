@@ -24,7 +24,7 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 ## Pendientes de otras tareas
 
 - [ ] **Tarea 008** — el copy de envíos/devoluciones sigue en euros y menciona España ("Envío gratis desde 60 €", "entrega en península"), inconsistente desde que los precios pasaron a MXN. Recordatorio explícito del usuario: no cerrar el proyecto sin resolver esto.
-- [ ] **Tarea 002** (Performance / Core Web Vitals) — pendiente.
+- [ ] **Tarea 002** (Performance / Core Web Vitals) — hecha, pero re-medir Lighthouse (mobile) contra el dominio real de Vercel una vez desplegado: las mediciones locales (esta laptop, sin CDN) dieron mejoras grandes pero no garantizaron LCP<2.5s/score≥90 en el 100% de las corridas; producción debería medir mejor.
 - [ ] **Tarea 003** (SEO técnico) — pendiente.
 - [ ] **Tarea 004** (Google Analytics 4) — pendiente, requiere que el usuario cree la property de GA4 y entregue el Measurement ID.
 - [ ] **Tarea 005** (Auditoría UI/UX y accesibilidad WCAG AA) — pendiente.

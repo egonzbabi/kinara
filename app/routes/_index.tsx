@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/_index";
-import { Hero } from "~/components/Hero";
+import { Hero, HERO_WIDTHS } from "~/components/Hero";
 import { TrustStrip } from "~/components/TrustStrip";
 import { CategoryTiles } from "~/components/CategoryTiles";
 import { ProductGrid } from "~/components/ProductGrid";
@@ -10,6 +10,19 @@ import { LookbookBand } from "~/components/LookbookBand";
 import { Newsletter } from "~/components/Newsletter";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
+import { img, imgSrcSet, PHOTO } from "~/data/images";
+
+// Precarga la imagen LCP de esta ruta — sin esto el navegador la descubre
+// recién al parsear el <img> en el body, perdiendo tiempo de LCP.
+export const links: Route.LinksFunction = () => [
+  {
+    rel: "preload",
+    as: "image",
+    href: img(PHOTO.heroPrimary, { w: 2000, h: 1300, q: 82 }),
+    imageSrcSet: imgSrcSet(PHOTO.heroPrimary, HERO_WIDTHS, { w: 2000, h: 1300, q: 82 }),
+    imageSizes: "100vw",
+  },
+];
 
 export function meta(_: Route.MetaArgs) {
   return [

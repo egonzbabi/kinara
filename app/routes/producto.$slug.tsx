@@ -1,14 +1,21 @@
 import { useState } from "react";
+import { preload } from "react-dom";
 import { Link } from "react-router";
 import type { Route } from "./+types/producto.$slug";
 import { CATEGORY_LABELS } from "~/data/products";
 import { getProductBySlug, getAllProducts, relatedProducts } from "~/lib/catalog";
-import { ProductGallery, type GalleryItem } from "~/components/ProductGallery";
+import {
+  ProductGallery,
+  MAIN_WIDTHS,
+  MAIN_SIZES,
+  type GalleryItem,
+} from "~/components/ProductGallery";
 import { Accordion } from "~/components/Accordion";
 import { ProductCard } from "~/components/ProductCard";
 import { Button } from "~/components/Button";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
+import { productImage, productSrcSet } from "~/lib/productImage";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
 
@@ -20,6 +27,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   const all = await getAllProducts();
   return { product, related: relatedProducts(product, all) };
 }
+
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data) return [{ title: "Producto · KINARA" }];
@@ -51,6 +59,17 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   const galleryItems: GalleryItem[] = product.colorImages
     ? product.colors.map((c) => ({ src: product.colorImages![c.name]!, color: c.name }))
     : product.gallery.map((src) => ({ src }));
+
+  // Precarga la imagen inicial de la galería (LCP de esta ruta) — sin esto el
+  // navegador la descubre recién al parsear el <img> en el body.
+  if (galleryItems[0]) {
+    preload(productImage(galleryItems[0].src, { width: 800, height: 1000 }), {
+      as: "image",
+      imageSrcSet: productSrcSet(galleryItems[0].src, MAIN_WIDTHS, { heightRatio: 1.25 }),
+      imageSizes: MAIN_SIZES,
+      fetchPriority: "high",
+    });
+  }
 
   const activeGalleryIndex = product.colorImages
     ? Math.max(

@@ -3,7 +3,11 @@ import { useState } from "react";
 import type { Product } from "~/data/products";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
+import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
+
+const CARD_WIDTHS = [400, 600, 900];
+const CARD_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 30vw, 46vw";
 
 export function ProductCard({
   product,
@@ -68,9 +72,12 @@ export function ProductCard({
       >
         <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-bone">
           <img
-            src={product.gallery[0]}
+            src={productImage(product.gallery[0], { width: 600, height: 750 })}
+            srcSet={productSrcSet(product.gallery[0], CARD_WIDTHS, { heightRatio: 1.25 })}
+            sizes={CARD_SIZES}
             alt={product.name}
             loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : undefined}
             className={cn(
               "absolute inset-0 h-full w-full object-cover transition-opacity duration-500",
               hover && hasSecond ? "opacity-0" : "opacity-100",
@@ -78,7 +85,9 @@ export function ProductCard({
           />
           {hasSecond && (
             <img
-              src={product.gallery[1]}
+              src={productImage(product.gallery[1], { width: 600, height: 750 })}
+              srcSet={productSrcSet(product.gallery[1], CARD_WIDTHS, { heightRatio: 1.25 })}
+              sizes={CARD_SIZES}
               alt=""
               aria-hidden
               loading="lazy"

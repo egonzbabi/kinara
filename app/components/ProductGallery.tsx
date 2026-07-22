@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { cn } from "~/lib/cn";
+import { productImage, productSrcSet } from "~/lib/productImage";
+
+export const MAIN_WIDTHS = [500, 800, 1100];
+export const MAIN_SIZES = "(min-width: 768px) 55vw, 100vw";
 
 export type GalleryItem = { src: string; color?: string };
 
@@ -43,7 +47,7 @@ export function ProductGallery({
               )}
             >
               <img
-                src={item.src}
+                src={productImage(item.src, { width: 160, height: 200 })}
                 alt=""
                 aria-hidden
                 className="h-full w-full object-cover"
@@ -57,7 +61,9 @@ export function ProductGallery({
       {/* Main */}
       <div className="flex-1 overflow-hidden rounded-2xl bg-bone">
         <img
-          src={current}
+          src={productImage(current ?? "", { width: 800, height: 1000 })}
+          srcSet={productSrcSet(current ?? "", MAIN_WIDTHS, { heightRatio: 1.25 })}
+          sizes={MAIN_SIZES}
           alt={alt}
           className="aspect-[4/5] w-full object-cover"
           fetchPriority="high"

@@ -42,7 +42,7 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | # | Archivo | Estado | Descripción |
 |---|---------|--------|-------------|
 | 001 | [001-ejemplo.md](001-ejemplo.md) | ejemplo | Tarea de muestra — bórrala cuando ya no la necesites de referencia |
-| 002 | [002-performance-core-web-vitals.md](002-performance-core-web-vitals.md) | pending | Performance y Core Web Vitals |
+| 002 | [002-performance-core-web-vitals.md](002-performance-core-web-vitals.md) | done | Performance y Core Web Vitals |
 | 003 | [003-seo-tecnico.md](003-seo-tecnico.md) | pending | SEO técnico (metadatos, JSON-LD, sitemap, robots.txt) |
 | 004 | [004-google-analytics.md](004-google-analytics.md) | pending | Google Analytics 4 con eventos de e-commerce (requiere Measurement ID del usuario) |
 | 005 | [005-ui-ux-accesibilidad.md](005-ui-ux-accesibilidad.md) | pending | Auditoría de UI/UX y accesibilidad (WCAG AA) |

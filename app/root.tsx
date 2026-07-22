@@ -17,16 +17,11 @@ import { SiteFooter } from "~/components/SiteFooter";
 import { CartDrawer } from "~/components/CartDrawer";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
   { rel: "preconnect", href: "https://images.unsplash.com" },
   {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&display=swap",
+    rel: "preconnect",
+    href: new URL(import.meta.env.VITE_SUPABASE_URL).origin,
+    crossOrigin: "anonymous",
   },
 ];
 

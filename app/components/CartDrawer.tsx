@@ -6,6 +6,7 @@ import {
   type CartItem,
 } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
+import { productImage } from "~/lib/productImage";
 import { Button, LinkButton } from "./Button";
 import { cn } from "~/lib/cn";
 
@@ -165,7 +166,7 @@ function CartLine({
         className="h-28 w-22 shrink-0 overflow-hidden rounded-lg bg-bone"
       >
         <img
-          src={item.image}
+          src={productImage(item.image, { width: 160, height: 200 })}
           alt={item.name}
           className="h-full w-full object-cover"
           loading="lazy"

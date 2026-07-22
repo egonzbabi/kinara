@@ -6,7 +6,9 @@ Formato de cada entrada: `- [ ] Requisito — (origen: tarea NNN)`
 
 ## Performance
 
--
+- [x] Toda imagen nueva que venga de Supabase Storage debe pasar por `productImage()`/`productSrcSet()` (`app/lib/productImage.ts`) con un `width`/`height` explícito acorde al tamaño real de render — nunca `<img src={url}>` directo con la URL cruda de Storage. Sin esto se sirven PNG/JPEG sin comprimir de 300-400KB+ en vez de WebP de ~10-20KB. — (origen: tarea 002)
+- [x] Las fuentes (Fraunces, Hanken Grotesk) se auto-hospedan vía `@fontsource-variable/*` importado en `app.css` — nunca volver a un `<link rel="stylesheet">` a Google Fonts (bloqueante, dos orígenes externos extra). Si se agrega una fuente nueva, preferir el mismo patrón. — (origen: tarea 002)
+- [x] La imagen candidata a LCP de una ruta nueva (la primera foto grande que se ve al cargar) debe tener `fetchPriority="high"` y, si es viable, un preload (`links()` si es estática o `preload()` de `react-dom` si depende de `loaderData` — `links()` de React Router 7 no recibe `loaderData` en esta versión). — (origen: tarea 002)
 
 ## SEO
 

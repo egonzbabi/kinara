@@ -26,6 +26,17 @@ export function img(id: string, { w = 1200, h, q = 80 }: ImgOpts = {}): string {
   return `${BASE}${id}?${params.toString()}`;
 }
 
+/**
+ * `srcSet` para una serie de anchos, manteniendo el aspect ratio de `w`/`h`
+ * pasados — evita que un móvil descargue la misma imagen de escritorio.
+ */
+export function imgSrcSet(id: string, widths: number[], { h: baseH, w: baseW, q = 80 }: ImgOpts = {}): string {
+  const ratio = baseH && baseW ? baseH / baseW : undefined;
+  return widths
+    .map((w) => `${img(id, { w, h: ratio ? Math.round(w * ratio) : undefined, q })} ${w}w`)
+    .join(", ");
+}
+
 /** Named raw photo ids (Unsplash), grouped by intended use. */
 export const PHOTO = {
   heroPrimary: "photo-1517836357463-d25dfeac3438",

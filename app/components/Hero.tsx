@@ -1,5 +1,7 @@
 import { LinkButton } from "./Button";
-import { img, PHOTO } from "~/data/images";
+import { img, imgSrcSet, PHOTO } from "~/data/images";
+
+export const HERO_WIDTHS = [640, 1000, 1500, 2000];
 
 export function Hero() {
   return (
@@ -7,6 +9,8 @@ export function Hero() {
       <div className="relative overflow-hidden rounded-[28px]">
         <img
           src={img(PHOTO.heroPrimary, { w: 2000, h: 1300, q: 82 })}
+          srcSet={imgSrcSet(PHOTO.heroPrimary, HERO_WIDTHS, { w: 2000, h: 1300, q: 82 })}
+          sizes="100vw"
           alt="Mujer estirando con ropa deportiva KINARA en un estudio cálido"
           className="h-[clamp(520px,82vh,860px)] w-full object-cover object-[center_30%]"
           fetchPriority="high"
