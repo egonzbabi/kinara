@@ -57,5 +57,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 014 | [014-boton-volver-detalle.md](014-boton-volver-detalle.md) | done | Botón "Volver" en el detalle de producto regresa a la tienda con filtros y scroll intactos |
 | 015 | [015-panel-admin-productos.md](015-panel-admin-productos.md) | done | Panel de administración de productos (login + CRUD) |
 | 016 | [016-modelo-id-regenerado.md](016-modelo-id-regenerado.md) | done | Campo `modelo` por color/talla + regenerar `products.id` |
+| 017 | [017-skydropx-envios.md](017-skydropx-envios.md) | done | Integración de Skydropx para cotización real de envíos |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

@@ -2,11 +2,20 @@ import type { Route } from "./+types/api.create-checkout-session";
 import { getStripe } from "~/lib/stripe.server";
 import { supabaseAdmin } from "~/lib/supabase.server";
 import { chunkMetadata } from "~/lib/orders.server";
-import { SHIPPING_FEE_MXN } from "~/lib/shipping";
+import { estimateParcel, SHIPPING_FEE_MXN } from "~/lib/shipping";
+import { getShippingRates, type ShippingAddress } from "~/lib/skydropx.server";
 import type { CartItem } from "~/context/CartContext";
+
+interface ChosenShipping {
+  providerName: string;
+  serviceCode: string;
+  total: number;
+}
 
 interface CheckoutRequest {
   items: CartItem[];
+  address: ShippingAddress;
+  shipping: ChosenShipping;
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -22,8 +31,13 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const items = body.items;
+  const address = body.address;
+  const shipping = body.shipping;
   if (!items || items.length === 0) {
     return Response.json({ error: "El carrito está vacío" }, { status: 400 });
+  }
+  if (!address || !shipping || !shipping.providerName || !shipping.serviceCode) {
+    return Response.json({ error: "Faltan datos de envío" }, { status: 400 });
   }
 
   for (const item of items) {
@@ -121,12 +135,39 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ error: `Sin stock suficiente — ${outOfStock.join("; ")}` }, { status: 400 });
   }
 
-  const shippingFee = SHIPPING_FEE_MXN;
+  // ── Envío confiable: igual que el precio de producto, nunca se confía en el
+  // total de envío que manda el cliente — se vuelve a cotizar server-side y se
+  // empareja la tarifa elegida por provider_name + service_code (el id de
+  // cotización de Skydropx es efímero y cambia en cada llamada).
+  let shippingFee: number;
+  let shippingCarrier: string;
+  if (shipping.providerName === "fallback") {
+    shippingFee = SHIPPING_FEE_MXN;
+    shippingCarrier = "Envío estándar";
+  } else {
+    const totalQty = items.reduce((n, i) => n + i.qty, 0);
+    const freshRates = await getShippingRates(address, [estimateParcel(totalQty)]);
+    const match = freshRates.find(
+      (r) => r.providerName === shipping.providerName && r.serviceCode === shipping.serviceCode,
+    );
+    if (!match) {
+      return Response.json(
+        { error: "Esa tarifa de envío ya no está disponible. Vuelve a cotizar e intenta de nuevo." },
+        { status: 400 },
+      );
+    }
+    shippingFee = match.total;
+    shippingCarrier = `${match.providerDisplayName} · ${match.serviceName}`;
+  }
+
   const itemsJson = JSON.stringify(trustedItems);
+  const addressJson = JSON.stringify(address);
   const metadata: Record<string, string> = {
     ...chunkMetadata("items_json", itemsJson),
+    ...chunkMetadata("shipping_address_json", addressJson),
     subtotal: String(subtotal),
     shipping_fee: String(shippingFee),
+    shipping_carrier: shippingCarrier,
   };
 
   const line_items: Array<{
@@ -147,7 +188,7 @@ export async function action({ request }: Route.ActionArgs) {
   line_items.push({
     price_data: {
       currency: "mxn",
-      product_data: { name: "Envío estándar" },
+      product_data: { name: `Envío · ${shippingCarrier}` },
       unit_amount: Math.round(shippingFee * 100),
     },
     quantity: 1,
@@ -161,8 +202,7 @@ export async function action({ request }: Route.ActionArgs) {
       mode: "payment",
       line_items,
       payment_method_types: ["card", "oxxo"],
-      shipping_address_collection: { allowed_countries: ["MX"] },
-      phone_number_collection: { enabled: true },
+      customer_email: address.email,
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout/cancelado`,
       metadata,

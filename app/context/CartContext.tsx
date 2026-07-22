@@ -27,6 +27,8 @@ type CartCtx = {
   items: CartItem[];
   count: number;
   subtotal: number;
+  /** false hasta que se termine de leer localStorage al montar. */
+  hydrated: boolean;
   isOpen: boolean;
   open: () => void;
   close: () => void;
@@ -67,14 +69,19 @@ function writeStoredCart(items: CartItem[]) {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   // Se hidrata una sola vez al montar (después del render inicial, para no
   // desajustar el HTML de SSR). Cada mutación de abajo ya escribe a
   // localStorage de forma síncrona, así que esto no compite con, por ejemplo,
   // el clear() de /checkout/success al volver de Stripe.
+  // `hydrated` deja saber a componentes hijos (ej. /checkout) que todavía no se
+  // debe decidir nada basado en `items` — sus propios efectos de montaje corren
+  // antes que este (React ejecuta hijos antes que padres al montar).
   useEffect(() => {
     const stored = readStoredCart();
     if (stored.length > 0) setItems(stored);
+    setHydrated(true);
   }, []);
 
   const open = useCallback(() => setIsOpen(true), []);
@@ -121,8 +128,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartCtx>(() => {
     const count = items.reduce((n, i) => n + i.qty, 0);
     const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
-    return { items, count, subtotal, isOpen, open, close, add, remove, setQty, clear };
-  }, [items, isOpen, open, close, add, remove, setQty, clear]);
+    return { items, count, subtotal, hydrated, isOpen, open, close, add, remove, setQty, clear };
+  }, [items, hydrated, isOpen, open, close, add, remove, setQty, clear]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

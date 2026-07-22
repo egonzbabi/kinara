@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router";
 import {
   FREE_SHIPPING_THRESHOLD,
@@ -6,13 +6,11 @@ import {
   type CartItem,
 } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
-import { Button } from "./Button";
+import { Button, LinkButton } from "./Button";
 import { cn } from "~/lib/cn";
 
 export function CartDrawer() {
   const { items, subtotal, count, isOpen, close, remove, setQty } = useCart();
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -27,28 +25,6 @@ export function CartDrawer() {
 
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
   const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
-
-  const onCheckout = async () => {
-    setCheckoutLoading(true);
-    setCheckoutError(null);
-    try {
-      const res = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      setCheckoutError(data.error || "No se pudo iniciar el pago. Intenta de nuevo.");
-    } catch {
-      setCheckoutError("Error de conexión. Intenta de nuevo.");
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
 
   return (
     <div
@@ -155,12 +131,9 @@ export function CartDrawer() {
             <p className="mb-4 text-[12px] text-muted">
               Impuestos incluidos. Envío calculado al pagar.
             </p>
-            <Button variant="clay" full size="lg" onClick={onCheckout} disabled={checkoutLoading}>
-              {checkoutLoading ? "Redirigiendo…" : "Finalizar compra"}
-            </Button>
-            {checkoutError && (
-              <p className="mt-2 text-[13px] font-medium text-clay">{checkoutError}</p>
-            )}
+            <LinkButton to="/checkout" variant="clay" full size="lg" onClick={close}>
+              Finalizar compra
+            </LinkButton>
             <button
               onClick={close}
               className="mt-3 w-full text-center text-[13px] text-muted underline-offset-4 hover:underline"

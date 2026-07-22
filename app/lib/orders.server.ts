@@ -49,6 +49,28 @@ function safeParseItems(metadata: Record<string, string> | null | undefined): Or
   }
 }
 
+interface StoredShippingAddress {
+  name: string;
+  email: string;
+  phone: string;
+  street1: string;
+  postalCode: string;
+  areaLevel1: string;
+  areaLevel2: string;
+  areaLevel3: string;
+}
+
+function safeParseShippingAddress(
+  metadata: Record<string, string> | null | undefined,
+): StoredShippingAddress | null {
+  try {
+    const parsed = JSON.parse(joinChunkedMetadata(metadata, "shipping_address_json"));
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 function isUniqueViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && (err as { code?: string }).code === "23505";
 }
@@ -107,11 +129,10 @@ export async function ensureOrderFromCheckoutSession(
   const total = (session.amount_total ?? 0) / 100;
   const currency = session.currency ?? "mxn";
 
-  const shippingDetails = session.collected_information?.shipping_details;
-  const customerName = session.customer_details?.name ?? shippingDetails?.name ?? "Sin nombre";
-  const customerEmail = session.customer_details?.email ?? "";
-  const customerPhone = session.customer_details?.phone ?? null;
-  const shippingAddress = shippingDetails?.address ?? session.customer_details?.address ?? {};
+  const shippingAddress = safeParseShippingAddress(session.metadata);
+  const customerName = shippingAddress?.name ?? session.customer_details?.name ?? "Sin nombre";
+  const customerEmail = shippingAddress?.email ?? session.customer_details?.email ?? "";
+  const customerPhone = shippingAddress?.phone ?? session.customer_details?.phone ?? null;
 
   const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
@@ -126,7 +147,7 @@ export async function ensureOrderFromCheckoutSession(
     total,
     currency,
     status: "processing",
-    shipping_address: shippingAddress,
+    shipping_address: shippingAddress ?? {},
     stripe_session_id: session.id,
   });
 
