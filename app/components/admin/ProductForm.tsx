@@ -82,6 +82,9 @@ export function ProductForm({ product, productId, error }: Props) {
   );
   const [gallery, setGallery] = useState<string[]>(product?.gallery ?? []);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  // Cuenta subidas de foto en curso — sin esto, "Guardar" podía enviar el
+  // formulario antes de que terminara una subida y la foto se perdía en silencio.
+  const [pendingUploads, setPendingUploads] = useState(0);
   const [modeloBase, setModeloBase] = useState(() => guessModeloBase(product?.colors ?? []));
 
   // productId de referencia para subir fotos: el producto ya guardado, o un slug
@@ -135,20 +138,26 @@ export function ProductForm({ product, productId, error }: Props) {
   };
 
   const handleColorImage = async (index: number, file: File) => {
+    setPendingUploads((n) => n + 1);
     try {
       const url = await uploadImage(file, uploadProductId, "color", colors[index].name || `color-${index}`);
       updateColor(index, { imageUrl: url });
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Falló la subida");
+    } finally {
+      setPendingUploads((n) => n - 1);
     }
   };
 
   const handleGalleryImage = async (file: File) => {
+    setPendingUploads((n) => n + 1);
     try {
       const url = await uploadImage(file, uploadProductId, "generic");
       setGallery((prev) => [...prev, url]);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Falló la subida");
+    } finally {
+      setPendingUploads((n) => n - 1);
     }
   };
 
@@ -480,8 +489,16 @@ export function ProductForm({ product, productId, error }: Props) {
         />
       </section>
 
-      <button type="submit" disabled={isSubmitting} className="btn btn-clay w-full sm:w-auto">
-        {isSubmitting ? "Guardando…" : "Guardar producto"}
+      <button
+        type="submit"
+        disabled={isSubmitting || pendingUploads > 0}
+        className="btn btn-clay w-full sm:w-auto"
+      >
+        {isSubmitting
+          ? "Guardando…"
+          : pendingUploads > 0
+            ? "Subiendo foto…"
+            : "Guardar producto"}
       </button>
     </form>
   );
