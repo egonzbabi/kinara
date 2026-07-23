@@ -37,6 +37,17 @@ const PHOTOS: Record<string, string> = {
   a33unpjw: "IMG_2104.jpg", // SET ESSENTAL
   w7fztofn: "IMG_2255.jpg", // SEAMLESS SOFTESS
   aahwibg2: "IMG_2248.jpg", // BUTTON
+  // Segunda tanda: solo había foto de referencia del proveedor (Excel), no
+  // foto de estudio propia — resolución más baja, reemplazar cuando haya mejor.
+  yrgm8j3k: "01_LEGGIN_FELPADA.jpg", // LEGGIN FELPADA
+  xodrb770: "03_ESSENTIAL_SHIRT.jpg", // ESSENTIAL SHIRT
+  cpzcb56l: "04_SEATLE_TOP.jpg", // SEATLE TOP
+  "0pc4ckxj": "06_CONJUNTO_MESH.jpg", // CONJUNTO MESH
+  t5a8m19y: "13_NEWYORKLEGGIN.jpg", // NEWYORKLEGGIN
+  tfd8kuxw: "19_NEWYORK_TOP.jpg", // NEWYORK TOP
+  a7afrq2o: "14_SOFT_FLARE.jpg", // SOFT FLARE
+  jzqkr4un: "10_BI_COLOR_SET.jpg", // BI COLOR SET
+  wk8gx3lz: "18_CONJUNTO_RIB.jpg", // CONJUNTO RIB
 };
 
 async function main() {
