@@ -58,5 +58,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 015 | [015-panel-admin-productos.md](015-panel-admin-productos.md) | done | Panel de administración de productos (login + CRUD) |
 | 016 | [016-modelo-id-regenerado.md](016-modelo-id-regenerado.md) | done | Campo `modelo` por color/talla + regenerar `products.id` |
 | 017 | [017-skydropx-envios.md](017-skydropx-envios.md) | done | Integración de Skydropx para cotización real de envíos |
+| 018 | [018-catalogo-parte-2.md](018-catalogo-parte-2.md) | in-progress | Catálogo parte 2 — 21 productos nuevos + completar YUCA BRA |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

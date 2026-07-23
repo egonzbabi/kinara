@@ -8,13 +8,14 @@ export type Database = {
           name: string;
           category: "mujer" | "hombre" | "accesorios";
           kind: string;
-          price: number;
+          price: number | null;
           compare_at: number | null;
           description: string | null;
           materials: string | null;
           badge: string | null;
           is_new: boolean;
           is_bestseller: boolean;
+          is_draft: boolean;
           created_at: string;
         };
         Insert: Omit<

@@ -82,7 +82,11 @@ const SELECT =
   "*, product_variants(color_name, color_hex, size, stock), product_images(url, position, color_name)";
 
 export async function getAllProducts(): Promise<Product[]> {
-  const { data, error } = await supabase.from("products").select(SELECT).order("created_at");
+  const { data, error } = await supabase
+    .from("products")
+    .select(SELECT)
+    .eq("is_draft", false)
+    .order("created_at");
   if (error) throw new Error(`No se pudo cargar el catálogo: ${error.message}`);
   return (data as ProductRow[]).map(mapRow);
 }
@@ -92,6 +96,7 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
     .from("products")
     .select(SELECT)
     .eq("slug", slug)
+    .eq("is_draft", false)
     .maybeSingle();
   if (error) throw new Error(`No se pudo cargar el producto "${slug}": ${error.message}`);
   return data ? mapRow(data as ProductRow) : undefined;

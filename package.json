@@ -8,6 +8,7 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "migrate:products": "tsx scripts/migrate-products.ts",
+    "migrate:parte2": "tsx scripts/migrate-parte2.ts",
     "upload:color-images": "tsx scripts/upload-color-images.ts",
     "upload:color-images-2": "tsx scripts/upload-color-images-batch2.ts",
     "upload:color-images-3": "tsx scripts/upload-color-images-batch3.ts",

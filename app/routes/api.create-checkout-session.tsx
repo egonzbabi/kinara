@@ -104,7 +104,7 @@ export async function action({ request }: Route.ActionArgs) {
     const variant = variantByKey.get(key);
     const label = `${item.name} — ${item.color} (${item.size})`;
 
-    if (!product || !variant) {
+    if (!product || product.price == null || !variant) {
       missing.push(label);
       continue;
     }

@@ -5,11 +5,17 @@ import { SIZE_ORDER } from "~/lib/catalog-constants";
 import { cn } from "~/lib/cn";
 import type { AdminProductInput, AdminColorInput, SizeStock } from "~/lib/admin-catalog.server";
 
-/** Deriva el código base de modelo a partir del primer "modelo" ya guardado (ej. "JV001-MARINO-M" -> "JV001"). */
+/**
+ * Deriva el código base de modelo a partir del primer "modelo" ya guardado.
+ * El formato siempre termina en "-COLOR-TALLA" (ambos sin guiones, ver
+ * modeloColorCode), así que el base es todo menos los últimos dos segmentos
+ * — el propio código base puede tener guiones (ej. "JV-FELPADA002-GRIS-M" ->
+ * "JV-FELPADA002", no "JV").
+ */
 function guessModeloBase(colors: AdminColorInput[]): string {
   for (const c of colors) {
     for (const s of c.sizes) {
-      if (s.modelo) return s.modelo.split("-")[0] ?? "";
+      if (s.modelo) return s.modelo.split("-").slice(0, -2).join("-");
     }
   }
   return "";

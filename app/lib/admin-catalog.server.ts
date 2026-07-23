@@ -34,7 +34,8 @@ export type AdminProductListItem = {
   slug: string;
   name: string;
   category: "mujer" | "hombre" | "accesorios";
-  price: number;
+  price: number | null;
+  isDraft: boolean;
   totalStock: number;
   colors: { name: string; hex: string | null }[];
   thumbnailUrl: string;
@@ -46,7 +47,8 @@ type ProductRow = {
   name: string;
   category: "mujer" | "hombre" | "accesorios";
   kind: string;
-  price: number;
+  price: number | null;
+  is_draft: boolean;
   compare_at: number | null;
   description: string | null;
   materials: string | null;
@@ -96,6 +98,7 @@ export async function listAdminProducts(): Promise<AdminProductListItem[]> {
       name: row.name,
       category: row.category,
       price: row.price,
+      isDraft: row.is_draft,
       totalStock,
       colors: Array.from(colorMap.entries()).map(([name, hex]) => ({ name, hex })),
       thumbnailUrl: pickThumbnail(row),
@@ -143,7 +146,7 @@ export async function getAdminProductById(id: string): Promise<AdminProductInput
     slug: row.slug,
     category: row.category,
     kind: row.kind,
-    price: row.price,
+    price: row.price ?? 0,
     compareAt: row.compare_at,
     description: row.description,
     materials: row.materials,
@@ -241,6 +244,7 @@ export async function createProduct(input: AdminProductInput): Promise<string> {
     badge: input.badge,
     is_new: input.isNew,
     is_bestseller: input.isBestseller,
+    is_draft: false,
   });
   if (insertError) throw new Error(`No se pudo crear el producto: ${insertError.message}`);
 
@@ -279,6 +283,7 @@ export async function updateProduct(id: string, input: AdminProductInput): Promi
       badge: input.badge,
       is_new: input.isNew,
       is_bestseller: input.isBestseller,
+      is_draft: false,
     })
     .eq("id", id);
   if (updateError) throw new Error(`No se pudo actualizar el producto: ${updateError.message}`);

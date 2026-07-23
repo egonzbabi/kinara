@@ -96,7 +96,14 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
                           <img src={p.thumbnailUrl} alt={p.name} className="h-full w-full object-cover" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-espresso">{p.name}</p>
+                          <p className="flex items-center gap-2 text-sm font-medium text-espresso">
+                            {p.name}
+                            {p.isDraft && (
+                              <span className="rounded-full bg-clay/10 px-2 py-0.5 text-[11px] font-semibold text-clay">
+                                Borrador
+                              </span>
+                            )}
+                          </p>
                           {p.colors.length > 0 && (
                             <div className="mt-1 flex gap-1">
                               {p.colors.slice(0, 5).map((c) => (
@@ -112,7 +119,13 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-sm text-espresso">{formatPrice(p.price)}</td>
+                    <td className="px-5 py-3 text-sm text-espresso">
+                      {p.price === null ? (
+                        <span className="text-muted">Sin precio</span>
+                      ) : (
+                        formatPrice(p.price)
+                      )}
+                    </td>
                     <td className="px-5 py-3 text-sm capitalize text-muted">{p.category}</td>
                     <td className="px-5 py-3 text-sm">
                       <span className={p.totalStock === 0 ? "text-clay" : "text-espresso"}>
