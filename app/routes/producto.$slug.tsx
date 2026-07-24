@@ -57,7 +57,10 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   // cada color disponible (en vez de solo la del color seleccionado + fotos genéricas),
   // y seleccionar una miniatura cambia también el color activo.
   const galleryItems: GalleryItem[] = product.colorImages
-    ? product.colors.map((c) => ({ src: product.colorImages![c.name]!, color: c.name }))
+    ? product.colors.map((c) => ({
+        src: product.colorImages![c.name] ?? product.gallery[0],
+        color: c.name,
+      }))
     : product.gallery.map((src) => ({ src }));
 
   // Precarga la imagen inicial de la galería (LCP de esta ruta) — sin esto el

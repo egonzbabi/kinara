@@ -49,14 +49,11 @@ function mapRow(row: ProductRow): Product {
     if (img.color_name && img.position === 0) colorImages[img.color_name] = img.url;
   }
 
-  // Si ya hay al menos una foto verificada por color para este producto, el swatch
-  // solo muestra los colores con foto real (ver tasks/009-fotos-por-color.md). Si
-  // todavía no se ha curado ninguna foto por color, se muestran todos los colores
-  // con stock (comportamiento previo, sin cambios).
+  // El swatch muestra todos los colores con stock, tengan o no foto propia; el
+  // color sin foto verificada cae a la foto genérica del producto (ver
+  // tasks/018-catalogo-parte-2.md).
   const hasColorPhotos = Object.keys(colorImages).length > 0;
-  const colors = hasColorPhotos
-    ? Array.from(colorMap.values()).filter((c) => colorImages[c.name])
-    : Array.from(colorMap.values());
+  const colors = Array.from(colorMap.values());
 
   return {
     id: row.id,
