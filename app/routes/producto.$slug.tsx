@@ -186,9 +186,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
           <div className="mt-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">Talla</p>
-              <button className="text-[13px] text-muted underline-offset-4 hover:text-clay hover:underline">
-                Guía de tallas
-              </button>
+              <span className="text-[13px] text-muted">Tallas reducidas</span>
             </div>
             <div
               className={cn(
@@ -236,8 +234,8 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
           )}
 
           <ul className="mt-5 flex flex-col gap-1.5 text-[13px] text-muted">
-            <li>· Envío gratis en pedidos desde 60 €</li>
-            <li>· Devoluciones gratuitas en 30 días</li>
+            <li>· Envío calculado al finalizar la compra</li>
+            <li>· NO HAY DEVOLUCIONES</li>
           </ul>
 
           {/* Details */}
@@ -264,8 +262,8 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                   title: "Envíos y devoluciones",
                   content: (
                     <p>
-                      Entrega en 24-48 h en península. Envío gratis desde 60 €.
-                      Devoluciones gratuitas durante 30 días.
+                      Entrega en 24-48 h en península. Envío calculado al
+                      finalizar la compra. NO HAY DEVOLUCIONES.
                     </p>
                   ),
                 },
