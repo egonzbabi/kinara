@@ -184,9 +184,11 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
 
           {/* Size */}
           <div className="mt-6">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <p className="text-sm font-medium">Talla</p>
-              <span className="text-[13px] text-muted">Tallas reducidas</span>
+              <span className="text-[13px] font-bold text-clay">
+                · Tallas reducidas
+              </span>
             </div>
             <div
               className={cn(
