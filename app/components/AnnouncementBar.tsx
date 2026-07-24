@@ -1,8 +1,8 @@
 const MESSAGES = [
-  "Envío gratis desde 60 €",
+  "Envío calculado al finalizar la compra",
   "Nueva colección SS26",
-  "Devoluciones gratis en 30 días",
-  "Tejidos reciclados · Hecho con cuidado",
+  "No aceptamos devoluciones",
+  "Tejidos cómodos · Hecho con cuidado",
 ];
 
 export function AnnouncementBar() {

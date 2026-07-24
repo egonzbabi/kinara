@@ -12,7 +12,7 @@ export function EditorialSplit() {
             calma.”
           </blockquote>
           <p className="mt-5 max-w-[48ch] text-muted">
-            Diseñamos cada pieza con tejidos reciclados y un patronaje que
+            Diseñamos cada pieza con tejidos cómodos y un patronaje que
             favorece a cuerpos reales. Menos colecciones, más duraderas. Color
             cálido que combina con todo lo que ya tienes.
           </p>

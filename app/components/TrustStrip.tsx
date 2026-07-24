@@ -3,17 +3,17 @@ import type { ReactNode } from "react";
 const ITEMS: { icon: ReactNode; title: string; copy: string }[] = [
   {
     icon: <TruckIcon />,
-    title: "Envío gratis +60 €",
-    copy: "Entrega en 24-48 h",
+    title: "Envío calculado",
+    copy: "Al finalizar la compra",
   },
   {
     icon: <ReturnIcon />,
-    title: "30 días de cambios",
-    copy: "Devoluciones sencillas",
+    title: "Sin devoluciones",
+    copy: "No aceptamos devoluciones",
   },
   {
     icon: <LeafIcon />,
-    title: "Tejidos reciclados",
+    title: "Tejidos cómodos",
     copy: "Hecho con cuidado",
   },
   {
