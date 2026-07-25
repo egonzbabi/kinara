@@ -51,7 +51,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   const key =
     kind === "color" && colorName
-      ? `${productId}/${slugify(colorName)}.${ext}`
+      ? `${productId}/${slugify(colorName)}-${Date.now()}.${ext}`
       : `${productId}/generic-${Date.now()}.${ext}`;
 
   const buffer = new Uint8Array(await file.arrayBuffer());

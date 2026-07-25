@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { preload } from "react-dom";
 import { Link } from "react-router";
 import type { Route } from "./+types/producto.$slug";
@@ -17,6 +17,7 @@ import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
+import { useDragScroll } from "~/hooks/useDragScroll";
 import { cn } from "~/lib/cn";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -52,6 +53,20 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   const [attempted, setAttempted] = useState(false);
 
   const colorImage = color ? product.colorImages?.[color] : undefined;
+
+  // Cuando el color elegido tiene varias fotos, la primera es la principal (mostrada
+  // arriba) y el resto aparece en el carrusel de abajo — elegir una foto del
+  // carrusel la pasa a ser la principal, sin cambiar de color.
+  const colorPhotos = (color && product.colorGallery?.[color]) || [];
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  useEffect(() => {
+    setActivePhotoIndex(0);
+  }, [color]);
+  const otherPhotos = colorPhotos
+    .map((src, i) => ({ src, i }))
+    .filter(({ i }) => i !== activePhotoIndex);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  useDragScroll(carouselRef);
 
   // Si el producto tiene foto real por color, la galería muestra una miniatura por
   // cada color disponible (en vez de solo la del color seleccionado + fotos genéricas),
@@ -117,15 +132,45 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
 
       <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
         {/* Gallery */}
-        <ProductGallery
-          items={galleryItems}
-          active={activeGalleryIndex}
-          onSelect={(i) => {
-            const item = galleryItems[i];
-            if (item.color) setColor(item.color);
-          }}
-          alt={product.name}
-        />
+        <div>
+          <ProductGallery
+            items={galleryItems}
+            active={activeGalleryIndex}
+            onSelect={(i) => {
+              const item = galleryItems[i];
+              if (item.color) setColor(item.color);
+            }}
+            alt={product.name}
+            mainSrcOverride={colorPhotos[activePhotoIndex]}
+          />
+
+          {/* Carrusel de más fotos del color elegido */}
+          {otherPhotos.length > 0 && (
+            <div className="mt-3 rounded-2xl bg-white p-3">
+              <div
+                ref={carouselRef}
+                className="no-scrollbar flex cursor-grab gap-2.5 overflow-x-auto"
+              >
+                {otherPhotos.map(({ src, i }) => (
+                  <button
+                    key={src}
+                    onClick={() => setActivePhotoIndex(i)}
+                    aria-label={`Ver foto ${i + 1} de ${color}`}
+                    className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border border-line opacity-80 transition-opacity hover:opacity-100"
+                  >
+                    <img
+                      src={productImage(src, { width: 160, height: 200 })}
+                      alt=""
+                      aria-hidden
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Info */}
         <div className="lg:py-4">

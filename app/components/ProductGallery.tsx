@@ -12,16 +12,19 @@ export function ProductGallery({
   active: activeProp,
   onSelect,
   alt,
+  mainSrcOverride,
 }: {
   items: GalleryItem[];
   /** Índice activo controlado por el padre (ej. sincronizado con el color seleccionado). */
   active?: number;
   onSelect?: (index: number) => void;
   alt: string;
+  /** Reemplaza la foto principal mostrada (ej. al elegir una foto del carrusel de un color con varias fotos), sin afectar qué miniatura de color está activa. */
+  mainSrcOverride?: string;
 }) {
   const [activeState, setActiveState] = useState(0);
   const active = activeProp ?? activeState;
-  const current = items[active]?.src ?? items[0]?.src;
+  const current = mainSrcOverride ?? items[active]?.src ?? items[0]?.src;
 
   const handleSelect = (i: number) => {
     setActiveState(i);

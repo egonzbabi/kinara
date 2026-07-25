@@ -16,8 +16,10 @@ export type Product = {
   colors: ColorOption[];
   sizes: string[];
   gallery: string[];
-  /** Foto real por color (nombre de color -> URL), cuando existe. Ver tasks/009-fotos-por-color.md. */
+  /** Foto principal por color (nombre de color -> URL), cuando existe. Ver tasks/009-fotos-por-color.md. */
   colorImages?: Record<string, string>;
+  /** Todas las fotos por color, en orden (la primera es la principal, igual que colorImages). Ver tasks/019-fotos-multiples-color.md. */
+  colorGallery?: Record<string, string[]>;
   badge?: "Nuevo" | "Best-seller" | "Edición" | "Últimas unidades";
   isNew?: boolean;
   isBestseller?: boolean;

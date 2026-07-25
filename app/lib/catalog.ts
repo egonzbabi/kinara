@@ -44,10 +44,12 @@ function mapRow(row: ProductRow): Product {
     .sort((a, b) => a.position - b.position)
     .map((img) => img.url);
 
-  const colorImages: Record<string, string> = {};
-  for (const img of row.product_images) {
-    if (img.color_name && img.position === 0) colorImages[img.color_name] = img.url;
+  const colorGallery: Record<string, string[]> = {};
+  for (const img of [...row.product_images].sort((a, b) => a.position - b.position)) {
+    if (img.color_name) (colorGallery[img.color_name] ??= []).push(img.url);
   }
+  const colorImages: Record<string, string> = {};
+  for (const [name, urls] of Object.entries(colorGallery)) colorImages[name] = urls[0];
 
   // El swatch muestra todos los colores con stock, tengan o no foto propia; el
   // color sin foto verificada cae a la foto genérica del producto (ver
@@ -67,6 +69,7 @@ function mapRow(row: ProductRow): Product {
     sizes,
     gallery: genericImages.length > 0 ? genericImages : ["/productos/placeholder.png"],
     colorImages: hasColorPhotos ? colorImages : undefined,
+    colorGallery: hasColorPhotos ? colorGallery : undefined,
     badge: row.badge && VALID_BADGES.has(row.badge) ? (row.badge as Product["badge"]) : undefined,
     isNew: row.is_new,
     isBestseller: row.is_bestseller,

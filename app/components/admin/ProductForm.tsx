@@ -32,7 +32,7 @@ function emptyColor(): AdminColorInput {
     name: "",
     hex: "#CCCCCC",
     sizes: SIZE_ORDER.map((size) => ({ size, stock: 0, modelo: null })),
-    imageUrl: null,
+    imageUrls: [],
   };
 }
 
@@ -141,12 +141,37 @@ export function ProductForm({ product, productId, error }: Props) {
     setPendingUploads((n) => n + 1);
     try {
       const url = await uploadImage(file, uploadProductId, "color", colors[index].name || `color-${index}`);
-      updateColor(index, { imageUrl: url });
+      setColors((prev) =>
+        prev.map((c, i) => (i === index ? { ...c, imageUrls: [...c.imageUrls, url] } : c)),
+      );
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Falló la subida");
     } finally {
       setPendingUploads((n) => n - 1);
     }
+  };
+
+  const removeColorImage = (colorIndex: number, photoIndex: number) => {
+    setColors((prev) =>
+      prev.map((c, i) =>
+        i === colorIndex
+          ? { ...c, imageUrls: c.imageUrls.filter((_, pi) => pi !== photoIndex) }
+          : c,
+      ),
+    );
+  };
+
+  const moveColorImage = (colorIndex: number, photoIndex: number, dir: -1 | 1) => {
+    setColors((prev) =>
+      prev.map((c, i) => {
+        if (i !== colorIndex) return c;
+        const target = photoIndex + dir;
+        if (target < 0 || target >= c.imageUrls.length) return c;
+        const imageUrls = [...c.imageUrls];
+        [imageUrls[photoIndex], imageUrls[target]] = [imageUrls[target], imageUrls[photoIndex]];
+        return { ...c, imageUrls };
+      }),
+    );
   };
 
   const handleGalleryImage = async (file: File) => {
@@ -406,23 +431,61 @@ export function ProductForm({ product, productId, error }: Props) {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Foto</label>
+                  <label className={labelClass}>
+                    Fotos {color.imageUrls.length > 0 && `(${color.imageUrls.length})`}
+                  </label>
+                  <p className="text-xs text-muted">La primera es la foto principal.</p>
+                  {color.imageUrls.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {color.imageUrls.map((url, pi) => (
+                        <div key={url} className="relative">
+                          <img
+                            src={url}
+                            alt={`${color.name} ${pi + 1}`}
+                            className={cn(
+                              "h-16 w-16 rounded-lg object-cover",
+                              pi === 0 && "ring-2 ring-clay ring-offset-1",
+                            )}
+                          />
+                          <div className="mt-1 flex justify-center gap-1">
+                            <button
+                              type="button"
+                              disabled={pi === 0}
+                              onClick={() => moveColorImage(i, pi, -1)}
+                              className="text-xs text-muted hover:text-espresso disabled:opacity-30"
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              disabled={pi === color.imageUrls.length - 1}
+                              onClick={() => moveColorImage(i, pi, 1)}
+                              className="text-xs text-muted hover:text-espresso disabled:opacity-30"
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeColorImage(i, pi)}
+                              className="text-xs text-clay hover:underline"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) handleColorImage(i, file);
+                      e.target.value = "";
                     }}
-                    className="mt-1.5 text-sm"
+                    className="mt-2 text-sm"
                   />
-                  {color.imageUrl && (
-                    <img
-                      src={color.imageUrl}
-                      alt={color.name}
-                      className="mt-2 h-16 w-16 rounded-lg object-cover"
-                    />
-                  )}
                 </div>
 
                 {colors.length > 1 && (

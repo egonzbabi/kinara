@@ -10,7 +10,8 @@ export type AdminColorInput = {
   name: string;
   hex: string | null;
   sizes: SizeStock[];
-  imageUrl: string | null;
+  /** Todas las fotos de este color, en orden — la primera es la principal. */
+  imageUrls: string[];
 };
 
 export type AdminProductInput = {
@@ -125,14 +126,17 @@ export async function getAdminProductById(id: string): Promise<AdminProductInput
         name: v.color_name,
         hex: v.color_hex,
         sizes: [],
-        imageUrl: null,
+        imageUrls: [],
       });
     }
     colorsByName.get(v.color_name)!.sizes.push({ size: v.size, stock: v.stock, modelo: v.modelo });
   }
-  for (const img of row.product_images) {
-    if (img.color_name && img.position === 0 && colorsByName.has(img.color_name)) {
-      colorsByName.get(img.color_name)!.imageUrl = img.url;
+  const colorImageRows = row.product_images
+    .filter((img) => img.color_name)
+    .sort((a, b) => a.position - b.position);
+  for (const img of colorImageRows) {
+    if (img.color_name && colorsByName.has(img.color_name)) {
+      colorsByName.get(img.color_name)!.imageUrls.push(img.url);
     }
   }
 
@@ -183,14 +187,14 @@ async function insertVariantsAndImages(productId: string, input: AdminProductInp
   }
 
   const imageRows = [
-    ...input.colors
-      .filter((c) => c.imageUrl)
-      .map((c) => ({
+    ...input.colors.flatMap((c) =>
+      c.imageUrls.map((url, i) => ({
         product_id: productId,
         color_name: c.name,
-        url: c.imageUrl!,
-        position: 0,
+        url,
+        position: i,
       })),
+    ),
     ...input.gallery.map((url, i) => ({
       product_id: productId,
       color_name: null,
@@ -316,7 +320,7 @@ export async function updateProduct(id: string, input: AdminProductInput): Promi
 
   // Limpiar en Storage las imágenes que ya no están en el set nuevo (si no, quedan huérfanas).
   const newUrls = new Set([
-    ...input.colors.filter((c) => c.imageUrl).map((c) => c.imageUrl!),
+    ...input.colors.flatMap((c) => c.imageUrls),
     ...input.gallery,
   ]);
   const orphanPaths = (oldImages ?? [])
