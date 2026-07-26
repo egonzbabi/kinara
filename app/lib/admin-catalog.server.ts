@@ -26,6 +26,7 @@ export type AdminProductInput = {
   badge: string | null;
   isNew: boolean;
   isBestseller: boolean;
+  isOnSale: boolean;
   colors: AdminColorInput[];
   gallery: string[];
 };
@@ -56,6 +57,7 @@ type ProductRow = {
   badge: string | null;
   is_new: boolean;
   is_bestseller: boolean;
+  is_on_sale: boolean;
   product_variants: {
     color_name: string;
     color_hex: string | null;
@@ -157,6 +159,7 @@ export async function getAdminProductById(id: string): Promise<AdminProductInput
     badge: row.badge,
     isNew: row.is_new,
     isBestseller: row.is_bestseller,
+    isOnSale: row.is_on_sale,
     colors: colorOrder.map((name) => colorsByName.get(name)!),
     gallery,
   };
@@ -248,6 +251,7 @@ export async function createProduct(input: AdminProductInput): Promise<string> {
     badge: input.badge,
     is_new: input.isNew,
     is_bestseller: input.isBestseller,
+    is_on_sale: input.isOnSale,
     is_draft: false,
   });
   if (insertError) throw new Error(`No se pudo crear el producto: ${insertError.message}`);
@@ -287,6 +291,7 @@ export async function updateProduct(id: string, input: AdminProductInput): Promi
       badge: input.badge,
       is_new: input.isNew,
       is_bestseller: input.isBestseller,
+      is_on_sale: input.isOnSale,
       is_draft: false,
     })
     .eq("id", id);

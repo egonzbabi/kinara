@@ -15,6 +15,7 @@ export type Database = {
           badge: string | null;
           is_new: boolean;
           is_bestseller: boolean;
+          is_on_sale: boolean;
           is_draft: boolean;
           created_at: string;
         };

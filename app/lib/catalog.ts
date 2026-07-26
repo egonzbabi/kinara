@@ -17,6 +17,7 @@ type ProductRow = {
   badge: string | null;
   is_new: boolean;
   is_bestseller: boolean;
+  is_on_sale: boolean;
   product_variants: {
     color_name: string;
     color_hex: string | null;
@@ -73,6 +74,7 @@ function mapRow(row: ProductRow): Product {
     badge: row.badge && VALID_BADGES.has(row.badge) ? (row.badge as Product["badge"]) : undefined,
     isNew: row.is_new,
     isBestseller: row.is_bestseller,
+    isOnSale: row.is_on_sale,
     description: row.description ?? "",
     materials: row.materials ?? "",
   };

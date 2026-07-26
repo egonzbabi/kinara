@@ -74,9 +74,10 @@ export function ProductForm({ product, productId, error }: Props) {
   const [materials, setMaterials] = useState(product?.materials ?? "");
   const [isNew, setIsNew] = useState(product?.isNew ?? false);
   const [isBestseller, setIsBestseller] = useState(product?.isBestseller ?? false);
-  // La casilla marcada ES la etiqueta que se ve sobre la foto — un solo dato, no dos
-  // campos separados. Si se marcan ambas, "Nuevo" gana (es la más relevante de mostrar).
-  const badge = isNew ? "Nuevo" : isBestseller ? "Best-seller" : "";
+  const [isOnSale, setIsOnSale] = useState(product?.isOnSale ?? false);
+  // La casilla marcada ES la etiqueta que se ve sobre la foto — un solo dato, no tres
+  // campos separados. Si se marca más de una, gana en este orden: Nuevo, Best-seller, Oferta.
+  const badge = isNew ? "Nuevo" : isBestseller ? "Best-seller" : isOnSale ? "Oferta" : "";
   const [colors, setColors] = useState<AdminColorInput[]>(
     product?.colors.map((c) => ({ ...c, sizes: sizesFor(c.sizes) })) ?? [emptyColor()],
   );
@@ -336,6 +337,20 @@ export function ProductForm({ product, productId, error }: Props) {
                 <p className="ml-6 text-xs text-muted">
                   Aparece en: etiqueta "Best-seller" sobre la foto, y el carrusel de más
                   vendidos de la página principal.
+                </p>
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm text-espresso">
+                  <input
+                    type="checkbox"
+                    name="isOnSale"
+                    checked={isOnSale}
+                    onChange={(e) => setIsOnSale(e.target.checked)}
+                  />
+                  Oferta
+                </label>
+                <p className="ml-6 text-xs text-muted">
+                  Aparece en: etiqueta "Oferta" sobre la foto del producto en la tienda.
                 </p>
               </div>
             </div>

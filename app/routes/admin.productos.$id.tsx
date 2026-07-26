@@ -34,6 +34,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     badge: String(form.get("badge") || "") || null,
     isNew: form.get("isNew") === "on",
     isBestseller: form.get("isBestseller") === "on",
+    isOnSale: form.get("isOnSale") === "on",
     colors: JSON.parse(String(form.get("colors_json") || "[]")),
     gallery: JSON.parse(String(form.get("gallery_json") || "[]")),
   };

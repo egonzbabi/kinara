@@ -53,6 +53,7 @@ async function main() {
         badge: null,
         is_new: false,
         is_bestseller: false,
+        is_on_sale: false,
         is_draft: true,
       });
       if (productError) throw new Error(`Insert products falló para ${p.name}: ${productError.message}`);

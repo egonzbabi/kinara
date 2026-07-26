@@ -106,9 +106,11 @@ export function ProductCard({
                   ? "bg-espresso text-bone"
                   : product.badge === "Nuevo"
                     ? "bg-sage text-bone"
-                    : product.badge === "Edición"
-                      ? "bg-clay text-bone"
-                      : "bg-bone text-espresso",
+                    : product.badge === "Oferta"
+                      ? "bg-clay-deep text-bone"
+                      : product.badge === "Edición"
+                        ? "bg-clay text-bone"
+                        : "bg-bone text-espresso",
               )}
             >
               {product.badge}

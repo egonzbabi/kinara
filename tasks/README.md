@@ -60,5 +60,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 017 | [017-skydropx-envios.md](017-skydropx-envios.md) | done | Integración de Skydropx para cotización real de envíos |
 | 018 | [018-catalogo-parte-2.md](018-catalogo-parte-2.md) | in-progress | Catálogo parte 2 — 21 productos nuevos + completar YUCA BRA |
 | 019 | [019-fotos-multiples-color.md](019-fotos-multiples-color.md) | done | Múltiples fotos por color + carrusel en la página de producto |
+| 020 | [020-badge-oferta.md](020-badge-oferta.md) | done | Agregar "Oferta" como opción de destacar producto |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
