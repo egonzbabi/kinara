@@ -70,9 +70,6 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
     setParams(p, { preventScrollReset: true });
   };
 
-  const setCat = (next: Category | "todo") =>
-    setParam("cat", next === "todo" ? null : next);
-
   const setSort = (next: Sort) =>
     setParam("sort", next === "destacados" ? null : next);
 
@@ -123,28 +120,15 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
   return (
     <div className="pad py-[clamp(28px,4vw,56px)]">
       {/* Header */}
-      <div className="reveal border-b border-line pb-7">
+      <div className="reveal pb-8">
         <span className="label">Tienda · SS26</span>
         <h1 className="mt-2 font-display text-[clamp(34px,5.5vw,68px)] leading-none">
           {heading}
         </h1>
       </div>
 
-      {/* Category chips */}
-      <div className="mt-6 flex flex-wrap items-center gap-2">
-        {(["todo", "mujer", "hombre", "accesorios"] as const).map((c) => (
-          <Chip
-            key={c}
-            active={cat === c}
-            onClick={() => setCat(c)}
-          >
-            {c === "todo" ? "Todo" : CATEGORY_LABELS[c]}
-          </Chip>
-        ))}
-      </div>
-
       {/* Filter bar */}
-      <div className="sticky top-16 z-30 -mx-[clamp(20px,5vw,80px)] mt-6 border-y border-line bg-sand/90 px-[clamp(20px,5vw,80px)] py-3 backdrop-blur">
+      <div className="sticky top-16 z-30 -mx-[clamp(20px,5vw,80px)] border-y border-line bg-sand/90 px-[clamp(20px,5vw,80px)] py-3 backdrop-blur">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           {/* Sizes */}
           <div className="flex items-center gap-2">
@@ -268,29 +252,5 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
         )}
       </div>
     </div>
-  );
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-        active
-          ? "border-espresso bg-espresso text-bone"
-          : "border-line hover:border-espresso",
-      )}
-    >
-      {children}
-    </button>
   );
 }
