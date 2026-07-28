@@ -5,8 +5,12 @@ import { cn } from "~/lib/cn";
 
 const LINKS = [
   { to: "/tienda", label: "Tienda" },
-  { to: "/tienda?cat=mujer", label: "Mujer" },
-  { to: "/tienda?cat=hombre", label: "Hombre" },
+  { to: "/tienda?tipo=Top", label: "Top" },
+  { to: "/tienda?tipo=Bottom", label: "Bottom" },
+  { to: "/tienda?tipo=Legging", label: "Legging" },
+  { to: "/tienda?tipo=Chaqueta", label: "Chaqueta" },
+  { to: "/tienda?tipo=Enterizo", label: "Enterizo" },
+  { to: "/tienda?tipo=Set", label: "Set" },
   { to: "/tienda?cat=accesorios", label: "Accesorios" },
 ];
 
@@ -33,87 +37,93 @@ export function SiteNav() {
   }, [menuOpen]);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 bg-sand/85 backdrop-blur-md transition-shadow",
-        scrolled ? "shadow-[0_1px_0_var(--color-line)]" : "",
-      )}
-    >
-      <nav className="pad flex h-16 items-center justify-between gap-4">
-        {/* Left: desktop links / mobile burger */}
-        <div className="flex flex-1 items-center gap-7">
-          {isProductDetail && (
+    <>
+      <header
+        className={cn(
+          "sticky top-0 z-50 bg-sand/85 backdrop-blur-md transition-shadow",
+          scrolled ? "shadow-[0_1px_0_var(--color-line)]" : "",
+        )}
+      >
+        <nav className="pad flex h-16 items-center justify-between gap-4">
+          {/* Left: desktop links / mobile burger */}
+          <div className="flex flex-1 items-center gap-7">
+            {isProductDetail && (
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                aria-label="Volver"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-espresso/80 transition-colors hover:text-clay"
+              >
+                <BackIcon />
+                <span className="hidden sm:inline">Volver</span>
+              </button>
+            )}
             <button
-              type="button"
-              onClick={() => navigate(-1)}
-              aria-label="Volver"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-espresso/80 transition-colors hover:text-clay"
+              className="md:hidden"
+              aria-label="Abrir menú"
+              onClick={() => setMenuOpen(true)}
             >
-              <BackIcon />
-              <span className="hidden sm:inline">Volver</span>
+              <BurgerIcon />
             </button>
-          )}
-          <button
-            className="md:hidden"
-            aria-label="Abrir menú"
-            onClick={() => setMenuOpen(true)}
-          >
-            <BurgerIcon />
-          </button>
-          <ul className="hidden items-center gap-7 md:flex">
-            {LINKS.map((l) => (
-              <li key={l.label}>
-                <NavLink
-                  to={l.to}
-                  end={l.to === "/tienda"}
-                  className={({ isActive }) =>
-                    cn(
-                      "text-sm font-medium text-espresso/80 transition-colors hover:text-clay",
-                      isActive && "text-espresso",
-                    )
-                  }
-                >
-                  {l.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </div>
+            <ul className="hidden items-center gap-7 md:flex">
+              {LINKS.map((l) => (
+                <li key={l.label}>
+                  <NavLink
+                    to={l.to}
+                    end={l.to === "/tienda"}
+                    className={({ isActive }) =>
+                      cn(
+                        "text-sm font-medium text-espresso/80 transition-colors hover:text-clay",
+                        isActive && "text-espresso",
+                      )
+                    }
+                  >
+                    {l.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Center: wordmark */}
-        <Link
-          to="/"
-          aria-label="KINARA · Inicio"
-          className="font-display text-[26px] font-semibold leading-none tracking-[0.18em]"
-        >
-          KINARA
-        </Link>
-
-        {/* Right: utilities */}
-        <div className="flex flex-1 items-center justify-end gap-5">
-          <button
-            className="hidden text-sm font-medium text-espresso/80 transition-colors hover:text-clay sm:block"
-            aria-label="Buscar"
+          {/* Center: wordmark */}
+          <Link
+            to="/"
+            aria-label="KINARA · Inicio"
+            className="font-display text-[26px] font-semibold leading-none tracking-[0.18em]"
           >
-            Buscar
-          </button>
-          <button
-            onClick={open}
-            className="group flex items-center gap-2 text-sm font-medium"
-            aria-label={`Abrir carrito de compras, ${count} artículos`}
-          >
-            <span className="transition-colors group-hover:text-clay">
-              Carrito
-            </span>
-            <span className="grid h-6 min-w-6 place-items-center rounded-full bg-espresso px-1.5 text-[12px] font-semibold tabular-nums text-bone">
-              {count}
-            </span>
-          </button>
-        </div>
-      </nav>
+            KINARA
+          </Link>
 
+          {/* Right: utilities */}
+          <div className="flex flex-1 items-center justify-end gap-5">
+            <button
+              className="hidden text-sm font-medium text-espresso/80 transition-colors hover:text-clay sm:block"
+              aria-label="Buscar"
+            >
+              Buscar
+            </button>
+            <button
+              onClick={open}
+              className="group flex items-center gap-2 text-sm font-medium"
+              aria-label={`Abrir carrito de compras, ${count} artículos`}
+            >
+              <span className="transition-colors group-hover:text-clay">
+                Carrito
+              </span>
+              <span className="grid h-6 min-w-6 place-items-center rounded-full bg-espresso px-1.5 text-[12px] font-semibold tabular-nums text-bone">
+                {count}
+              </span>
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Fuera del <header>: si viviera adentro, el backdrop-blur-md del header
+          crea un containing block nuevo para descendientes position:fixed (regla
+          CSS de backdrop-filter/transform/filter), y el panel quedaba mal
+          posicionado/recortado en vez de cubrir el viewport completo. */}
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
-    </header>
+    </>
   );
 }
 

@@ -17,6 +17,7 @@ Formato de cada entrada: `- [ ] Requisito — (origen: tarea NNN)`
 ## Accesibilidad / UI-UX
 
 - [x] Nunca publicar una foto de producto con texto/badges de marketing de un proveedor superpuestos (inglés/chino, watermarks, capturas de UI) — recortar/limpiar antes de subir a Storage. — (origen: tarea 009)
+- [x] Ningún elemento con `position: fixed` (ej. un panel de menú mobile a pantalla completa) puede vivir dentro de un ancestro con `backdrop-filter`, `filter` o `transform` (ej. el `<header>` con `backdrop-blur-md`) — esas propiedades crean un nuevo containing block para descendientes `fixed`, y el elemento queda mal posicionado/recortado en vez de cubrir el viewport. Renderizar ese tipo de overlay como hermano del elemento con esas propiedades, no como hijo. — (origen: tarea 021)
 
 ## Analytics
 
