@@ -4,6 +4,7 @@ import { supabaseAdmin } from "./supabase.server";
 export interface OrderItem {
   productId: string;
   productName: string;
+  modelo: string | null;
   colorName: string | null;
   size: string;
   quantity: number;
@@ -136,6 +137,8 @@ export async function ensureOrderFromCheckoutSession(
   const shippingCarrier = session.metadata?.shipping_carrier || null;
   const shippingDaysRaw = session.metadata?.shipping_days;
   const shippingDays = shippingDaysRaw ? Number(shippingDaysRaw) : null;
+  const shippingProviderName = session.metadata?.shipping_provider_name || null;
+  const shippingServiceCode = session.metadata?.shipping_service_code || null;
 
   const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
@@ -153,6 +156,12 @@ export async function ensureOrderFromCheckoutSession(
     shipping_address: shippingAddress ?? {},
     shipping_carrier: shippingCarrier,
     shipping_days: shippingDays,
+    shipping_provider_name: shippingProviderName,
+    shipping_service_code: shippingServiceCode,
+    skydropx_shipment_id: null,
+    tracking_number: null,
+    tracking_url: null,
+    label_url: null,
     stripe_session_id: session.id,
   });
 

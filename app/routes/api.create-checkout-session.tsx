@@ -68,7 +68,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   const { data: variants, error: variantsError } = await supabaseAdmin
     .from("product_variants")
-    .select("product_id, color_name, size, stock")
+    .select("product_id, color_name, size, stock, modelo")
     .in("product_id", productIds);
   if (variantsError) {
     console.error("[checkout] error consultando product_variants:", variantsError);
@@ -91,6 +91,7 @@ export async function action({ request }: Route.ActionArgs) {
   const trustedItems: {
     productId: string;
     productName: string;
+    modelo: string | null;
     colorName: string;
     size: string;
     quantity: number;
@@ -117,6 +118,7 @@ export async function action({ request }: Route.ActionArgs) {
     trustedItems.push({
       productId: item.productId,
       productName: product.name,
+      modelo: variant.modelo,
       colorName: item.color,
       size: item.size,
       quantity: item.qty,
@@ -142,10 +144,14 @@ export async function action({ request }: Route.ActionArgs) {
   let shippingFee: number;
   let shippingCarrier: string;
   let shippingDays: number | null;
+  let shippingProviderName: string | null;
+  let shippingServiceCode: string | null;
   if (shipping.providerName === "fallback") {
     shippingFee = SHIPPING_FEE_MXN;
     shippingCarrier = "Envío estándar";
     shippingDays = null;
+    shippingProviderName = null;
+    shippingServiceCode = null;
   } else {
     const totalQty = items.reduce((n, i) => n + i.qty, 0);
     const freshRates = await getShippingRates(address, [estimateParcel(totalQty)]);
@@ -161,6 +167,8 @@ export async function action({ request }: Route.ActionArgs) {
     shippingFee = match.total;
     shippingCarrier = `${match.providerDisplayName} · ${match.serviceName}`;
     shippingDays = match.days;
+    shippingProviderName = match.providerName;
+    shippingServiceCode = match.serviceCode;
   }
 
   const itemsJson = JSON.stringify(trustedItems);
@@ -172,6 +180,8 @@ export async function action({ request }: Route.ActionArgs) {
     shipping_fee: String(shippingFee),
     shipping_days: shippingDays == null ? "" : String(shippingDays),
     shipping_carrier: shippingCarrier,
+    shipping_provider_name: shippingProviderName ?? "",
+    shipping_service_code: shippingServiceCode ?? "",
   };
 
   const line_items: Array<{

@@ -23,6 +23,7 @@ export type Parcel = {
 };
 
 export type ShippingRate = {
+  id: string;
   providerName: string;
   providerDisplayName: string;
   serviceName: string;
@@ -31,6 +32,22 @@ export type ShippingRate = {
   currency: string;
   days: number | null;
 };
+
+export type ShipmentResult = {
+  shipmentId: string;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  labelUrl: string | null;
+};
+
+// Códigos de Carta Porte (SAT) usados por defecto al comprar una guía: "4G" es
+// el código genérico de empaque (caja) del catálogo c_TipoDeEmbalaje, "01010101"
+// es el código genérico "producto no encontrado en el catálogo" de c_ClaveProdServ
+// — ambos descubiertos probando contra el sandbox de Skydropx (no documentados
+// públicamente). Si el catálogo de productos de la tienda alguna vez necesita
+// declarar un giro específico (ropa) para Carta Porte, ajustar aquí.
+export const SAT_PACKAGE_TYPE_DEFAULT = "4G";
+export const SAT_CONSIGNMENT_NOTE_DEFAULT = "01010101";
 
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
@@ -139,6 +156,7 @@ async function createQuotation(addressTo: ShippingAddress, parcels: Parcel[]): P
 
 type SkydropxRateResponse = {
   success: boolean;
+  id: string;
   provider_name: string;
   provider_display_name: string;
   provider_service_name: string;
@@ -170,6 +188,7 @@ async function pollQuotation(id: string): Promise<ShippingRate[]> {
       return data.rates
         .filter((r) => r.success)
         .map((r) => ({
+          id: r.id,
           providerName: r.provider_name,
           providerDisplayName: r.provider_display_name,
           serviceName: r.provider_service_name,
@@ -203,4 +222,128 @@ export async function getShippingRates(
     console.error("[skydropx] no se pudo cotizar el envío:", err);
     return [];
   }
+}
+
+function toShipmentAddress(address: ShippingAddress, reference: string) {
+  return { ...toSkydropxAddress(address), reference };
+}
+
+async function createShipment(params: {
+  quotationId: string;
+  rateId: string;
+  addressTo: ShippingAddress;
+  parcels: Parcel[];
+}): Promise<string> {
+  const { baseUrl } = requireConfig();
+  const token = await getAccessToken();
+
+  const res = await fetch(`${baseUrl}/api/v1/shipments`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      shipment: {
+        quotation_id: params.quotationId,
+        rate_id: params.rateId,
+        address_from: toShipmentAddress(originAddress(), "Bodega"),
+        address_to: toShipmentAddress(params.addressTo, "Domicilio del comprador"),
+        consignment_note: SAT_CONSIGNMENT_NOTE_DEFAULT,
+        package_type: SAT_PACKAGE_TYPE_DEFAULT,
+        parcels: params.parcels,
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Skydropx shipment creation falló: ${res.status} ${await res.text()}`);
+  }
+
+  const data = (await res.json()) as { data: { id: string } };
+  return data.data.id;
+}
+
+type SkydropxPackageResource = {
+  type: string;
+  attributes: {
+    tracking_status: string;
+    tracking_number: string | null;
+    tracking_url_provider: string | null;
+    label_url: string | null;
+  };
+};
+
+async function pollShipment(shipmentId: string): Promise<ShipmentResult> {
+  const { baseUrl } = requireConfig();
+  const token = await getAccessToken();
+
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const res = await fetch(`${baseUrl}/api/v1/shipments/${shipmentId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new Error(`Skydropx shipment poll falló: ${res.status} ${await res.text()}`);
+    }
+
+    const data = (await res.json()) as {
+      data: { attributes: { workflow_status: string; error_detail: string | null } };
+      included: SkydropxPackageResource[];
+    };
+    const status = data.data.attributes.workflow_status;
+
+    if (status === "success") {
+      const pkg = data.included.find((r) => r.type === "package");
+      return {
+        shipmentId,
+        trackingNumber: pkg?.attributes.tracking_number ?? null,
+        trackingUrl: pkg?.attributes.tracking_url_provider ?? null,
+        labelUrl: pkg?.attributes.label_url ?? null,
+      };
+    }
+    if (status !== "in_progress" && status !== "pending") {
+      throw new Error(
+        `Skydropx no pudo generar la guía (estado: ${status}): ${data.data.attributes.error_detail ?? "sin detalle"}`,
+      );
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+
+  throw new Error(`Skydropx shipment ${shipmentId} no terminó de procesarse a tiempo`);
+}
+
+/**
+ * Compra una guía real con Skydropx (tiene costo, descuenta del saldo de la
+ * cuenta) — nunca se llama automáticamente al pagar; solo cuando el admin lo
+ * pide explícitamente desde `/admin/pedidos`. El `quotationId` de la compra
+ * original ya expiró para cuando esto se llama, así que se vuelve a cotizar
+ * fresco y se empareja por `providerName`+`serviceCode`, igual que
+ * `api.create-checkout-session.tsx` hace para validar el precio al pagar.
+ */
+export async function purchaseShipment(params: {
+  addressTo: ShippingAddress;
+  parcels: Parcel[];
+  providerName: string;
+  serviceCode: string;
+}): Promise<ShipmentResult> {
+  const quotationId = await createQuotation(params.addressTo, params.parcels);
+  const rates = await pollQuotation(quotationId);
+  const rate = rates.find(
+    (r) => r.providerName === params.providerName && r.serviceCode === params.serviceCode,
+  );
+  if (!rate) {
+    throw new Error(
+      "Esa tarifa de envío ya no está disponible en Skydropx. Vuelve a intentar — se recotizará con las tarifas vigentes.",
+    );
+  }
+
+  const shipmentId = await createShipment({
+    quotationId,
+    rateId: rate.id,
+    addressTo: params.addressTo,
+    parcels: params.parcels,
+  });
+
+  return await pollShipment(shipmentId);
 }

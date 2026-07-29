@@ -2,6 +2,11 @@
 
 Este archivo se carga automáticamente al inicio de cada sesión de Claude Code en este repo. Contiene el contexto del proyecto y las reglas que debe seguir cualquier modificación.
 
+## ⚠️ Pendientes a cargo del usuario (fuera del código, no algo que Claude pueda hacer)
+
+- **Dirección de origen en Skydropx incorrecta.** Al comprar una guía de prueba (tarea 028) se detectó que la dirección de origen que usa Skydropx para generar la guía no es la correcta (apareció "Pendiente de confirmar" como calle) — la dirección que manda la API (`SKYDROPX_ORIGIN_*` en `.env`) puede estar siendo ignorada por una dirección default configurada a nivel cuenta. Hay que entrar a `pro.skydropx.com` → Direcciones (o Configuración) y corregir la dirección de origen ahí antes de comprar guías reales en producción.
+- **Facturación de Skydropx: ¿necesitan tu RFC?** Sí — para que Skydropx te pueda emitir una factura (CFDI) válida a tu RFC (deducible de impuestos), necesitan tus datos fiscales completos: RFC, razón social, uso de CFDI, domicilio fiscal y régimen fiscal. Esto se configura directamente en `pro.skydropx.com` (sección de datos fiscales/facturación de la cuenta) — no es algo que se haga por API ni que Claude pueda completar. Si no se cargan esos datos, Skydropx normalmente factura a "público en general", que no sirve para deducir el gasto como empresa.
+
 ## Stack
 
 - React Router 7 (framework mode, SSR) + TypeScript + Tailwind CSS v4

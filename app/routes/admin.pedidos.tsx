@@ -5,6 +5,7 @@ import { requireAdmin } from "~/lib/session.server";
 import {
   listAdminOrders,
   updateOrderStatus,
+  buyShippingLabel,
   type AdminOrderListItem,
   type OrderStatus,
 } from "~/lib/admin-orders.server";
@@ -38,7 +39,18 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   await requireAdmin(request);
   const form = await request.formData();
+  const intent = String(form.get("intent") || "update_status");
   const id = String(form.get("id"));
+
+  if (intent === "buy_label") {
+    try {
+      await buyShippingLabel(id);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : "No se pudo comprar la guía." };
+    }
+  }
+
   const status = String(form.get("status")) as OrderStatus;
   await updateOrderStatus(id, status);
   return { ok: true };
@@ -207,6 +219,44 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
             }
           />
           <Row label="Costo de envío" value={formatPrice(order.shippingFee)} />
+          {order.trackingNumber ? (
+            <>
+              <div className="flex justify-between gap-4">
+                <dt className="shrink-0 text-muted">Número de rastreo</dt>
+                <dd className="text-right text-espresso">
+                  {order.trackingUrl ? (
+                    <a
+                      href={order.trackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline decoration-line underline-offset-2 hover:text-clay"
+                    >
+                      {order.trackingNumber}
+                    </a>
+                  ) : (
+                    order.trackingNumber
+                  )}
+                </dd>
+              </div>
+              {order.labelUrl && (
+                <div className="flex justify-between gap-4">
+                  <dt className="shrink-0 text-muted">Guía</dt>
+                  <dd className="text-right">
+                    <a
+                      href={order.labelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-espresso underline decoration-line underline-offset-2 hover:text-clay"
+                    >
+                      Ver / descargar PDF
+                    </a>
+                  </dd>
+                </div>
+              )}
+            </>
+          ) : (
+            <BuyLabelRow order={order} />
+          )}
         </dl>
       </section>
 
@@ -217,7 +267,6 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
           <Row label="Envío" value={formatPrice(order.shippingFee)} />
           <Row label="Total" value={formatPrice(order.total)} />
           <Row label="Moneda" value={order.currency.toUpperCase()} />
-          <Row label="ID sesión Stripe" value={order.stripeSessionId} mono />
         </dl>
       </section>
 
@@ -228,6 +277,7 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
             <thead>
               <tr className="border-b border-line bg-bone">
                 <th className="px-3 py-2 text-left font-medium text-muted">Producto</th>
+                <th className="px-3 py-2 text-left font-medium text-muted">Modelo</th>
                 <th className="px-3 py-2 text-left font-medium text-muted">Color</th>
                 <th className="px-3 py-2 text-left font-medium text-muted">Talla</th>
                 <th className="px-3 py-2 text-right font-medium text-muted">Cant.</th>
@@ -239,6 +289,9 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
               {order.items.map((item, i) => (
                 <tr key={i} className="border-b border-line last:border-0">
                   <td className="px-3 py-2 text-espresso">{item.productName}</td>
+                  <td className="px-3 py-2 font-mono text-[12px] text-muted">
+                    {item.modelo ?? "—"}
+                  </td>
                   <td className="px-3 py-2 text-muted">{item.colorName ?? "—"}</td>
                   <td className="px-3 py-2 text-muted">{item.size}</td>
                   <td className="px-3 py-2 text-right text-muted">{item.quantity}</td>
@@ -252,6 +305,51 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
           </table>
         </div>
       </section>
+    </div>
+  );
+}
+
+function BuyLabelRow({ order }: { order: AdminOrderListItem }) {
+  const fetcher = useFetcher<{ ok: boolean; error?: string }>();
+  const canBuy = Boolean(order.shippingProviderName && order.shippingServiceCode);
+  const isBuying = fetcher.state !== "idle";
+
+  return (
+    <div className="flex justify-between gap-4">
+      <dt className="shrink-0 text-muted">Número de rastreo</dt>
+      <dd className="text-right">
+        {canBuy ? (
+          <fetcher.Form
+            method="post"
+            onSubmit={(e) => {
+              if (
+                !confirm(
+                  `Esto comprará una guía real con Skydropx (${order.shippingCarrier}) y tiene costo — se descuenta del saldo de tu cuenta de Skydropx. ¿Continuar?`,
+                )
+              ) {
+                e.preventDefault();
+              }
+            }}
+          >
+            <input type="hidden" name="intent" value="buy_label" />
+            <input type="hidden" name="id" value={order.id} />
+            <button
+              type="submit"
+              disabled={isBuying}
+              className="text-sm font-medium text-clay underline decoration-clay/40 underline-offset-2 hover:decoration-clay disabled:opacity-50"
+            >
+              {isBuying ? "Comprando…" : "Comprar guía con Skydropx"}
+            </button>
+          </fetcher.Form>
+        ) : (
+          <span className="text-muted">
+            — (pedido anterior a esta función, sin datos de paquetería)
+          </span>
+        )}
+        {fetcher.data?.error && (
+          <p className="mt-1 text-[12px] text-clay">{fetcher.data.error}</p>
+        )}
+      </dd>
     </div>
   );
 }

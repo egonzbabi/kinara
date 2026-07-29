@@ -103,6 +103,12 @@ export type Database = {
           shipping_address: unknown;
           shipping_carrier: string | null;
           shipping_days: number | null;
+          shipping_provider_name: string | null;
+          shipping_service_code: string | null;
+          skydropx_shipment_id: string | null;
+          tracking_number: string | null;
+          tracking_url: string | null;
+          label_url: string | null;
           stripe_session_id: string;
           created_at: string;
         };
