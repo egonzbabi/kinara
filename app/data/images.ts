@@ -61,3 +61,33 @@ export const PHOTO = {
   pBrisa1: "photo-1571945153237-4929e783af4a",
   pBrisa2: "photo-1483721310020-03333e577078",
 } as const;
+
+/**
+ * Collage del hero de home: fotos propias (no Unsplash) subidas a Supabase
+ * Storage (`product-images/site/`), servidas vía `productImage()`/`productSrcSet()`
+ * (`app/lib/productImage.ts`) para WebP + resize automático. `main` es la foto
+ * grande (LCP); `support` son las 3 de apoyo, en orden de arriba hacia abajo.
+ */
+const HERO_BASE =
+  "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/site";
+
+export const HERO_COLLAGE = {
+  main: {
+    url: `${HERO_BASE}/hero-4.jpg`,
+    alt: "Mujer sonriente estirando los brazos hacia arriba con top deportivo blanco y leggings KINARA",
+  },
+  support: [
+    {
+      url: `${HERO_BASE}/hero-2.jpg`,
+      alt: "Mujer sonriente con tapete de yoga bajo el brazo, vistiendo leggings KINARA en un parque",
+    },
+    {
+      url: `${HERO_BASE}/hero-1.jpg`,
+      alt: "Mujer estirando los brazos hacia arriba en una vereda arbolada",
+    },
+    {
+      url: `${HERO_BASE}/hero-3.jpg`,
+      alt: "Mujer sonriente sentada en el pasto estirando después de entrenar",
+    },
+  ],
+} as const;
