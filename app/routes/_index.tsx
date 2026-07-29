@@ -7,7 +7,6 @@ import { ProductGrid } from "~/components/ProductGrid";
 import { EditorialSplit } from "~/components/EditorialSplit";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { LookbookBand } from "~/components/LookbookBand";
-import { Newsletter } from "~/components/Newsletter";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { img, imgSrcSet, PHOTO } from "~/data/images";
@@ -74,7 +73,6 @@ export default function Index({ loaderData }: Route.ComponentProps) {
       <EditorialSplit />
       <BestsellerRail products={products} />
       <LookbookBand />
-      <Newsletter />
     </>
   );
 }

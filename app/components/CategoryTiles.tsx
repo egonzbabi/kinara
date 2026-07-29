@@ -1,12 +1,15 @@
 import { Link } from "react-router";
 import { CATEGORY_TILES } from "~/data/categories";
+import { productImage, productSrcSet } from "~/lib/productImage";
+
+const TILE_WIDTHS = [320, 480, 640];
 
 export function CategoryTiles() {
   return (
     <section className="pad py-[clamp(48px,7vw,96px)]">
       <div className="reveal mb-8 flex items-end justify-between gap-6">
         <div>
-          <span className="label">Compra por categoría</span>
+          <span className="label">Compra por tipo</span>
           <h2 className="mt-2 font-display text-[clamp(28px,4vw,48px)] leading-none">
             Encuentra lo tuyo
           </h2>
@@ -19,18 +22,20 @@ export function CategoryTiles() {
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         {CATEGORY_TILES.map((tile, i) => (
           <Link
-            key={tile.slug}
-            to={`/tienda?cat=${tile.slug}`}
+            key={tile.tipo}
+            to={`/tienda?tipo=${tile.tipo}`}
             className="reveal group relative block overflow-hidden rounded-2xl"
             style={{ transitionDelay: `${i * 80}ms` }}
           >
             <div className="aspect-[3/4] overflow-hidden md:aspect-[4/5]">
               <img
-                src={tile.image}
-                alt={`Categoría ${tile.title}`}
+                src={productImage(tile.image, { width: 480, height: 600 })}
+                srcSet={productSrcSet(tile.image, TILE_WIDTHS, { heightRatio: 1.25 })}
+                sizes="(min-width: 768px) 32vw, (min-width: 640px) 46vw, 92vw"
+                alt={`Tipo ${tile.title}`}
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
               />

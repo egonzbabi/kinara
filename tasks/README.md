@@ -62,5 +62,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 019 | [019-fotos-multiples-color.md](019-fotos-multiples-color.md) | done | Múltiples fotos por color + carrusel en la página de producto |
 | 020 | [020-badge-oferta.md](020-badge-oferta.md) | done | Agregar "Oferta" como opción de destacar producto |
 | 021 | [021-menu-tipos-producto.md](021-menu-tipos-producto.md) | done | Menú principal: quitar Hombre, reemplazar Mujer por tipos de producto |
+| 022 | [022-tienda-colores-home.md](022-tienda-colores-home.md) | done | Limpieza de /tienda, colores exactos, quitar Hombre, rediseño de home |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

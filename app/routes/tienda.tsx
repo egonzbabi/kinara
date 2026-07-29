@@ -58,11 +58,6 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
     [products],
   );
 
-  const allTypes = useMemo(
-    () => Array.from(new Set(products.map((p) => p.kind))).sort(),
-    [products],
-  );
-
   const setParam = (key: string, value: string | null) => {
     const p = new URLSearchParams(params);
     if (value === null) p.delete(key);
@@ -110,7 +105,11 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
   }, [products, cat, sizes, colors, types, sort]);
 
   const heading =
-    cat === "todo" ? "Toda la colección" : CATEGORY_LABELS[cat as Category];
+    types.length === 1
+      ? types[0]
+      : cat !== "todo"
+        ? CATEGORY_LABELS[cat as Category]
+        : "Toda la colección";
 
   const clearAll = () => setParams(new URLSearchParams(), { preventScrollReset: true });
 
@@ -121,8 +120,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
     <div className="pad py-[clamp(28px,4vw,56px)]">
       {/* Header */}
       <div className="reveal pb-8">
-        <span className="label">Tienda · SS26</span>
-        <h1 className="mt-2 font-display text-[clamp(34px,5.5vw,68px)] leading-none">
+        <h1 className="font-display text-[clamp(34px,5.5vw,68px)] leading-none">
           {heading}
         </h1>
       </div>
@@ -146,27 +144,6 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
                   )}
                 >
                   {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Types */}
-          <div className="flex items-center gap-2">
-            <span className="label">Tipo</span>
-            <div className="flex flex-wrap gap-1.5">
-              {allTypes.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => toggle("tipo", t, types)}
-                  className={cn(
-                    "rounded-md border px-2 py-1 text-[12px] font-medium transition-colors",
-                    types.includes(t)
-                      ? "border-espresso bg-espresso text-bone"
-                      : "border-line hover:border-espresso",
-                  )}
-                >
-                  {t}
                 </button>
               ))}
             </div>

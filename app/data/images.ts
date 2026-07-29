@@ -40,17 +40,8 @@ export function imgSrcSet(id: string, widths: number[], { h: baseH, w: baseW, q 
 /** Named raw photo ids (Unsplash), grouped by intended use. */
 export const PHOTO = {
   heroPrimary: "photo-1517836357463-d25dfeac3438",
-  heroSecondary: "photo-1552674605-db6ffd4facb5",
-
-  categoryMujer: "photo-1535556116002-6281ff3e9f36",
-  categoryHombre: "photo-1538805060514-97d9cc17730c",
-  categoryAccesorios: "photo-1556817411-31ae72fa3ea0",
 
   editorial: "photo-1549576490-b0b4831ef60a",
-  lookbookA: "photo-1483721310020-03333e577078",
-  lookbookB: "photo-1518611012118-696072aa579a",
-  lookbookC: "photo-1532009324734-20a7a5813719",
-  lookbookD: "photo-1571945153237-4929e783af4a",
 
   // Product galleries
   pBruma1: "photo-1556817411-31ae72fa3ea0",

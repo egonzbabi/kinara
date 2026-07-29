@@ -1,6 +1,10 @@
 import { useRef } from "react";
+import { Link } from "react-router";
 import { LOOKS } from "~/data/looks";
 import { useDragScroll } from "~/hooks/useDragScroll";
+import { productImage, productSrcSet } from "~/lib/productImage";
+
+const LOOK_WIDTHS = [420, 640, 840];
 
 export function LookbookBand() {
   const railRef = useRef<HTMLDivElement>(null);
@@ -25,24 +29,29 @@ export function LookbookBand() {
         className="no-scrollbar flex cursor-grab gap-4 overflow-x-auto px-[clamp(20px,5vw,80px)] pb-2"
       >
         {LOOKS.map((look) => (
-          <figure
+          <Link
             key={look.id}
+            to={`/producto/${look.slug}`}
             className="group relative w-[72vw] shrink-0 overflow-hidden rounded-2xl sm:w-[44vw] md:w-[32vw] lg:w-[26vw]"
           >
-            <div className="aspect-[3/4] overflow-hidden">
-              <img
-                src={look.image}
-                alt={`${look.num} — ${look.name}`}
-                loading="lazy"
-                draggable={false}
-                className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
-              />
-            </div>
-            <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-espresso/70 to-transparent p-5 text-bone">
-              <span className="font-display text-lg">{look.name}</span>
-              <span className="label text-bone/70">{look.num}</span>
-            </figcaption>
-          </figure>
+            <figure>
+              <div className="aspect-[3/4] overflow-hidden">
+                <img
+                  src={productImage(look.image, { width: 640, height: 853 })}
+                  srcSet={productSrcSet(look.image, LOOK_WIDTHS, { heightRatio: 4 / 3 })}
+                  sizes="(min-width: 1024px) 26vw, (min-width: 768px) 32vw, (min-width: 640px) 44vw, 72vw"
+                  alt={look.name}
+                  loading="lazy"
+                  draggable={false}
+                  className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                />
+              </div>
+              <figcaption className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-espresso/70 to-transparent p-5 text-bone">
+                <span className="font-display text-lg">{look.name}</span>
+                <span className="label text-bone/70">{look.num}</span>
+              </figcaption>
+            </figure>
+          </Link>
         ))}
       </div>
     </section>

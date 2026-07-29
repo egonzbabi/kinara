@@ -5,7 +5,6 @@ const COLS = [
     title: "Tienda",
     links: [
       { label: "Mujer", to: "/tienda?cat=mujer" },
-      { label: "Hombre", to: "/tienda?cat=hombre" },
       { label: "Accesorios", to: "/tienda?cat=accesorios" },
       { label: "Novedades", to: "/tienda" },
     ],
@@ -67,9 +66,7 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-col items-start justify-between gap-4 pt-7 sm:flex-row sm:items-center">
-          <p className="text-[13px] text-muted">
-            © {2026} KINARA · Hecho con cuidado en España
-          </p>
+          <p className="text-[13px] text-muted">© {2026} KINARA</p>
           <div className="flex items-center gap-5 text-[13px] text-muted">
             <a href="#" className="hover:text-clay">
               Privacidad
