@@ -65,5 +65,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 022 | [022-tienda-colores-home.md](022-tienda-colores-home.md) | done | Limpieza de /tienda, colores exactos, quitar Hombre, rediseño de home |
 | 023 | [023-header-logo-menu-banner.md](023-header-logo-menu-banner.md) | done | Header: menú principal debajo del logo KINARA, logo más grande, banner más lento |
 | 024 | [024-hero-collage-copy.md](024-hero-collage-copy.md) | done | Hero de home: collage de 4 fotos + nuevo copy del título |
+| 025 | [025-hero-carrusel.md](025-hero-carrusel.md) | done | Hero de home: collage → carrusel automático + "universo" a "mundo" |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

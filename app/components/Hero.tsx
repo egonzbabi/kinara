@@ -1,30 +1,46 @@
+import { useEffect, useState } from "react";
 import { LinkButton } from "./Button";
 import { HERO_COLLAGE } from "~/data/images";
 import { productImage, productSrcSet } from "~/lib/productImage";
 
-export const HERO_WIDTHS = [480, 720, 1080, 1440];
+export const HERO_WIDTHS = [640, 1000, 1500, 2000];
+const SLIDE_MS = 5000;
+
+const SLIDES = [HERO_COLLAGE.main, ...HERO_COLLAGE.support];
 
 export function Hero() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const id = setInterval(() => {
+      setActive((i) => (i + 1) % SLIDES.length);
+    }, SLIDE_MS);
+    return () => clearInterval(id);
+  }, [paused]);
+
   return (
     <section className="pad pt-4">
-      <div className="relative grid h-[clamp(520px,82vh,860px)] grid-cols-2 grid-rows-2 gap-1 overflow-hidden rounded-[28px] sm:grid-rows-3">
-        <img
-          src={productImage(HERO_COLLAGE.main.url, { width: 1440, height: 1600 })}
-          srcSet={productSrcSet(HERO_COLLAGE.main.url, HERO_WIDTHS, { heightRatio: 1600 / 1440 })}
-          sizes="(min-width: 640px) 55vw, 50vw"
-          alt={HERO_COLLAGE.main.alt}
-          className="h-full w-full object-cover object-[center_20%] sm:row-span-3"
-          fetchPriority="high"
-        />
-        {HERO_COLLAGE.support.map((photo) => (
+      <div
+        className="relative h-[clamp(520px,82vh,860px)] w-full overflow-hidden rounded-[28px]"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
+      >
+        {SLIDES.map((slide, i) => (
           <img
-            key={photo.url}
-            src={productImage(photo.url, { width: 720, height: 540 })}
-            srcSet={productSrcSet(photo.url, HERO_WIDTHS, { heightRatio: 540 / 720 })}
-            sizes="(min-width: 640px) 27vw, 50vw"
-            alt={photo.alt}
-            className="h-full w-full object-cover"
-            loading="lazy"
+            key={slide.url}
+            src={productImage(slide.url, { width: 2000, height: 1300 })}
+            srcSet={productSrcSet(slide.url, HERO_WIDTHS, { heightRatio: 1300 / 2000 })}
+            sizes="100vw"
+            alt={slide.alt}
+            className="absolute inset-0 h-full w-full object-cover object-[center_20%] transition-opacity duration-1000 ease-in-out"
+            style={{ opacity: i === active ? 1 : 0 }}
+            fetchPriority={i === 0 ? "high" : undefined}
           />
         ))}
 
@@ -42,7 +58,7 @@ export function Hero() {
           <div className="pointer-events-auto max-w-2xl text-bone">
             <span className="label text-bone/70">Nueva colección · SS26</span>
             <h1 className="mt-3 font-display text-[clamp(40px,7vw,92px)] font-medium leading-[0.98] tracking-[-0.01em]">
-              El universo de la
+              El mundo de la
               <br />
               mujer en <span className="italic text-[#f0c9b5]">movimiento</span>.
             </h1>
@@ -62,6 +78,24 @@ export function Hero() {
                 Ver Mujer
               </LinkButton>
             </div>
+          </div>
+
+          <div className="pointer-events-auto mt-8 flex gap-2">
+            {SLIDES.map((slide, i) => (
+              <button
+                key={slide.url}
+                type="button"
+                aria-label={`Ver foto ${i + 1} de ${SLIDES.length}`}
+                aria-current={i === active}
+                onClick={() => {
+                  setActive(i);
+                  setPaused(true);
+                }}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === active ? "w-6 bg-bone" : "w-1.5 bg-bone/40 hover:bg-bone/70"
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>
