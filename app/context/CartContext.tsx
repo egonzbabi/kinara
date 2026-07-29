@@ -139,6 +139,3 @@ export function useCart(): CartCtx {
   if (!value) throw new Error("useCart must be used inside CartProvider");
   return value;
 }
-
-/** Free-shipping threshold in EUR. */
-export const FREE_SHIPPING_THRESHOLD = 60;

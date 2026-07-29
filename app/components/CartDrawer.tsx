@@ -1,10 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router";
-import {
-  FREE_SHIPPING_THRESHOLD,
-  useCart,
-  type CartItem,
-} from "~/context/CartContext";
+import { useCart, type CartItem } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage } from "~/lib/productImage";
 import { Button, LinkButton } from "./Button";
@@ -23,9 +19,6 @@ export function CartDrawer() {
       document.body.style.overflow = "";
     };
   }, [isOpen, close]);
-
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
 
   return (
     <div
@@ -65,33 +58,6 @@ export function CartDrawer() {
             <CloseIcon />
           </button>
         </header>
-
-        {/* Free shipping meter */}
-        {items.length > 0 && (
-          <div className="border-b border-line px-6 py-4">
-            <p className="mb-2 text-[13px] text-muted">
-              {remaining > 0 ? (
-                <>
-                  Te faltan{" "}
-                  <span className="font-semibold text-espresso">
-                    {formatPrice(remaining)}
-                  </span>{" "}
-                  para el envío gratis
-                </>
-              ) : (
-                <span className="font-semibold text-sage">
-                  ¡Envío gratis conseguido! 🌿
-                </span>
-              )}
-            </p>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-bone">
-              <div
-                className="h-full rounded-full bg-clay transition-[width] duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-6">

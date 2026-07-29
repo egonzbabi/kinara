@@ -48,7 +48,7 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 005 | [005-ui-ux-accesibilidad.md](005-ui-ux-accesibilidad.md) | pending | Auditoría de UI/UX y accesibilidad (WCAG AA) |
 | 006 | [006-supabase-productos.md](006-supabase-productos.md) | done | Migrar catálogo e imágenes a Supabase |
 | 007 | [007-stripe-checkout.md](007-stripe-checkout.md) | done | Cobros con Stripe Checkout Sessions hospedado, modo test |
-| 008 | [008-copy-envios-pesos.md](008-copy-envios-pesos.md) | pending | Actualizar copy de envíos/devoluciones a pesos mexicanos (⚠️ recordar antes de dar el sitio por terminado) |
+| 008 | [008-copy-envios-pesos.md](008-copy-envios-pesos.md) | done | Actualizar copy de envíos/devoluciones a pesos mexicanos |
 | 009 | [009-fotos-por-color.md](009-fotos-por-color.md) | done | Fotos reales por color de producto desde el catálogo del proveedor (5 productos) |
 | 010 | [010-fotos-por-color-restante.md](010-fotos-por-color-restante.md) | done | Fotos por color restantes — 8 productos más con foto real por color |
 | 011 | [011-fotos-lulu-top.md](011-fotos-lulu-top.md) | done | Fotos por color de LULU TOP (080924 y 2315), omitido de tareas 009/010 |

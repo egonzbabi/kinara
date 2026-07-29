@@ -312,8 +312,8 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                   title: "Envíos y devoluciones",
                   content: (
                     <p>
-                      Entrega en 24-48 h en península. Envío calculado al
-                      finalizar la compra. NO HAY DEVOLUCIONES.
+                      Envío calculado al finalizar la compra según tu
+                      dirección. NO HAY DEVOLUCIONES.
                     </p>
                   ),
                 },

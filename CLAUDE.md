@@ -2,10 +2,6 @@
 
 Este archivo se carga automáticamente al inicio de cada sesión de Claude Code en este repo. Contiene el contexto del proyecto y las reglas que debe seguir cualquier modificación.
 
-## ⚠️ Pendiente antes de dar el sitio por terminado
-
-- [`tasks/008-copy-envios-pesos.md`](tasks/008-copy-envios-pesos.md) — el copy de envíos/devoluciones sigue en euros y menciona España ("Envío gratis desde 60 €", "entrega en península"), inconsistente desde que los precios pasaron a MXN. El usuario pidió dejarlo pendiente por ahora pero que se le recuerde antes de cerrar el proyecto.
-
 ## Stack
 
 - React Router 7 (framework mode, SSR) + TypeScript + Tailwind CSS v4
