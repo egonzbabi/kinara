@@ -44,9 +44,9 @@ export function SiteNav() {
           scrolled ? "shadow-[0_1px_0_var(--color-line)]" : "",
         )}
       >
-        <nav className="pad flex h-16 items-center justify-between gap-4">
-          {/* Left: desktop links / mobile burger */}
-          <div className="flex flex-1 items-center gap-7">
+        <div className="pad flex h-20 items-center justify-between gap-4">
+          {/* Left: back button / mobile burger */}
+          <div className="flex flex-1 items-center gap-4">
             {isProductDetail && (
               <button
                 type="button"
@@ -65,31 +65,13 @@ export function SiteNav() {
             >
               <BurgerIcon />
             </button>
-            <ul className="hidden items-center gap-7 md:flex">
-              {LINKS.map((l) => (
-                <li key={l.label}>
-                  <NavLink
-                    to={l.to}
-                    end={l.to === "/tienda"}
-                    className={({ isActive }) =>
-                      cn(
-                        "text-sm font-medium text-espresso/80 transition-colors hover:text-clay",
-                        isActive && "text-espresso",
-                      )
-                    }
-                  >
-                    {l.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Center: wordmark */}
           <Link
             to="/"
             aria-label="KINARA · Inicio"
-            className="font-display text-[26px] font-semibold leading-none tracking-[0.18em]"
+            className="font-display text-[40px] font-semibold leading-none tracking-[0.18em]"
           >
             KINARA
           </Link>
@@ -115,6 +97,31 @@ export function SiteNav() {
               </span>
             </button>
           </div>
+        </div>
+
+        {/* Second row: main navigation, its own line below the wordmark */}
+        <nav
+          aria-label="Navegación principal"
+          className="hidden border-t border-line/60 md:block"
+        >
+          <ul className="pad flex h-12 items-center justify-center gap-7">
+            {LINKS.map((l) => (
+              <li key={l.label}>
+                <NavLink
+                  to={l.to}
+                  end={l.to === "/tienda"}
+                  className={({ isActive }) =>
+                    cn(
+                      "text-sm font-medium text-espresso/80 transition-colors hover:text-clay",
+                      isActive && "text-espresso",
+                    )
+                  }
+                >
+                  {l.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
         </nav>
       </header>
 

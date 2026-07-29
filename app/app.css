@@ -35,7 +35,7 @@
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Motion */
-  --animate-marquee: marquee 36s linear infinite;
+  --animate-marquee: marquee 55s linear infinite;
 }
 
 @layer base {
