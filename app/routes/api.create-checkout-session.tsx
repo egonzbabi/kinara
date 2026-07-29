@@ -141,9 +141,11 @@ export async function action({ request }: Route.ActionArgs) {
   // cotización de Skydropx es efímero y cambia en cada llamada).
   let shippingFee: number;
   let shippingCarrier: string;
+  let shippingDays: number | null;
   if (shipping.providerName === "fallback") {
     shippingFee = SHIPPING_FEE_MXN;
     shippingCarrier = "Envío estándar";
+    shippingDays = null;
   } else {
     const totalQty = items.reduce((n, i) => n + i.qty, 0);
     const freshRates = await getShippingRates(address, [estimateParcel(totalQty)]);
@@ -158,6 +160,7 @@ export async function action({ request }: Route.ActionArgs) {
     }
     shippingFee = match.total;
     shippingCarrier = `${match.providerDisplayName} · ${match.serviceName}`;
+    shippingDays = match.days;
   }
 
   const itemsJson = JSON.stringify(trustedItems);
@@ -167,6 +170,7 @@ export async function action({ request }: Route.ActionArgs) {
     ...chunkMetadata("shipping_address_json", addressJson),
     subtotal: String(subtotal),
     shipping_fee: String(shippingFee),
+    shipping_days: shippingDays == null ? "" : String(shippingDays),
     shipping_carrier: shippingCarrier,
   };
 

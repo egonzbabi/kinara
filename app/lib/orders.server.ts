@@ -133,6 +133,9 @@ export async function ensureOrderFromCheckoutSession(
   const customerName = shippingAddress?.name ?? session.customer_details?.name ?? "Sin nombre";
   const customerEmail = shippingAddress?.email ?? session.customer_details?.email ?? "";
   const customerPhone = shippingAddress?.phone ?? session.customer_details?.phone ?? null;
+  const shippingCarrier = session.metadata?.shipping_carrier || null;
+  const shippingDaysRaw = session.metadata?.shipping_days;
+  const shippingDays = shippingDaysRaw ? Number(shippingDaysRaw) : null;
 
   const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
@@ -148,6 +151,8 @@ export async function ensureOrderFromCheckoutSession(
     currency,
     status: "processing",
     shipping_address: shippingAddress ?? {},
+    shipping_carrier: shippingCarrier,
+    shipping_days: shippingDays,
     stripe_session_id: session.id,
   });
 

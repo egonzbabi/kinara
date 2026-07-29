@@ -67,5 +67,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 024 | [024-hero-collage-copy.md](024-hero-collage-copy.md) | done | Hero de home: collage de 4 fotos + nuevo copy del título |
 | 025 | [025-hero-carrusel.md](025-hero-carrusel.md) | done | Hero de home: collage → carrusel automático + "universo" a "mundo" |
 | 026 | [026-hero-crop-ropa.md](026-hero-crop-ropa.md) | done | Hero: corregir encuadre para que se vea la ropa deportiva, no solo el torso |
+| 027 | [027-admin-pedidos-detalle.md](027-admin-pedidos-detalle.md) | done | Admin/Pedidos: mostrar toda la info de la tienda + de Skydropx por pedido |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

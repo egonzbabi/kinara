@@ -101,6 +101,8 @@ export type Database = {
           currency: string;
           status: "processing" | "shipped" | "delivered" | "cancelled";
           shipping_address: unknown;
+          shipping_carrier: string | null;
+          shipping_days: number | null;
           stripe_session_id: string;
           created_at: string;
         };
