@@ -38,7 +38,7 @@ export function Hero() {
             srcSet={productSrcSet(slide.url, HERO_WIDTHS, { heightRatio: 1300 / 2000 })}
             sizes="100vw"
             alt={slide.alt}
-            className="absolute inset-0 h-full w-full object-cover object-[center_20%] transition-opacity duration-1000 ease-in-out"
+            className="absolute inset-0 h-full w-full object-cover object-[center_62%] transition-opacity duration-1000 ease-in-out"
             style={{ opacity: i === active ? 1 : 0 }}
             fetchPriority={i === 0 ? "high" : undefined}
           />
