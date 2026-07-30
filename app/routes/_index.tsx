@@ -44,12 +44,34 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   const { products } = loaderData;
 
   const novedades = products.filter((p) => p.isNew).slice(0, 4);
+  const ofertas = products.filter((p) => p.isOnSale).slice(0, 4);
 
   return (
     <>
       <Hero />
       <TrustStrip />
       <CategoryTiles />
+
+      {/* Ofertas */}
+      {ofertas.length > 0 && (
+        <section className="pad py-[clamp(48px,7vw,96px)]">
+          <div className="reveal mb-8 flex items-end justify-between gap-6">
+            <div>
+              <span className="label">Por tiempo limitado</span>
+              <h2 className="mt-2 font-display text-[clamp(28px,4vw,48px)] leading-none">
+                Ofertas
+              </h2>
+            </div>
+            <Link
+              to="/tienda"
+              className="text-sm font-medium underline-offset-4 hover:text-clay hover:underline"
+            >
+              Ver todo →
+            </Link>
+          </div>
+          <ProductGrid products={ofertas} priorityCount={2} />
+        </section>
+      )}
 
       {/* Lo nuevo */}
       <section className="pad py-[clamp(48px,7vw,96px)]">
