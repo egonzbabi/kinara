@@ -72,5 +72,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 029 | [029-validacion-direccion-cp.md](029-validacion-direccion-cp.md) | done | Checkout: validar/autocompletar colonia-municipio-estado contra el código postal |
 | 030 | [030-vercel-skydropx-env-vars.md](030-vercel-skydropx-env-vars.md) | done | Fix: faltaban las 11 variables de entorno de Skydropx en Vercel (producción) |
 | 031 | [031-seccion-ofertas-home.md](031-seccion-ofertas-home.md) | done | Home: sección de Ofertas antes de Lo nuevo |
+| 032 | [032-pagina-contacto.md](032-pagina-contacto.md) | done | Página de Contacto (formulario por email) + link en el menú |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

@@ -15,7 +15,7 @@ const COLS = [
       { label: "Envíos y entregas", to: "/tienda" },
       { label: "Devoluciones", to: "/tienda" },
       { label: "Guía de tallas", to: "/tienda" },
-      { label: "Contacto", to: "/tienda" },
+      { label: "Contacto", to: "/contacto" },
     ],
   },
   {

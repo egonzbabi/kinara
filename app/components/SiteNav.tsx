@@ -78,6 +78,12 @@ export function SiteNav() {
 
           {/* Right: utilities */}
           <div className="flex flex-1 items-center justify-end gap-5">
+            <Link
+              to="/contacto"
+              className="hidden text-sm font-medium text-espresso/80 transition-colors hover:text-clay sm:block"
+            >
+              Contacto
+            </Link>
             <button
               className="hidden text-sm font-medium text-espresso/80 transition-colors hover:text-clay sm:block"
               aria-label="Buscar"
@@ -176,9 +182,16 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
             </li>
           ))}
         </ul>
-        <button className="mt-8 text-left text-sm font-medium text-muted">
-          Buscar
-        </button>
+        <div className="mt-8 flex flex-col gap-3">
+          <Link
+            to="/contacto"
+            onClick={onClose}
+            className="text-left text-sm font-medium text-muted"
+          >
+            Contacto
+          </Link>
+          <button className="text-left text-sm font-medium text-muted">Buscar</button>
+        </div>
       </div>
     </div>
   );

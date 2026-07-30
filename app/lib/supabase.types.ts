@@ -132,6 +132,28 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["postal_codes"]["Insert"]>;
         Relationships: [];
       };
+      contact_messages: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          message: string;
+          email_sent: boolean;
+          email_error: string | null;
+          created_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["contact_messages"]["Row"],
+          "id" | "created_at" | "email_sent" | "email_error"
+        > & {
+          id?: string;
+          created_at?: string;
+          email_sent?: boolean;
+          email_error?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
