@@ -70,5 +70,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 027 | [027-admin-pedidos-detalle.md](027-admin-pedidos-detalle.md) | done | Admin/Pedidos: mostrar toda la info de la tienda + de Skydropx por pedido |
 | 028 | [028-modelo-y-guia-skydropx.md](028-modelo-y-guia-skydropx.md) | done | Admin/Pedidos: modelo en productos + compra real de guía con Skydropx (número de rastreo) |
 | 029 | [029-validacion-direccion-cp.md](029-validacion-direccion-cp.md) | done | Checkout: validar/autocompletar colonia-municipio-estado contra el código postal |
+| 030 | [030-vercel-skydropx-env-vars.md](030-vercel-skydropx-env-vars.md) | done | Fix: faltaban las 11 variables de entorno de Skydropx en Vercel (producción) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
