@@ -23,6 +23,7 @@ export default [
 
   route("api/create-checkout-session", "routes/api.create-checkout-session.tsx"),
   route("api/shipping-quote", "routes/api.shipping-quote.tsx"),
+  route("api/postal-code", "routes/api.postal-code.tsx"),
   route("api/stripe-webhook", "routes/api.stripe-webhook.tsx"),
   route("checkout", "routes/checkout.tsx"),
   route("checkout/success", "routes/checkout.success.tsx"),

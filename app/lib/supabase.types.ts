@@ -119,6 +119,19 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["orders"]["Insert"]>;
         Relationships: [];
       };
+      postal_codes: {
+        Row: {
+          id: number;
+          postal_code: string;
+          colonia: string;
+          tipo_asentamiento: string | null;
+          municipio: string;
+          estado: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["postal_codes"]["Row"], "id"> & { id?: number };
+        Update: Partial<Database["public"]["Tables"]["postal_codes"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

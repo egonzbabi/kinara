@@ -69,5 +69,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 026 | [026-hero-crop-ropa.md](026-hero-crop-ropa.md) | done | Hero: corregir encuadre para que se vea la ropa deportiva, no solo el torso |
 | 027 | [027-admin-pedidos-detalle.md](027-admin-pedidos-detalle.md) | done | Admin/Pedidos: mostrar toda la info de la tienda + de Skydropx por pedido |
 | 028 | [028-modelo-y-guia-skydropx.md](028-modelo-y-guia-skydropx.md) | done | Admin/Pedidos: modelo en productos + compra real de guía con Skydropx (número de rastreo) |
+| 029 | [029-validacion-direccion-cp.md](029-validacion-direccion-cp.md) | done | Checkout: validar/autocompletar colonia-municipio-estado contra el código postal |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

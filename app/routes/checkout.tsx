@@ -41,6 +41,10 @@ type Rate = {
   days: number | null;
 };
 
+type PostalCodeLookup =
+  | { found: true; estado: string; municipio: string; colonias: string[] }
+  | { found: false };
+
 const inputClass =
   "mt-1.5 w-full rounded-lg border border-line bg-bone px-3 py-2.5 text-sm text-espresso focus:border-clay focus:outline-none";
 const labelClass = "text-sm font-medium text-espresso";
@@ -51,6 +55,9 @@ export default function Checkout() {
 
   const [address, setAddress] = useState<Address>(EMPTY_ADDRESS);
   const [attempted, setAttempted] = useState(false);
+
+  const [cpLookup, setCpLookup] = useState<PostalCodeLookup | null>(null);
+  const [cpLoading, setCpLoading] = useState(false);
 
   const [rates, setRates] = useState<Rate[] | null>(null);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
@@ -64,11 +71,52 @@ export default function Checkout() {
     if (hydrated && items.length === 0) navigate("/tienda");
   }, [hydrated, items.length, navigate]);
 
-  const setField = (field: keyof Address) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAddress((prev) => ({ ...prev, [field]: e.target.value }));
+  // Autocompleta Estado/Municipio y convierte Colonia en lista desplegable en
+  // cuanto el CP resuelve contra el catálogo de SEPOMEX (tarea 029) — evita
+  // que se mande a Skydropx una combinación colonia/municipio/estado que no
+  // corresponde al CP real.
+  useEffect(() => {
+    const cp = address.postalCode;
+    if (!/^\d{5}$/.test(cp)) {
+      setCpLookup(null);
+      return;
+    }
+    let cancelled = false;
+    setCpLoading(true);
+    fetch(`/api/postal-code?cp=${cp}`)
+      .then((res) => res.json())
+      .then((data: PostalCodeLookup) => {
+        if (cancelled) return;
+        setCpLookup(data);
+        if (data.found) {
+          setAddress((prev) => {
+            if (prev.postalCode !== cp) return prev;
+            const colonia = data.colonias.includes(prev.areaLevel3)
+              ? prev.areaLevel3
+              : data.colonias[0];
+            return { ...prev, areaLevel1: data.estado, areaLevel2: data.municipio, areaLevel3: colonia };
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCpLookup(null);
+      })
+      .finally(() => {
+        if (!cancelled) setCpLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [address.postalCode]);
+
+  const updateField = (field: keyof Address, value: string) => {
+    setAddress((prev) => ({ ...prev, [field]: value }));
     setRates(null);
     setSelectedCode(null);
   };
+  const setField =
+    (field: keyof Address) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      updateField(field, e.target.value);
 
   const missingFields = (Object.keys(EMPTY_ADDRESS) as (keyof Address)[]).filter(
     (field) => !address[field].trim(),
@@ -177,8 +225,16 @@ export default function Checkout() {
             <input
               value={address.postalCode}
               onChange={setField("postalCode")}
+              inputMode="numeric"
+              maxLength={5}
               className={cn(inputClass, attempted && !address.postalCode.trim() && "outline outline-2 outline-offset-2 outline-clay")}
             />
+            {cpLoading && <p className="mt-1 text-[12px] text-muted">Buscando código postal…</p>}
+            {cpLookup?.found === false && address.postalCode.length === 5 && (
+              <p className="mt-1 text-[12px] text-clay">
+                No encontramos ese código postal — verifica Colonia/Municipio/Estado manualmente.
+              </p>
+            )}
           </div>
           <div className="sm:col-span-2">
             <label className={labelClass}>Calle y número</label>
@@ -190,18 +246,37 @@ export default function Checkout() {
           </div>
           <div>
             <label className={labelClass}>Colonia</label>
-            <input
-              value={address.areaLevel3}
-              onChange={setField("areaLevel3")}
-              className={cn(inputClass, attempted && !address.areaLevel3.trim() && "outline outline-2 outline-offset-2 outline-clay")}
-            />
+            {cpLookup?.found ? (
+              <select
+                value={address.areaLevel3}
+                onChange={(e) => updateField("areaLevel3", e.target.value)}
+                className={cn(inputClass, attempted && !address.areaLevel3.trim() && "outline outline-2 outline-offset-2 outline-clay")}
+              >
+                {cpLookup.colonias.map((colonia) => (
+                  <option key={colonia} value={colonia}>
+                    {colonia}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={address.areaLevel3}
+                onChange={setField("areaLevel3")}
+                className={cn(inputClass, attempted && !address.areaLevel3.trim() && "outline outline-2 outline-offset-2 outline-clay")}
+              />
+            )}
           </div>
           <div>
             <label className={labelClass}>Alcaldía / Municipio</label>
             <input
               value={address.areaLevel2}
               onChange={setField("areaLevel2")}
-              className={cn(inputClass, attempted && !address.areaLevel2.trim() && "outline outline-2 outline-offset-2 outline-clay")}
+              readOnly={cpLookup?.found === true}
+              className={cn(
+                inputClass,
+                cpLookup?.found === true && "cursor-not-allowed bg-line/40 text-muted",
+                attempted && !address.areaLevel2.trim() && "outline outline-2 outline-offset-2 outline-clay",
+              )}
             />
           </div>
           <div>
@@ -209,7 +284,12 @@ export default function Checkout() {
             <input
               value={address.areaLevel1}
               onChange={setField("areaLevel1")}
-              className={cn(inputClass, attempted && !address.areaLevel1.trim() && "outline outline-2 outline-offset-2 outline-clay")}
+              readOnly={cpLookup?.found === true}
+              className={cn(
+                inputClass,
+                cpLookup?.found === true && "cursor-not-allowed bg-line/40 text-muted",
+                attempted && !address.areaLevel1.trim() && "outline outline-2 outline-offset-2 outline-clay",
+              )}
             />
           </div>
         </div>
