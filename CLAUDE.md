@@ -10,7 +10,7 @@ Este archivo se carga automáticamente al inicio de cada sesión de Claude Code 
 - **Formulario de contacto (`/contacto`, tarea 032) construido, pero le faltan 2 datos reales para mandar el correo:**
   1. Crear una cuenta en [resend.com](https://resend.com) y dar el API key → `RESEND_API_KEY` (local: `.env`; producción: variable de entorno en Vercel).
   2. El correo real del cliente al que deben llegar los mensajes → `CONTACT_EMAIL_TO` (mismos dos lugares).
-  Mientras tanto, los mensajes del formulario **sí se guardan** en la tabla `contact_messages` de Supabase (nunca se pierden), solo no se manda el correo hasta que se carguen estas 2 variables. No hay todavía una pantalla en `/admin` para ver esos mensajes guardados — si se necesita revisarlos mientras tanto, hay que consultarlos directo en Supabase (tabla `contact_messages`).
+  Mientras tanto, los mensajes del formulario **sí se guardan** en la tabla `contact_messages` de Supabase (nunca se pierden), solo no se manda el correo hasta que se carguen estas 2 variables. Ya se pueden ver en `/admin/mensajes` (agregado en la tarea 032b).
 
 ## Stack
 

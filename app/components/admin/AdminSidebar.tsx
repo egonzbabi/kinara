@@ -33,6 +33,17 @@ export function AdminSidebar() {
           >
             Pedidos
           </NavLink>
+          <NavLink
+            to="/admin/mensajes"
+            className={({ isActive }) =>
+              cn(
+                "block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive ? "bg-clay/10 text-clay" : "text-espresso hover:bg-sand",
+              )
+            }
+          >
+            Mensajes
+          </NavLink>
         </nav>
 
         <div className="border-t border-line px-3 py-4">
