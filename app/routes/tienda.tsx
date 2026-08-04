@@ -90,6 +90,13 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
     setParam(key, next.length ? next.join(",") : null);
   };
 
+  // Color es selección única (no varios a la vez): con 2+ familias activas no
+  // hay una sola foto que mostrar en la tarjeta, así que se ve como si el
+  // filtro "mostrara todos los colores". Elegir una familia nueva reemplaza
+  // la anterior; volver a hacer clic en la misma la quita.
+  const selectColorFamily = (family: string) =>
+    setParam("color", colors[0] === family ? null : family);
+
   const filtered = useMemo(() => {
     let list: Product[] = products.slice();
     if (cat !== "todo") list = list.filter((p) => p.category === cat);
@@ -171,7 +178,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
               {allFamilies.map((c) => (
                 <button
                   key={c.name}
-                  onClick={() => toggle("color", c.name, colors)}
+                  onClick={() => selectColorFamily(c.name)}
                   title={c.name}
                   aria-label={c.name}
                   aria-pressed={colors.includes(c.name)}
