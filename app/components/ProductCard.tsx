@@ -5,6 +5,7 @@ import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
+import { getColorFamily } from "~/lib/colorFamilies";
 
 const CARD_WIDTHS = [400, 600, 900];
 const CARD_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 30vw, 46vw";
@@ -12,27 +13,41 @@ const CARD_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 30vw, 46vw";
 export function ProductCard({
   product,
   priority = false,
+  activeFamily,
 }: {
   product: Product;
   priority?: boolean;
+  /** Familia de color actualmente filtrada en /tienda (si es exactamente
+   * una, ver ~/lib/colorFamilies). Se resuelve a cuál de los colores propios
+   * del producto pertenece a esa familia y, si tiene foto para ese color, se
+   * muestra esa en vez de la genérica — nunca la foto de otro color (mismo
+   * patrón que la página de detalle de producto, tareas 009/018). */
+  activeFamily?: string;
 }) {
   const { add } = useCart();
   const [hover, setHover] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const [color, setColor] = useState<string | null>(
-    product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null,
-  );
+  const matchingColor = activeFamily
+    ? product.colors.find((c) => getColorFamily(c.name) === activeFamily)?.name
+    : undefined;
+  const defaultColor = () => {
+    if (matchingColor) return matchingColor;
+    return product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null;
+  };
+  const [color, setColor] = useState<string | null>(defaultColor);
   const [size, setSize] = useState<string | null>(
     product.sizes.length === 1 ? product.sizes[0] : null,
   );
   const [attempted, setAttempted] = useState(false);
 
+  const displayImage =
+    (matchingColor && product.colorImages?.[matchingColor]) || product.gallery[0];
   const hasSecond = product.gallery.length > 1;
 
   const resetQuickAdd = () => {
     setQuickAddOpen(false);
     setAttempted(false);
-    setColor(product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null);
+    setColor(defaultColor());
     setSize(product.sizes.length === 1 ? product.sizes[0] : null);
   };
 
@@ -72,10 +87,10 @@ export function ProductCard({
       >
         <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-bone">
           <img
-            src={productImage(product.gallery[0], { width: 600, height: 750 })}
-            srcSet={productSrcSet(product.gallery[0], CARD_WIDTHS, { heightRatio: 1.25 })}
+            src={productImage(displayImage, { width: 600, height: 750 })}
+            srcSet={productSrcSet(displayImage, CARD_WIDTHS, { heightRatio: 1.25 })}
             sizes={CARD_SIZES}
-            alt={product.name}
+            alt={matchingColor ? `${product.name} — ${matchingColor}` : product.name}
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : undefined}
             className={cn(

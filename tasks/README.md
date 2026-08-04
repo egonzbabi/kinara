@@ -74,5 +74,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 031 | [031-seccion-ofertas-home.md](031-seccion-ofertas-home.md) | done | Home: sección de Ofertas antes de Lo nuevo |
 | 032 | [032-pagina-contacto.md](032-pagina-contacto.md) | done | Página de Contacto (formulario por email) + link en el menú |
 | 033 | [033-admin-mensajes.md](033-admin-mensajes.md) | done | Admin: pantalla /admin/mensajes para ver los mensajes de contacto |
+| 034 | [034-familias-de-color.md](034-familias-de-color.md) | done | Filtro de color en /tienda: agrupar por familia + reflejar el color en la foto |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

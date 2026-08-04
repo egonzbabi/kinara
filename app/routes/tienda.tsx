@@ -6,6 +6,7 @@ import { CATEGORY_LABELS, type Category, type Product } from "~/data/products";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
+import { FAMILY_ORDER, FAMILY_SWATCH, getColorFamily } from "~/lib/colorFamilies";
 
 export function meta(_: Route.MetaArgs) {
   return [
@@ -53,10 +54,24 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
     [params],
   );
 
-  const allColors = useMemo(
-    () => Array.from(new Map(products.flatMap((p) => p.colors).map((c) => [c.name, c])).values()),
-    [products],
-  );
+  // Filtro por familia de color (ej. "Rosa" agrupa Rosa/Fresa/Melon/Palo De
+  // Rosa/Lila), no por cada nombre exacto de color del catálogo — ver
+  // ~/lib/colorFamilies. `colors` (el param de la URL) guarda nombres de
+  // familia, no nombres de color exactos.
+  const allFamilies = useMemo(() => {
+    const swatch = new Map<string, string>();
+    for (const p of products) {
+      for (const c of p.colors) {
+        const family = getColorFamily(c.name);
+        if (!swatch.has(family)) swatch.set(family, FAMILY_SWATCH[family] ?? c.hex);
+      }
+    }
+    const known = FAMILY_ORDER.filter((f) => swatch.has(f));
+    const extra = Array.from(swatch.keys())
+      .filter((f) => !FAMILY_ORDER.includes(f))
+      .sort();
+    return [...known, ...extra].map((name) => ({ name, hex: swatch.get(name)! }));
+  }, [products]);
 
   const setParam = (key: string, value: string | null) => {
     const p = new URLSearchParams(params);
@@ -82,7 +97,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
       list = list.filter((p) => p.sizes.some((s) => sizes.includes(s)));
     if (colors.length)
       list = list.filter((p) =>
-        p.colors.some((c) => colors.includes(c.name)),
+        p.colors.some((c) => colors.includes(getColorFamily(c.name))),
       );
     if (types.length) list = list.filter((p) => types.includes(p.kind));
 
@@ -153,7 +168,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
           <div className="flex items-center gap-2">
             <span className="label">Color</span>
             <div className="flex flex-wrap gap-1.5">
-              {allColors.map((c) => (
+              {allFamilies.map((c) => (
                 <button
                   key={c.name}
                   onClick={() => toggle("color", c.name, colors)}
@@ -212,7 +227,11 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
       {/* Grid */}
       <div className="mt-6">
         {filtered.length > 0 ? (
-          <ProductGrid products={filtered} priorityCount={4} />
+          <ProductGrid
+            products={filtered}
+            priorityCount={4}
+            activeFamily={colors.length === 1 ? colors[0] : undefined}
+          />
         ) : (
           <div className="flex flex-col items-center gap-3 py-24 text-center">
             <p className="font-display text-2xl">Sin resultados</p>
