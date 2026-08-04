@@ -27,9 +27,16 @@ export function ProductCard({
   const { add } = useCart();
   const [hover, setHover] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
-  const matchingColor = activeFamily
-    ? product.colors.find((c) => getColorFamily(c.name) === activeFamily)?.name
-    : undefined;
+  // Un producto puede tener más de un color dentro de la misma familia (ej.
+  // "Ivory" y "Agua" son ambos "Blanco") pero solo alguno con foto propia —
+  // hay que preferir el que sí tenga foto, no solo el primero que aparezca,
+  // o se termina cayendo a la foto genérica (que puede ser de otro color por
+  // completo) aunque exista una foto correcta disponible en esa familia.
+  const familyColors = activeFamily
+    ? product.colors.filter((c) => getColorFamily(c.name) === activeFamily)
+    : [];
+  const familyColorWithPhoto = familyColors.find((c) => product.colorImages?.[c.name]);
+  const matchingColor = familyColorWithPhoto?.name ?? familyColors[0]?.name;
   const defaultColor = () => {
     if (matchingColor) return matchingColor;
     return product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null;
@@ -41,7 +48,8 @@ export function ProductCard({
   const [attempted, setAttempted] = useState(false);
 
   const displayImage =
-    (matchingColor && product.colorImages?.[matchingColor]) || product.gallery[0];
+    (familyColorWithPhoto && product.colorImages?.[familyColorWithPhoto.name]) ||
+    product.gallery[0];
   const hasSecond = product.gallery.length > 1;
 
   const resetQuickAdd = () => {
