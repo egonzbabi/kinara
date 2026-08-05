@@ -68,9 +68,9 @@ export function SiteFooter() {
         <div className="flex flex-col items-start justify-between gap-4 pt-7 sm:flex-row sm:items-center">
           <p className="text-[13px] text-muted">© {2026} KINARA</p>
           <div className="flex items-center gap-5 text-[13px] text-muted">
-            <a href="#" className="hover:text-clay">
+            <Link to="/aviso-de-privacidad" className="hover:text-clay">
               Privacidad
-            </a>
+            </Link>
             <a href="#" className="hover:text-clay">
               Términos
             </a>

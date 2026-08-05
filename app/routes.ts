@@ -10,6 +10,7 @@ export default [
   route("tienda", "routes/tienda.tsx"),
   route("producto/:slug", "routes/producto.$slug.tsx"),
   route("contacto", "routes/contacto.tsx"),
+  route("aviso-de-privacidad", "routes/aviso-de-privacidad.tsx"),
 
   route("admin", "routes/admin.login.tsx"),
   route("admin/logout", "routes/admin.logout.tsx"),

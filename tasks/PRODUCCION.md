@@ -42,7 +42,7 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 
 ## Legal (recomendado, no implementado — confirmar con un contador/abogado)
 
-- [ ] Aviso de privacidad — obligatorio en México (LFPDPPP) para cualquier sitio que recolecte datos personales (nombre, email, teléfono, dirección — se recolectan en `/checkout` y `/contacto`). No existe todavía ninguna página de este tipo en el sitio.
+- [x] Aviso de privacidad — obligatorio en México (LFPDPPP). Ya existe como página real en `/aviso-de-privacidad` (tarea 035), enlazada desde el pie de página. **Es un borrador de partida, no asesoría legal** — usa el nombre comercial "KINARA" sin razón social/RFC/domicilio fiscal (no se inventaron). Antes de considerarlo definitivo, hay que confirmar con un abogado/contador: si el negocio debe publicarse como persona física o moral y su RFC, el domicilio fiscal completo, y si aplican finalidades secundarias de marketing. La sección de cookies deberá actualizarse el día que se active Google Analytics (tarea 004).
 - [ ] Términos y condiciones / política de devoluciones publicada (el copy ya dice "No aceptamos devoluciones" en el sitio — confirmar que sea consistente con lo que se publique como política formal).
 
 ## Opcional pero recomendado antes o poco después de lanzar
