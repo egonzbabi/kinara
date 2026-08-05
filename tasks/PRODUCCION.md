@@ -31,6 +31,15 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 - [ ] Actualizar todas las variables de entorno de arriba en Vercel → Production, y disparar un redeploy.
 - [ ] Decidir si conectar el repo original del compañero (`maxruizg/Kinara-ecommerce`, remoto `origin`) a Vercel, o mantener el proyecto solo enlazado a `mio` (`egonzbabi/kinara`).
 
+## Catálogo (fotos y precios)
+
+- [ ] **2 productos sin precio** (borrador, no aparecen en `/tienda`): NEWYORK TOP, NEWYORKLEGGIN. Publicarlos desde `/admin/productos` en cuanto se defina el precio real.
+- [ ] **7 colores sin foto propia** (usan la foto genérica del producto, que puede no ser ese color exacto):
+  - NEWYORK TOP (borrador): Ivory, Verde, Azul Gris — los 3 colores del producto, ninguno tiene foto.
+  - NEWYORKLEGGIN (borrador): Cocoa, Gris, Marino — los 3 colores del producto, ninguno tiene foto.
+  - SET ESSENTIAL (publicado): Ivory — 1 de 7 colores sin foto (los otros 6 sí tienen).
+  - Todos los demás productos ya tienen foto genérica de respaldo (no hay ninguno mostrando el placeholder gris).
+
 ## Legal (recomendado, no implementado — confirmar con un contador/abogado)
 
 - [ ] Aviso de privacidad — obligatorio en México (LFPDPPP) para cualquier sitio que recolecte datos personales (nombre, email, teléfono, dirección — se recolectan en `/checkout` y `/contacto`). No existe todavía ninguna página de este tipo en el sitio.
