@@ -1,6 +1,5 @@
 const MESSAGES = [
   "Envío calculado al finalizar la compra",
-  "Nueva colección SS26",
   "No aceptamos devoluciones",
   "Tejidos cómodos · Hecho con cuidado",
 ];
