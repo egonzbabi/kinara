@@ -96,7 +96,6 @@ export function Hero() {
             className="pointer-events-auto max-w-2xl text-bone"
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="label text-bone/70">Nueva colección · SS26</span>
             <h1 className="mt-3 font-display text-[clamp(40px,7vw,92px)] font-medium leading-[0.98] tracking-[-0.01em]">
               El mundo de la
               <br />
