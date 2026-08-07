@@ -150,6 +150,21 @@
       transform: translateX(-50%);
     }
   }
+
+  /* Slow continuous zoom on the active hero slide (Ken Burns), paired with
+     the page-turn crossfade in Hero.tsx — runs longer than the slide
+     interval on purpose so it never visibly completes mid-rotation. */
+  @keyframes kenburns {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.09);
+    }
+  }
+  .animate-kenburns {
+    animation: kenburns 6.5s var(--ease-out-soft) forwards;
+  }
 }
 
 /* ---------------------------------------------------------------

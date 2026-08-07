@@ -26,23 +26,47 @@ export function Hero() {
     <section className="pad pt-4">
       <div
         className="relative h-[clamp(520px,82vh,860px)] w-full overflow-hidden rounded-[28px]"
+        style={{ perspective: "2400px" }}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocus={() => setPaused(true)}
         onBlur={() => setPaused(false)}
       >
-        {SLIDES.map((slide, i) => (
-          <img
-            key={slide.url}
-            src={productImage(slide.url, { width: 2000, height: 1300 })}
-            srcSet={productSrcSet(slide.url, HERO_WIDTHS, { heightRatio: 1300 / 2000 })}
-            sizes="100vw"
-            alt={slide.alt}
-            className="absolute inset-0 h-full w-full object-cover object-[center_62%] transition-opacity duration-1000 ease-in-out"
-            style={{ opacity: i === active ? 1 : 0 }}
-            fetchPriority={i === 0 ? "high" : undefined}
-          />
-        ))}
+        {/* Cada foto vive en su propia "página": gira sutilmente sobre el
+            borde derecho al salir (como si se pasara la hoja) mientras la
+            entrante se asienta en su lugar. El zoom lento (Ken Burns) da
+            movimiento incluso mientras una foto está quieta en pantalla. */}
+        {SLIDES.map((slide, i) => {
+          const isActive = i === active;
+          return (
+            <div
+              key={slide.url}
+              className="absolute inset-0 overflow-hidden"
+              style={{
+                opacity: isActive ? 1 : 0,
+                transform: isActive
+                  ? "rotateY(0deg) scale(1)"
+                  : "rotateY(-8deg) scale(1.045)",
+                transformOrigin: "right center",
+                transformStyle: "preserve-3d",
+                zIndex: isActive ? 2 : 1,
+                transition:
+                  "opacity 1150ms var(--ease-out-soft), transform 1150ms var(--ease-out-soft)",
+              }}
+            >
+              <img
+                src={productImage(slide.url, { width: 2000, height: 1300 })}
+                srcSet={productSrcSet(slide.url, HERO_WIDTHS, { heightRatio: 1300 / 2000 })}
+                sizes="100vw"
+                alt={slide.alt}
+                className={`h-full w-full object-cover object-[center_62%] ${
+                  isActive ? "animate-kenburns" : ""
+                }`}
+                fetchPriority={i === 0 ? "high" : undefined}
+              />
+            </div>
+          );
+        })}
 
         {/* Warm scrim for legibility + brand tone */}
         <div
