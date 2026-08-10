@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import { supabaseAdmin } from "./supabase.server";
+import { sendOrderConfirmationEmail } from "./resend.server";
 
 export interface OrderItem {
   productId: string;
@@ -179,6 +180,32 @@ export async function ensureOrderFromCheckoutSession(
   }
 
   await decrementStockForItems(items);
+
+  // Nunca bloquea la creación de la orden: si Resend no está configurado o
+  // el envío falla, solo se registra — el pedido ya está creado y pagado.
+  const emailResult = await sendOrderConfirmationEmail({
+    orderId,
+    customerName,
+    customerEmail,
+    items,
+    subtotal,
+    shippingFee,
+    total,
+    shippingAddress: shippingAddress
+      ? {
+          street1: shippingAddress.street1,
+          postalCode: shippingAddress.postalCode,
+          areaLevel1: shippingAddress.areaLevel1,
+          areaLevel2: shippingAddress.areaLevel2,
+          areaLevel3: shippingAddress.areaLevel3,
+        }
+      : null,
+    shippingCarrier,
+    shippingDays,
+  });
+  if (!emailResult.sent) {
+    console.error(`[orders] correo de confirmación no enviado para ${orderId}:`, emailResult.error);
+  }
 
   return { orderId, created: true };
 }
