@@ -33,13 +33,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-bone">
       <div className="pad py-[clamp(48px,6vw,88px)]">
-        <div className="border-b border-line pb-10 text-center">
-          <p className="font-display text-[clamp(24px,3.4vw,38px)] italic leading-tight text-espresso">
-            Hecha para moverte. <span className="text-clay">Creada para brillar.</span>
-          </p>
-        </div>
-
-        <div className="grid gap-10 border-b border-line pb-12 pt-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="grid gap-10 border-b border-line pb-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Link
               to="/"

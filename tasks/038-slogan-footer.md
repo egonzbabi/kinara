@@ -1,6 +1,6 @@
 ---
 id: 038
-title: "Slogan de marca visible en todas las páginas"
+title: "Slogan de marca siempre visible (header fijo)"
 status: done
 ---
 
@@ -16,45 +16,52 @@ Antes de trabajar esta tarea, Claude debe haber leído (en este orden):
 
 El usuario pidió agregar el slogan de KINARA — "Hecha para moverte. Creada para brillar." — visible en todas las secciones y páginas del sitio, con un diseño cuidado ("muy bonito diseño"). Es un cambio visual/de copy puntual autorizado explícitamente por el usuario (excepción a la regla de diseño intocable de `CLAUDE.md`).
 
+**Primer intento (revertido dentro de esta misma tarea):** se colocó el slogan en el pie de página (`SiteFooter.tsx`), razonando que el footer también es global (vive en el layout raíz) sin sumarle altura permanente al header `sticky`. El usuario aclaró que no era eso lo que quería: "quiero que siempre se vea el slogan y solo si hago scroll se ve" — es decir, visible sin necesidad de bajar hasta el pie de página. Se revirtió el bloque del footer y se movió al header (que sí es `sticky top-0`, visible en todo momento).
+
+Después de esa primera versión en el header (tipografía pequeña, muy pegada al logo), el usuario pidió: "haz el slogan un poco más grande y no tan pegado al título, diseña algo muy bonito, analiza bien" — se ajustó tamaño y espaciado con más cuidado (ver Decisión de diseño).
+
 ## Objetivo
 
-El slogan aparece en un lugar realmente global del sitio (presente en toda página, no solo en home), con un tratamiento tipográfico destacado y elegante, sin agregarle altura permanente al header fijo (que ya lleva logo + navegación + banner superior) ni competir con el resto del contenido.
+El slogan está siempre visible, en cualquier punto de scroll de cualquier página, con un tratamiento tipográfico elegante y con suficiente aire respecto al logo — sin que el header se sienta abultado.
 
 ## Decisión de diseño
 
-Se eligió el pie de página (`SiteFooter.tsx`) en vez del header: el footer ya se renderiza en el layout raíz (`app/root.tsx`) y por lo tanto aparece en absolutamente todas las rutas, igual que el header — pero agregarlo al header (que es `sticky`) le sumaría altura permanente visible en cada scroll de cada página, lo cual choca con las reglas de performance/UX ya establecidas en `CLAUDE.md` (no clutter, consistencia visual). El footer permite darle al slogan su propio momento visual sin ese costo.
-
-Tratamiento: una línea centrada en `font-display` (Fraunces, la misma tipografía serif de los títulos del sitio) en itálicas, tamaño grande (`clamp(24px, 3.4vw, 38px)`), con la segunda mitad de la frase ("Creada para brillar.") en el color de acento de marca `text-clay` — mismo patrón ya validado visualmente en el Hero (la palabra "movimiento" en itálicas con acento de color). Se colocó arriba de las columnas existentes del footer, separado por una línea divisoria (`border-b`), sin tocar ningún otro contenido/copy ya existente.
+- Se colocó dentro de `SiteNav.tsx`, debajo del wordmark "KINARA", dentro del mismo `<header>` `sticky top-0` — así hereda la visibilidad permanente sin crear un segundo elemento sticky independiente.
+- El logo y el slogan se agruparon en un `flex flex-col items-center` (antes el wordmark era un `<Link>` suelto directamente en la fila); la fila del header pasó de una altura fija `h-20` a `py-3` (alto por contenido) para acomodar las dos líneas sin recortar.
+- Tipografía: `font-display` (Fraunces, itálicas) en `text-[clamp(12px,2.8vw,15px)]` — más grande que el primer intento (`11px`/`12px` fijos) y responsivo. Separación del logo con `mt-2` (antes `mt-0.5`, se sentía pegado). Segunda mitad de la frase ("Creada para brillar.") en `text-clay`, mismo patrón ya usado en el Hero para la palabra "movimiento".
+- `whitespace-nowrap`: la frase completa siempre cabe en una sola línea, incluso en mobile (375px), verificado visualmente.
 
 ## Archivos involucrados
 
-- `app/components/SiteFooter.tsx` — nuevo bloque centrado antes del grid de columnas.
+- `app/components/SiteNav.tsx` — wordmark + slogan agrupados en `flex flex-col items-center`, fila del header cambiada de `h-20` a `py-3`.
+- `app/components/SiteFooter.tsx` — revertido a su estado original (sin el bloque de slogan del primer intento).
 
 ## Restricciones específicas de esta tarea
 
-- No se tocó el header (`SiteNav.tsx`) ni el banner superior (`AnnouncementBar.tsx`) — el slogan vive solo en el footer.
-- No se modificó ningún otro texto ya existente en el footer (la descripción de marca en la primera columna se dejó igual, aunque temáticamente se parece — el usuario no pidió quitarla).
-- Reutiliza tokens de diseño ya existentes (`font-display`, `text-clay`, `text-espresso`, `border-line`) — no se inventó ninguna paleta ni tipografía nueva.
+- No se tocó la navegación (`LINKS`), el menú móvil, el carrito ni ningún otro elemento del header — solo el bloque del wordmark.
+- No se dejó ningún rastro del primer intento (footer) — `SiteFooter.tsx` quedó exactamente como estaba antes de esta tarea.
+- Reutiliza tokens de diseño ya existentes (`font-display`, `text-clay`, `text-muted`) — no se inventó ninguna paleta ni tipografía nueva.
 
 ## Criterios de aceptación
 
-- [x] El slogan "Hecha para moverte. Creada para brillar." aparece en el footer de toda página del sitio (verificado en home y en `/contacto`).
-- [x] Tratamiento tipográfico destacado: itálicas, tamaño grande, acento de color en la segunda frase — consistente con el lenguaje visual ya usado en el Hero.
-- [x] Se ve bien en desktop y mobile (el salto de línea en mobile es natural, sin corte a media palabra).
+- [x] El slogan es visible en todo momento, sin necesidad de hacer scroll, en cualquier página (vive en el header `sticky`).
+- [x] Tamaño y espaciado con suficiente aire respecto al logo (ajustado tras feedback explícito del usuario).
+- [x] La frase no se corta ni desborda en mobile (375px) ni en desktop.
+- [x] El header sigue fijo (`sticky`) correctamente al hacer scroll, con el slogan siempre encima.
 - [x] `npm run typecheck` pasa sin errores; sin errores de consola.
 
 ## Verificación de requisitos anteriores
 
 - Revisado contra `REQUISITOS.md`: sí — no introduce ningún patrón nuevo que deba registrarse ahí (cambio de copy/diseño puntual, ya autorizado explícitamente por el usuario).
-- Regresiones encontradas: ninguna — el resto del footer (columnas, copyright, links legales) se conserva igual.
+- Regresiones encontradas: ninguna — el resto del header (navegación, carrito, menú móvil, botón volver) se conserva igual; `SiteFooter.tsx` quedó igual que antes de esta tarea.
 - Requisitos nuevos agregados a `REQUISITOS.md`: no aplica.
 
 ## Pruebas manuales
 
-- Confirmado por JS (`document.body.innerText.includes(...)`) que el texto está presente tanto en `/` como en `/contacto`.
-- Capturas en desktop (1280px) y mobile (375px): itálicas, color de acento y espaciado correctos en ambos, sin overflow ni corte de texto.
-- Sin errores de consola.
+- Confirmado por JS (`getBoundingClientRect` del `<header>`) que se mantiene fijo en `top: 0` después de hacer scroll varios miles de píxeles hacia abajo, en dos pestañas distintas.
+- Capturas en desktop (1280px) y mobile (375px), en distintas posiciones de scroll: logo + slogan siempre visibles, sin corte de texto, buen espaciado tras el ajuste de tamaño.
+- Sin errores de consola en ningún punto.
 
 ## Notas de progreso
 
-- 2026-08-10: Tarea creada e implementada en la misma sesión, a pedido explícito del usuario. Verificado en dos rutas distintas para confirmar que es realmente global (vive en el layout raíz vía `SiteFooter`, no en una página específica).
+- 2026-08-10: Tarea creada. Primer intento en el footer, revertido tras aclaración del usuario de que lo quería siempre visible. Movido al header `sticky`. Ajustado tamaño (`clamp(12px,2.8vw,15px)`, antes fijo y más pequeño) y espaciado (`mt-2`, antes `mt-0.5`) tras un segundo pedido explícito del usuario de hacerlo "un poco más grande y no tan pegado al título". Verificado el resultado final en desktop y mobile, con scroll.

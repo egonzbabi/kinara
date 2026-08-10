@@ -44,7 +44,7 @@ export function SiteNav() {
           scrolled ? "shadow-[0_1px_0_var(--color-line)]" : "",
         )}
       >
-        <div className="pad flex h-20 items-center justify-between gap-4">
+        <div className="pad flex items-center justify-between gap-4 py-3">
           {/* Left: back button / mobile burger */}
           <div className="flex flex-1 items-center gap-4">
             {isProductDetail && (
@@ -67,14 +67,19 @@ export function SiteNav() {
             </button>
           </div>
 
-          {/* Center: wordmark */}
-          <Link
-            to="/"
-            aria-label="KINARA · Inicio"
-            className="font-display text-[40px] font-semibold leading-none tracking-[0.18em]"
-          >
-            KINARA
-          </Link>
+          {/* Center: wordmark + slogan, siempre visibles (header sticky) */}
+          <div className="flex flex-col items-center">
+            <Link
+              to="/"
+              aria-label="KINARA · Inicio"
+              className="font-display text-[40px] font-semibold leading-none tracking-[0.18em]"
+            >
+              KINARA
+            </Link>
+            <p className="mt-2 whitespace-nowrap font-display text-[clamp(12px,2.8vw,15px)] italic leading-none tracking-[0.02em] text-muted">
+              Hecha para moverte. <span className="text-clay">Creada para brillar.</span>
+            </p>
+          </div>
 
           {/* Right: utilities */}
           <div className="flex flex-1 items-center justify-end gap-5">
