@@ -77,5 +77,7 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 034 | [034-familias-de-color.md](034-familias-de-color.md) | done | Filtro de color en /tienda: agrupar por familia + reflejar el color en la foto |
 | 035 | [035-aviso-privacidad.md](035-aviso-privacidad.md) | done | Página /aviso-de-privacidad (borrador — pendiente de revisión legal) |
 | 036 | [036-hero-transicion-pagina.md](036-hero-transicion-pagina.md) | done | Hero de home: transición de foto tipo "página" + zoom lento (Ken Burns) |
+| 037 | [037-correo-confirmacion-pedido.md](037-correo-confirmacion-pedido.md) | done | Correo de confirmación de pedido al cliente (Resend) |
+| 038 | [038-slogan-footer.md](038-slogan-footer.md) | done | Slogan de marca visible en todas las páginas (footer) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
