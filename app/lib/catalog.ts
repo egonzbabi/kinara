@@ -23,6 +23,7 @@ type ProductRow = {
     color_hex: string | null;
     size: string;
     stock: number;
+    modelo: string | null;
   }[];
   product_images: { url: string; position: number; color_name: string | null }[];
 };
@@ -30,12 +31,14 @@ type ProductRow = {
 function mapRow(row: ProductRow): Product {
   const colorMap = new Map<string, ColorOption>();
   const stockBySize = new Map<string, number>();
+  const skuByVariant: Record<string, string> = {};
 
   for (const v of row.product_variants) {
     if (!colorMap.has(v.color_name)) {
       colorMap.set(v.color_name, { name: v.color_name, hex: v.color_hex ?? "#CCCCCC" });
     }
     stockBySize.set(v.size, (stockBySize.get(v.size) ?? 0) + v.stock);
+    if (v.modelo) skuByVariant[`${v.color_name}|${v.size}`] = v.modelo;
   }
 
   const sizes = SIZE_ORDER.filter((s) => (stockBySize.get(s) ?? 0) > 0);
@@ -71,6 +74,7 @@ function mapRow(row: ProductRow): Product {
     gallery: genericImages.length > 0 ? genericImages : ["/productos/placeholder.png"],
     colorImages: hasColorPhotos ? colorImages : undefined,
     colorGallery: hasColorPhotos ? colorGallery : undefined,
+    skuByVariant: Object.keys(skuByVariant).length > 0 ? skuByVariant : undefined,
     badge: row.badge && VALID_BADGES.has(row.badge) ? (row.badge as Product["badge"]) : undefined,
     isNew: row.is_new,
     isBestseller: row.is_bestseller,
@@ -81,7 +85,7 @@ function mapRow(row: ProductRow): Product {
 }
 
 const SELECT =
-  "*, product_variants(color_name, color_hex, size, stock), product_images(url, position, color_name)";
+  "*, product_variants(color_name, color_hex, size, stock, modelo), product_images(url, position, color_name)";
 
 export async function getAllProducts(): Promise<Product[]> {
   const { data, error } = await supabase

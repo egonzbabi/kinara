@@ -51,6 +51,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   );
   const missingSelection = !color || !size;
   const [attempted, setAttempted] = useState(false);
+  const sku = color && size ? product.skuByVariant?.[`${color}|${size}`] : undefined;
 
   const colorImage = color ? product.colorImages?.[color] : undefined;
 
@@ -261,6 +262,12 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               ))}
             </div>
           </div>
+
+          {sku && (
+            <p className="mt-4 text-[13px] text-muted">
+              SKU: <span className="font-medium text-espresso/80">{sku}</span>
+            </p>
+          )}
 
           {/* Add to cart */}
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">

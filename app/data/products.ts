@@ -20,6 +20,8 @@ export type Product = {
   colorImages?: Record<string, string>;
   /** Todas las fotos por color, en orden (la primera es la principal, igual que colorImages). Ver tasks/019-fotos-multiples-color.md. */
   colorGallery?: Record<string, string[]>;
+  /** SKU por combinación color+talla ("Negro|M" -> "JV014-NEGRO-M"), cuando existe. Ver tasks/040-sku-detalle-producto.md. */
+  skuByVariant?: Record<string, string>;
   badge?: "Nuevo" | "Best-seller" | "Oferta" | "Edición" | "Últimas unidades";
   isNew?: boolean;
   isBestseller?: boolean;

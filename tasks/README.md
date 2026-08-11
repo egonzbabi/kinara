@@ -80,5 +80,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 037 | [037-correo-confirmacion-pedido.md](037-correo-confirmacion-pedido.md) | done | Correo de confirmación de pedido al cliente (Resend) |
 | 038 | [038-slogan-footer.md](038-slogan-footer.md) | done | Slogan de marca siempre visible (header fijo) |
 | 039 | [039-modelo-a-sku.md](039-modelo-a-sku.md) | done | Cambiar la etiqueta "Modelo" por "SKU" en el admin |
+| 040 | [040-sku-detalle-producto.md](040-sku-detalle-producto.md) | done | Mostrar el SKU en el detalle de producto |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
