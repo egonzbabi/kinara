@@ -277,7 +277,7 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
             <thead>
               <tr className="border-b border-line bg-bone">
                 <th className="px-3 py-2 text-left font-medium text-muted">Producto</th>
-                <th className="px-3 py-2 text-left font-medium text-muted">Modelo</th>
+                <th className="px-3 py-2 text-left font-medium text-muted">SKU</th>
                 <th className="px-3 py-2 text-left font-medium text-muted">Color</th>
                 <th className="px-3 py-2 text-left font-medium text-muted">Talla</th>
                 <th className="px-3 py-2 text-right font-medium text-muted">Cant.</th>

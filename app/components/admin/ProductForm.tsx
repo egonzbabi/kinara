@@ -212,12 +212,12 @@ export function ProductForm({ product, productId, error }: Props) {
         </p>
       )}
 
-      {/* Modelo (código base) */}
+      {/* SKU (código base) */}
       <section className="rounded-xl bg-bone p-5">
-        <h2 className="font-display text-lg text-espresso">Modelo</h2>
+        <h2 className="font-display text-lg text-espresso">SKU</h2>
         <p className="mt-1 text-[13px] text-muted">
           Código base (ej. el número del Excel/proveedor). Al dar de alta un color y su
-          stock por talla, se completa solo el modelo de esa talla como{" "}
+          stock por talla, se completa solo el SKU de esa talla como{" "}
           <span className="font-medium">CÓDIGO-COLOR-TALLA</span> — puedes editarlo
           manualmente en cualquier talla si necesitas otro valor.
         </p>
@@ -435,8 +435,8 @@ export function ProductForm({ product, productId, error }: Props) {
                       />
                       <input
                         type="text"
-                        placeholder="modelo"
-                        title="Código de modelo (código-color-talla)"
+                        placeholder="SKU"
+                        title="Código de SKU (código-color-talla)"
                         value={s.modelo ?? ""}
                         onChange={(e) => updateModelo(i, s.size, e.target.value)}
                         className={cn(inputClass, "mt-1 w-24 text-xs")}
