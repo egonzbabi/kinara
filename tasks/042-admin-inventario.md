@@ -20,7 +20,9 @@ El usuario pidió una sección nueva en `/admin` para ver el inventario de produ
 
 ## Objetivo
 
-Nueva página `/admin/inventario`, accesible desde el menú lateral, con una tabla (foto, producto, categoría/tipo, color, talla, SKU, stock, precio) — una fila por cada combinación producto+color+talla existente. Con buscador y filtro de categoría, botón para imprimir (usando el diálogo nativo del navegador, que permite "Guardar como PDF") y botón para descargar un CSV con los mismos datos.
+Nueva página `/admin/inventario`, accesible desde el menú lateral, con una tabla (foto, producto, tipo, color, talla, SKU, stock, precio) — una fila por cada combinación producto+color+talla existente. Con buscador y filtro por tipo, botón para imprimir (usando el diálogo nativo del navegador, que permite "Guardar como PDF") y botón para descargar un CSV con los mismos datos.
+
+**Ajuste tras feedback del usuario (misma tarea):** debajo del nombre del producto se muestra también su slug (el campo "URL" del formulario de edición) — útil porque a veces conserva el nombre anterior de un producto que fue renombrado (ej. "NOVA TOP" con slug `daily-top`, de cuando el producto se llamaba "Daily Top"). Y el filtro/subtítulo que mostraba la categoría (`mujer`/`hombre`/`accesorios`, casi siempre igual para todo el catálogo) se cambió por el tipo de prenda (`kind`: Top, Bottom, Legging, etc.), mucho más útil para filtrar.
 
 ## Archivos involucrados
 
@@ -40,8 +42,8 @@ Nueva página `/admin/inventario`, accesible desde el menú lateral, con una tab
 
 ## Criterios de aceptación
 
-- [x] `/admin/inventario` muestra una tabla con foto, producto, categoría/tipo, color, talla, SKU, stock y precio — una fila por combinación color+talla real.
-- [x] Buscador (por nombre, color o SKU) y filtro de categoría funcionan sobre la tabla.
+- [x] `/admin/inventario` muestra una tabla con foto, producto (+ slug/URL debajo), tipo, color, talla, SKU, stock y precio — una fila por combinación color+talla real.
+- [x] Buscador (por nombre, color o SKU) y filtro por tipo funcionan sobre la tabla.
 - [x] Botón "Descargar CSV" genera un archivo sin errores, respetando los filtros activos.
 - [x] Botón "Imprimir" dispara el diálogo de impresión nativo; el menú lateral y la barra superior quedan ocultos en la vista de impresión (verificado por clases `print:hidden` presentes en el DOM).
 - [x] Nuevo link "Inventario" visible y funcional en el menú lateral de admin.
@@ -64,3 +66,4 @@ Nueva página `/admin/inventario`, accesible desde el menú lateral, con una tab
 ## Notas de progreso
 
 - 2026-08-12: Tarea creada e implementada en la misma sesión, a pedido explícito del usuario.
+- 2026-08-12 (ajuste): a pedido del usuario, se agregó el slug del producto debajo del nombre y se cambió el filtro/subtítulo de categoría por tipo (`kind`). Verificado con una cuenta de admin desechable: "NOVA TOP" muestra `daily-top` debajo del nombre y "Tipo: Top"; el filtro ahora dice "Todos los tipos".

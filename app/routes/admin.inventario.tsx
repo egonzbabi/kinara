@@ -68,9 +68,9 @@ function downloadInventoryCsv(rows: InventoryRow[]) {
 export default function AdminInventario({ loaderData }: Route.ComponentProps) {
   const { rows } = loaderData;
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("Todas");
+  const [kind, setKind] = useState("Todos");
 
-  const categories = ["Todas", ...new Set(rows.map((r) => r.category))];
+  const kinds = ["Todos", ...new Set(rows.map((r) => r.kind))];
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -79,10 +79,10 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
         r.productName.toLowerCase().includes(q) ||
         (r.sku ?? "").toLowerCase().includes(q) ||
         r.colorName.toLowerCase().includes(q);
-      const matchCat = category === "Todas" || r.category === category;
-      return matchSearch && matchCat;
+      const matchKind = kind === "Todos" || r.kind === kind;
+      return matchSearch && matchKind;
     });
-  }, [rows, search, category]);
+  }, [rows, search, kind]);
 
   const totalStock = filtered.reduce((n, r) => n + r.stock, 0);
 
@@ -108,10 +108,10 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
             onChange={(e) => setSearch(e.target.value)}
             className={cn(inputClass, "sm:max-w-xs")}
           />
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass}>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c === "Todas" ? "Todas las categorías" : c}
+          <select value={kind} onChange={(e) => setKind(e.target.value)} className={inputClass}>
+            {kinds.map((k) => (
+              <option key={k} value={k}>
+                {k === "Todos" ? "Todos los tipos" : k}
               </option>
             ))}
           </select>
@@ -195,9 +195,8 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
                           </span>
                         )}
                       </p>
-                      <p className="text-[12px] capitalize text-muted">
-                        {r.category} · {r.kind}
-                      </p>
+                      <p className="font-mono text-[12px] text-muted">{r.productSlug}</p>
+                      <p className="text-[12px] text-muted">Tipo: {r.kind}</p>
                     </td>
                     <td className="px-5 py-2.5 text-sm text-espresso">{r.colorName}</td>
                     <td className="px-5 py-2.5 text-sm text-espresso">{r.size}</td>

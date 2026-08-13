@@ -112,6 +112,8 @@ export async function listAdminProducts(): Promise<AdminProductListItem[]> {
 export type InventoryRow = {
   productId: string;
   productName: string;
+  /** Slug (URL) del producto — a veces conserva el nombre anterior si el producto se renombró. */
+  productSlug: string;
   category: "mujer" | "hombre" | "accesorios";
   kind: string;
   isDraft: boolean;
@@ -150,6 +152,7 @@ export async function listInventory(): Promise<InventoryRow[]> {
       rows.push({
         productId: row.id,
         productName: row.name,
+        productSlug: row.slug,
         category: row.category,
         kind: row.kind,
         isDraft: row.is_draft,
