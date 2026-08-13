@@ -81,5 +81,7 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 038 | [038-slogan-footer.md](038-slogan-footer.md) | done | Slogan de marca siempre visible (header fijo) |
 | 039 | [039-modelo-a-sku.md](039-modelo-a-sku.md) | done | Cambiar la etiqueta "Modelo" por "SKU" en el admin |
 | 040 | [040-sku-detalle-producto.md](040-sku-detalle-producto.md) | done | Mostrar el SKU en el detalle de producto |
+| 041 | [041-footer-tienda-sincronizado.md](041-footer-tienda-sincronizado.md) | done | Footer: columna Tienda con las mismas opciones que el menú |
+| 042 | [042-admin-inventario.md](042-admin-inventario.md) | done | Admin: sección de Inventario (tabla con fotos, imprimible y descargable) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

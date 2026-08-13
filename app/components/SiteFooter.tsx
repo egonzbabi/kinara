@@ -1,13 +1,12 @@
 import { Link } from "react-router";
+import { LINKS as NAV_LINKS } from "./SiteNav";
 
 const COLS = [
   {
     title: "Tienda",
-    links: [
-      { label: "Mujer", to: "/tienda?cat=mujer" },
-      { label: "Accesorios", to: "/tienda?cat=accesorios" },
-      { label: "Novedades", to: "/tienda" },
-    ],
+    // Mismas opciones que el menú principal (SiteNav) — se reutiliza la
+    // lista para que nunca se desincronicen.
+    links: NAV_LINKS,
   },
   {
     title: "Ayuda",

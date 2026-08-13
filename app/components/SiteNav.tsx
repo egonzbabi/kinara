@@ -3,7 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { useCart } from "~/context/CartContext";
 import { cn } from "~/lib/cn";
 
-const LINKS = [
+export const LINKS = [
   { to: "/tienda", label: "Tienda" },
   { to: "/tienda?tipo=Top", label: "Top" },
   { to: "/tienda?tipo=Bottom", label: "Bottom" },
