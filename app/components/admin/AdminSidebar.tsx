@@ -3,7 +3,7 @@ import { cn } from "~/lib/cn";
 
 export function AdminSidebar() {
   return (
-    <aside className="w-full shrink-0 border-b border-line bg-bone lg:w-56 lg:border-b-0 lg:border-r">
+    <aside className="w-full shrink-0 border-b border-line bg-bone print:hidden lg:w-56 lg:border-b-0 lg:border-r">
       <div className="flex h-full flex-col lg:min-h-screen">
         <div className="px-5 py-5">
           <span className="font-display text-lg text-espresso">KINARA</span>
@@ -43,6 +43,17 @@ export function AdminSidebar() {
             }
           >
             Mensajes
+          </NavLink>
+          <NavLink
+            to="/admin/inventario"
+            className={({ isActive }) =>
+              cn(
+                "block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive ? "bg-clay/10 text-clay" : "text-espresso hover:bg-sand",
+              )
+            }
+          >
+            Inventario
           </NavLink>
         </nav>
 

@@ -22,6 +22,7 @@ export default [
     route("admin/productos/:id/eliminar", "routes/admin.productos.$id.eliminar.tsx"),
     route("admin/pedidos", "routes/admin.pedidos.tsx"),
     route("admin/mensajes", "routes/admin.mensajes.tsx"),
+    route("admin/inventario", "routes/admin.inventario.tsx"),
   ]),
 
   route("api/create-checkout-session", "routes/api.create-checkout-session.tsx"),

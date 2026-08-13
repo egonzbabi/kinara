@@ -109,6 +109,63 @@ export async function listAdminProducts(): Promise<AdminProductListItem[]> {
   });
 }
 
+export type InventoryRow = {
+  productId: string;
+  productName: string;
+  category: "mujer" | "hombre" | "accesorios";
+  kind: string;
+  isDraft: boolean;
+  colorName: string;
+  size: "S" | "M" | "L" | "XL";
+  sku: string | null;
+  stock: number;
+  price: number | null;
+  compareAt: number | null;
+  photoUrl: string;
+};
+
+/**
+ * Una fila por combinación producto+color+talla (nivel SKU) — es la unidad
+ * real de inventario físico, a diferencia de `listAdminProducts` que agrupa
+ * todo por producto para la tabla de /admin/productos.
+ */
+export async function listInventory(): Promise<InventoryRow[]> {
+  const { data, error } = await supabaseAdmin
+    .from("products")
+    .select(SELECT)
+    .order("created_at");
+  if (error) throw new Error(`No se pudo cargar el inventario: ${error.message}`);
+
+  const rows: InventoryRow[] = [];
+  for (const row of data as ProductRow[]) {
+    const photoByColor = new Map<string, string>();
+    for (const img of row.product_images) {
+      if (img.color_name && !photoByColor.has(img.color_name)) {
+        photoByColor.set(img.color_name, img.url);
+      }
+    }
+    const generic = pickThumbnail(row);
+
+    for (const v of row.product_variants) {
+      rows.push({
+        productId: row.id,
+        productName: row.name,
+        category: row.category,
+        kind: row.kind,
+        isDraft: row.is_draft,
+        colorName: v.color_name,
+        size: v.size,
+        sku: v.modelo,
+        stock: v.stock,
+        price: row.price,
+        compareAt: row.compare_at,
+        photoUrl: photoByColor.get(v.color_name) ?? generic,
+      });
+    }
+  }
+  return rows;
+}
+
 export async function getAdminProductById(id: string): Promise<AdminProductInput | null> {
   const { data, error } = await supabaseAdmin
     .from("products")
