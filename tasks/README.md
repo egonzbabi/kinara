@@ -84,5 +84,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 041 | [041-footer-tienda-sincronizado.md](041-footer-tienda-sincronizado.md) | done | Footer: columna Tienda con las mismas opciones que el menú |
 | 042 | [042-admin-inventario.md](042-admin-inventario.md) | done | Admin: sección de Inventario (tabla con fotos, imprimible y descargable) |
 | 043 | [043-inventario-excel-fotos.md](043-inventario-excel-fotos.md) | done | Inventario: descarga en Excel real con fotos y celdas combinadas |
+| 044 | [044-inventario-rediseno.md](044-inventario-rediseno.md) | done | Rediseño de /admin/inventario: tarjetas de resumen + agrupado por producto |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
