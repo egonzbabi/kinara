@@ -19,6 +19,11 @@ export function modeloColorCode(colorName: string): string {
     .replace(/[^A-Z0-9]/g, "");
 }
 
+/** Deriva el SKU original/base a partir de un SKU completo (CÓDIGO-COLOR-TALLA -> CÓDIGO). */
+export function baseSkuFrom(sku: string): string {
+  return sku.split("-").slice(0, -2).join("-");
+}
+
 const SHORT_ID_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 /** Código interno corto y aleatorio para product.id (no tiene significado de negocio). */

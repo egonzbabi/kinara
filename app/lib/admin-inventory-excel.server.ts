@@ -1,15 +1,11 @@
 import ExcelJS from "exceljs";
 import type { InventoryRow } from "./admin-catalog.server";
+import { baseSkuFrom } from "./slug";
 
-/**
- * Deriva el "SKU original" (código base, antes de -COLOR-TALLA) a partir del
- * primer SKU disponible del producto — misma regla ya usada en
- * ProductForm.tsx (`guessModeloBase`), nunca se guardó por separado.
- */
+/** SKU original del grupo — el primer SKU disponible del producto, sin -COLOR-TALLA. */
 function baseSku(rows: InventoryRow[]): string {
   const withSku = rows.find((r) => r.sku);
-  if (!withSku?.sku) return "";
-  return withSku.sku.split("-").slice(0, -2).join("-");
+  return withSku?.sku ? baseSkuFrom(withSku.sku) : "";
 }
 
 type ImageExtension = ExcelJS.Image["extension"];
@@ -70,6 +66,7 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     { header: "SKU", key: "sku", width: 20 },
     { header: "Stock", key: "stock", width: 10 },
     { header: "Precio", key: "precio", width: 12 },
+    { header: "Valor (stock × precio)", key: "valor", width: 18 },
     { header: "Estado", key: "estado", width: 12 },
   ];
   sheet.getRow(1).font = { bold: true };
@@ -82,9 +79,12 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   const photos = await Promise.all(groups.map((group) => fetchImage(group[0].photoUrl)));
 
   let currentRow = 2;
+  let totalValue = 0;
   groups.forEach((group, i) => {
     const startRow = currentRow;
     for (const r of group) {
+      const value = (r.price ?? 0) * r.stock;
+      totalValue += value;
       sheet.addRow({
         skuOriginal: "",
         producto: r.productName,
@@ -94,6 +94,7 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
         sku: r.sku ?? "",
         stock: r.stock,
         precio: r.price ?? "",
+        valor: value,
         estado: r.isDraft ? "Borrador" : "Publicado",
       });
       sheet.getRow(currentRow).height = 60;
@@ -121,6 +122,9 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
       sheet.addImage(imageId, `A${startRow}:A${endRow}`);
     }
   });
+
+  const totalRow = sheet.addRow({ producto: "Valor total del inventario", valor: totalValue });
+  totalRow.font = { bold: true };
 
   return workbook.xlsx.writeBuffer() as unknown as Promise<Buffer>;
 }

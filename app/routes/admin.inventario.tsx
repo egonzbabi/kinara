@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { Route } from "./+types/admin.inventario";
 import { requireAdmin } from "~/lib/session.server";
 import { listInventory, type InventoryRow } from "~/lib/admin-catalog.server";
+import { baseSkuFrom } from "~/lib/slug";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
@@ -27,6 +28,8 @@ type ProductGroup = {
   price: number | null;
   photoUrl: string;
   totalStock: number;
+  baseSku: string;
+  value: number;
   colors: {
     colorName: string;
     photoUrl: string;
@@ -48,11 +51,14 @@ function groupByProduct(rows: InventoryRow[]): ProductGroup[] {
         price: r.price,
         photoUrl: r.photoUrl,
         totalStock: 0,
+        baseSku: r.sku ? baseSkuFrom(r.sku) : "",
+        value: 0,
         colors: [],
       };
       groups.set(r.productId, group);
     }
     group.totalStock += r.stock;
+    group.value += (r.price ?? 0) * r.stock;
     let color = group.colors.find((c) => c.colorName === r.colorName);
     if (!color) {
       color = { colorName: r.colorName, photoUrl: r.photoUrl, sizes: {} };
@@ -73,9 +79,15 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-xl bg-bone p-4">
+    <div className="overflow-hidden rounded-xl bg-bone p-4">
       <p className="label text-[11px] text-muted">{label}</p>
-      <p className={cn("mt-1 font-display text-3xl", accent ? "text-clay" : "text-espresso")}>
+      <p
+        className={cn(
+          "mt-1 truncate font-display text-[clamp(18px,3.2vw,26px)] leading-tight",
+          accent ? "text-clay" : "text-espresso",
+        )}
+        title={String(value)}
+      >
         {value}
       </p>
     </div>
@@ -96,6 +108,7 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
       const matchSearch =
         r.productName.toLowerCase().includes(q) ||
         (r.sku ?? "").toLowerCase().includes(q) ||
+        (r.sku ? baseSkuFrom(r.sku).toLowerCase().includes(q) : false) ||
         r.colorName.toLowerCase().includes(q);
       const matchKind = kind === "Todos" || r.kind === kind;
       const matchStock =
@@ -110,6 +123,7 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
 
   const totalStock = filtered.reduce((n, r) => n + r.stock, 0);
   const outOfStockCount = filtered.filter((r) => r.stock === 0).length;
+  const totalValue = filtered.reduce((n, r) => n + (r.price ?? 0) * r.stock, 0);
 
   const inputClass =
     "rounded-lg border border-line bg-bone px-4 py-2.5 text-sm text-espresso placeholder:text-muted focus:border-clay focus:outline-none";
@@ -125,10 +139,11 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
       </div>
 
       {/* Resumen */}
-      <div className="grid grid-cols-2 gap-3 print:hidden sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 print:hidden sm:grid-cols-3 lg:grid-cols-5">
         <StatCard label="Productos" value={groups.length} />
         <StatCard label="SKUs (color+talla)" value={filtered.length} />
         <StatCard label="Unidades en stock" value={totalStock} />
+        <StatCard label="Valor de inventario" value={formatPrice(Math.round(totalValue))} />
         <StatCard label="Sin stock" value={outOfStockCount} accent={outOfStockCount > 0} />
       </div>
 
@@ -205,7 +220,15 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
                     )}
                   </p>
                   <p className="font-mono text-[12px] text-muted">{g.productSlug}</p>
-                  <p className="text-[12px] text-muted">{g.kind}</p>
+                  <p className="text-[12px] text-muted">
+                    {g.kind}
+                    {g.baseSku && (
+                      <>
+                        {" "}
+                        · SKU <span className="font-mono">{g.baseSku}</span>
+                      </>
+                    )}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="label text-[11px] text-muted">Stock total</p>
@@ -223,6 +246,10 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
                   <p className="font-display text-xl text-espresso">
                     {g.price === null ? <span className="text-muted">—</span> : formatPrice(g.price)}
                   </p>
+                </div>
+                <div className="text-right">
+                  <p className="label text-[11px] text-muted">Valor</p>
+                  <p className="font-display text-xl text-espresso">{formatPrice(g.value)}</p>
                 </div>
               </div>
 
