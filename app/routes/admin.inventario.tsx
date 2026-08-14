@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Route } from "./+types/admin.inventario";
 import { requireAdmin } from "~/lib/session.server";
-import { listInventory, type InventoryRow } from "~/lib/admin-catalog.server";
+import { listInventory } from "~/lib/admin-catalog.server";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
@@ -14,55 +14,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   await requireAdmin(request);
   const rows = await listInventory();
   return { rows };
-}
-
-function csvEscape(value: string | number): string {
-  const s = String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-
-function downloadInventoryCsv(rows: InventoryRow[]) {
-  const headers = [
-    "Producto",
-    "Categoría",
-    "Tipo",
-    "Color",
-    "Talla",
-    "SKU",
-    "Stock",
-    "Precio",
-    "Precio anterior",
-    "Estado",
-    "Foto",
-  ];
-  const lines = [
-    headers.join(","),
-    ...rows.map((r) =>
-      [
-        csvEscape(r.productName),
-        csvEscape(r.category),
-        csvEscape(r.kind),
-        csvEscape(r.colorName),
-        csvEscape(r.size),
-        csvEscape(r.sku ?? ""),
-        csvEscape(r.stock),
-        csvEscape(r.price ?? ""),
-        csvEscape(r.compareAt ?? ""),
-        csvEscape(r.isDraft ? "Borrador" : "Publicado"),
-        csvEscape(r.photoUrl),
-      ].join(","),
-    ),
-  ];
-  // BOM UTF-8: sin esto, Excel abre acentos/ñ como caracteres corruptos.
-  const blob = new Blob(["﻿" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `inventario-kinara-${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
 }
 
 export default function AdminInventario({ loaderData }: Route.ComponentProps) {
@@ -117,13 +68,12 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
           </select>
         </div>
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => downloadInventoryCsv(filtered)}
+          <a
+            href={`/admin/inventario/excel?search=${encodeURIComponent(search)}&kind=${encodeURIComponent(kind)}`}
             className="btn btn-outline whitespace-nowrap px-5 py-2.5 text-[13px]"
           >
-            Descargar CSV
-          </button>
+            Descargar Excel
+          </a>
           <button
             type="button"
             onClick={() => window.print()}

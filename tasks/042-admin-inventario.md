@@ -67,3 +67,4 @@ Nueva página `/admin/inventario`, accesible desde el menú lateral, con una tab
 
 - 2026-08-12: Tarea creada e implementada en la misma sesión, a pedido explícito del usuario.
 - 2026-08-12 (ajuste): a pedido del usuario, se agregó el slug del producto debajo del nombre y se cambió el filtro/subtítulo de categoría por tipo (`kind`). Verificado con una cuenta de admin desechable: "NOVA TOP" muestra `daily-top` debajo del nombre y "Tipo: Top"; el filtro ahora dice "Todos los tipos".
+- 2026-08-13: el botón "Descargar CSV" fue reemplazado por un Excel real con fotos incrustadas — ver [tarea 043](043-inventario-excel-fotos.md). El CSV descrito en este archivo ya no existe en el código.
