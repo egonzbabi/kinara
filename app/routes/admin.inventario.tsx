@@ -122,7 +122,6 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
   const groups = useMemo(() => groupByProduct(filtered), [filtered]);
 
   const totalStock = filtered.reduce((n, r) => n + r.stock, 0);
-  const outOfStockCount = filtered.filter((r) => r.stock === 0).length;
   const totalValue = filtered.reduce((n, r) => n + (r.price ?? 0) * r.stock, 0);
 
   const inputClass =
@@ -139,12 +138,11 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
       </div>
 
       {/* Resumen */}
-      <div className="grid grid-cols-2 gap-3 print:hidden sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 print:hidden sm:grid-cols-4">
         <StatCard label="Productos" value={groups.length} />
         <StatCard label="SKUs (color+talla)" value={filtered.length} />
         <StatCard label="Unidades en stock" value={totalStock} />
         <StatCard label="Valor de inventario" value={formatPrice(Math.round(totalValue))} />
-        <StatCard label="Sin stock" value={outOfStockCount} accent={outOfStockCount > 0} />
       </div>
 
       <div className="flex flex-col gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
@@ -293,21 +291,17 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
                           const cell = c.sizes[s];
                           return (
                             <td key={s} className="px-3 py-2 text-center">
-                              {cell ? (
-                                <span
-                                  title={cell.sku ?? undefined}
-                                  className={cn(
-                                    "inline-flex min-w-8 justify-center rounded-md px-2 py-1 text-[13px] font-medium tabular-nums",
-                                    cell.stock === 0
-                                      ? "bg-clay/10 text-clay"
-                                      : "bg-sage/10 text-espresso",
-                                  )}
-                                >
-                                  {cell.stock}
-                                </span>
-                              ) : (
-                                <span className="text-[13px] text-line">—</span>
-                              )}
+                              <span
+                                title={cell?.sku ?? "Talla no disponible en este color"}
+                                className={cn(
+                                  "inline-flex min-w-8 justify-center rounded-md px-2 py-1 text-[13px] font-medium tabular-nums",
+                                  !cell || cell.stock === 0
+                                    ? "bg-clay/10 text-clay"
+                                    : "bg-sage/10 text-espresso",
+                                )}
+                              >
+                                {cell ? cell.stock : "—"}
+                              </span>
                             </td>
                           );
                         })}

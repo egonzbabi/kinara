@@ -88,5 +88,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 045 | [045-inventario-valuado-sku.md](045-inventario-valuado-sku.md) | done | Inventario: valuación de stock + SKU original visible y buscable |
 | 046 | [046-excel-inventario-merge-filas.md](046-excel-inventario-merge-filas.md) | done | Excel de inventario: reduce alto de fila y combina todas las columnas repetidas |
 | 047 | [047-excel-inventario-foto-nombre-original.md](047-excel-inventario-foto-nombre-original.md) | done | Excel de inventario: columna de foto más ancha + columna Nombre original |
+| 048 | [048-inventario-quita-tarjeta-sin-stock.md](048-inventario-quita-tarjeta-sin-stock.md) | done | Inventario: quitar la tarjeta "Sin stock" y unificar el color de celdas sin talla |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
