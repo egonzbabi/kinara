@@ -39,6 +39,7 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
   - NEWYORKLEGGIN (borrador): Cocoa, Gris, Marino — los 3 colores del producto, ninguno tiene foto.
   - SET ESSENTIAL (publicado): Ivory — 1 de 7 colores sin foto (los otros 6 sí tienen).
   - Todos los demás productos ya tienen foto genérica de respaldo (no hay ninguno mostrando el placeholder gris).
+- [ ] **Foto de proveedor duplicada entre dos productos distintos**: SOFT FLARE PANTS y ALLURE LEG PANTS usan cada uno su propia foto (archivos distintos en Storage), pero al compararlas visualmente son la misma foto de stock del proveedor (mismo modelo/pose/encuadre) — se ve como si fuera el mismo producto repetido dos veces. Conviene subir una foto propia real para al menos uno de los dos antes de lanzar, para que no parezcan el mismo artículo.
 
 ## Legal (recomendado, no implementado — confirmar con un contador/abogado)
 

@@ -88,8 +88,13 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   // Columnas que se combinan en un solo cuadro por producto — igual en cada
   // renglón (a diferencia de Color/Talla/SKU/Stock/Valor, que sí cambian).
   const MERGE_COLUMNS = ["A", "B", "C", "D", "E", "F", "L"] as const;
+  // Los títulos van alineados arriba (no al centro) para que coincidan con
+  // la foto, que también se ancla cerca del borde superior del bloque — en
+  // productos con muchos colores/tallas, centrar el texto lo dejaba muy por
+  // debajo de la foto.
+  const topCenter = { vertical: "top" as const, horizontal: "center" as const };
+  const topLeft = { vertical: "top" as const, horizontal: "left" as const };
   const middleCenter = { vertical: "middle" as const, horizontal: "center" as const };
-  const middleLeft = { vertical: "middle" as const, horizontal: "left" as const };
 
   let currentRow = 2;
   let totalValue = 0;
@@ -132,21 +137,21 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     }
 
     sheet.getCell(`B${startRow}`).value = baseSku(group);
-    sheet.getCell(`B${startRow}`).alignment = middleCenter;
+    sheet.getCell(`B${startRow}`).alignment = topCenter;
     sheet.getCell(`C${startRow}`).value = first.productName;
-    sheet.getCell(`C${startRow}`).alignment = middleLeft;
+    sheet.getCell(`C${startRow}`).alignment = topLeft;
     // "Nombre original" = el slug (campo URL) del producto — a veces conserva
     // el nombre anterior si el producto se renombró (ver tarea 042).
     sheet.getCell(`D${startRow}`).value = first.productSlug;
-    sheet.getCell(`D${startRow}`).alignment = middleLeft;
+    sheet.getCell(`D${startRow}`).alignment = topLeft;
     sheet.getCell(`E${startRow}`).value = first.kind;
-    sheet.getCell(`E${startRow}`).alignment = middleCenter;
+    sheet.getCell(`E${startRow}`).alignment = topCenter;
     sheet.getCell(`F${startRow}`).value = first.price ?? "";
-    sheet.getCell(`F${startRow}`).alignment = middleCenter;
+    sheet.getCell(`F${startRow}`).alignment = topCenter;
     // "Publicado" = el producto está visible y a la venta en /tienda;
     // "Borrador" = todavía no (normalmente porque le falta precio).
     sheet.getCell(`L${startRow}`).value = first.isDraft ? "Borrador" : "Publicado";
-    sheet.getCell(`L${startRow}`).alignment = middleCenter;
+    sheet.getCell(`L${startRow}`).alignment = topCenter;
 
     const photo = photos[i];
     if (photo) {
