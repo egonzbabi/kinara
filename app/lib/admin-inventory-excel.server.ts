@@ -80,6 +80,8 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   const photos = await Promise.all(groups.map((group) => fetchImage(group[0].photoUrl)));
 
   const ROW_HEIGHT = 30;
+  const PHOTO_WIDTH = 80;
+  const PHOTO_HEIGHT = 100;
   // Columnas que se combinan en un solo cuadro por producto — igual en cada
   // renglón (a diferencia de Color/Talla/SKU/Stock/Valor, que sí cambian).
   const MERGE_COLUMNS = ["A", "B", "C", "D", "E", "F", "L"] as const;
@@ -152,7 +154,16 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
         buffer: photo.buffer,
         extension: photo.extension,
       } as unknown as ExcelJS.Image);
-      sheet.addImage(imageId, `A${startRow}:A${endRow}`);
+      // Tamaño fijo para todas las fotos (no se estira para llenar la celda
+      // combinada) — así un producto con muchos colores/tallas no se ve más
+      // grande que uno con pocos. Se ancla en la esquina superior de su
+      // bloque; si el bloque es más bajo que la foto, puede asomarse un poco
+      // sobre las filas de abajo (comportamiento normal de imágenes flotantes
+      // en Excel), pero nunca se deforma.
+      sheet.addImage(imageId, {
+        tl: { col: 0, row: startRow - 1 },
+        ext: { width: PHOTO_WIDTH, height: PHOTO_HEIGHT },
+      } as ExcelJS.ImagePosition);
     }
   });
 
