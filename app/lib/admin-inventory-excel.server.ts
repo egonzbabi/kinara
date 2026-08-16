@@ -57,9 +57,10 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   });
 
   sheet.columns = [
-    { header: "Foto", key: "foto", width: 14 },
+    { header: "Foto", key: "foto", width: 26 },
     { header: "SKU original", key: "skuOriginal", width: 16 },
     { header: "Producto", key: "producto", width: 28 },
+    { header: "Nombre original", key: "nombreOriginal", width: 20 },
     { header: "Tipo", key: "tipo", width: 14 },
     { header: "Color", key: "color", width: 14 },
     { header: "Talla", key: "talla", width: 8 },
@@ -78,10 +79,10 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   // número de colores/tallas).
   const photos = await Promise.all(groups.map((group) => fetchImage(group[0].photoUrl)));
 
-  const ROW_HEIGHT = 24;
+  const ROW_HEIGHT = 30;
   // Columnas que se combinan en un solo cuadro por producto — igual en cada
   // renglón (a diferencia de Color/Talla/SKU/Stock/Valor, que sí cambian).
-  const MERGE_COLUMNS = ["A", "B", "C", "D", "I", "K"] as const;
+  const MERGE_COLUMNS = ["A", "B", "C", "D", "E", "J", "L"] as const;
 
   let currentRow = 2;
   let totalValue = 0;
@@ -93,6 +94,7 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
       sheet.addRow({
         skuOriginal: "",
         producto: "",
+        nombreOriginal: "",
         tipo: "",
         color: r.colorName,
         talla: r.size,
@@ -118,12 +120,16 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     sheet.getCell(`B${startRow}`).alignment = middleCenter;
     sheet.getCell(`C${startRow}`).value = first.productName;
     sheet.getCell(`C${startRow}`).alignment = middleLeft;
-    sheet.getCell(`D${startRow}`).value = first.kind;
-    sheet.getCell(`D${startRow}`).alignment = middleCenter;
-    sheet.getCell(`I${startRow}`).value = first.price ?? "";
-    sheet.getCell(`I${startRow}`).alignment = middleCenter;
-    sheet.getCell(`K${startRow}`).value = first.isDraft ? "Borrador" : "Publicado";
-    sheet.getCell(`K${startRow}`).alignment = middleCenter;
+    // "Nombre original" = el slug (campo URL) del producto — a veces conserva
+    // el nombre anterior si el producto se renombró (ver tarea 042).
+    sheet.getCell(`D${startRow}`).value = first.productSlug;
+    sheet.getCell(`D${startRow}`).alignment = middleLeft;
+    sheet.getCell(`E${startRow}`).value = first.kind;
+    sheet.getCell(`E${startRow}`).alignment = middleCenter;
+    sheet.getCell(`J${startRow}`).value = first.price ?? "";
+    sheet.getCell(`J${startRow}`).alignment = middleCenter;
+    sheet.getCell(`L${startRow}`).value = first.isDraft ? "Borrador" : "Publicado";
+    sheet.getCell(`L${startRow}`).alignment = middleCenter;
 
     const photo = photos[i];
     if (photo) {
