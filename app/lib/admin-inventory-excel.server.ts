@@ -78,6 +78,11 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   // número de colores/tallas).
   const photos = await Promise.all(groups.map((group) => fetchImage(group[0].photoUrl)));
 
+  const ROW_HEIGHT = 24;
+  // Columnas que se combinan en un solo cuadro por producto — igual en cada
+  // renglón (a diferencia de Color/Talla/SKU/Stock/Valor, que sí cambian).
+  const MERGE_COLUMNS = ["A", "B", "C", "D", "I", "K"] as const;
+
   let currentRow = 2;
   let totalValue = 0;
   groups.forEach((group, i) => {
@@ -87,28 +92,38 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
       totalValue += value;
       sheet.addRow({
         skuOriginal: "",
-        producto: r.productName,
-        tipo: r.kind,
+        producto: "",
+        tipo: "",
         color: r.colorName,
         talla: r.size,
         sku: r.sku ?? "",
         stock: r.stock,
-        precio: r.price ?? "",
+        precio: "",
         valor: value,
-        estado: r.isDraft ? "Borrador" : "Publicado",
+        estado: "",
       });
-      sheet.getRow(currentRow).height = 60;
+      sheet.getRow(currentRow).height = ROW_HEIGHT;
       currentRow++;
     }
     const endRow = currentRow - 1;
+    const first = group[0];
 
     if (endRow > startRow) {
-      sheet.mergeCells(`A${startRow}:A${endRow}`);
-      sheet.mergeCells(`B${startRow}:B${endRow}`);
+      for (const col of MERGE_COLUMNS) sheet.mergeCells(`${col}${startRow}:${col}${endRow}`);
     }
-    const skuCell = sheet.getCell(`B${startRow}`);
-    skuCell.value = baseSku(group);
-    skuCell.alignment = { vertical: "middle", horizontal: "center" };
+    const middleCenter = { vertical: "middle" as const, horizontal: "center" as const };
+    const middleLeft = { vertical: "middle" as const, horizontal: "left" as const };
+
+    sheet.getCell(`B${startRow}`).value = baseSku(group);
+    sheet.getCell(`B${startRow}`).alignment = middleCenter;
+    sheet.getCell(`C${startRow}`).value = first.productName;
+    sheet.getCell(`C${startRow}`).alignment = middleLeft;
+    sheet.getCell(`D${startRow}`).value = first.kind;
+    sheet.getCell(`D${startRow}`).alignment = middleCenter;
+    sheet.getCell(`I${startRow}`).value = first.price ?? "";
+    sheet.getCell(`I${startRow}`).alignment = middleCenter;
+    sheet.getCell(`K${startRow}`).value = first.isDraft ? "Borrador" : "Publicado";
+    sheet.getCell(`K${startRow}`).alignment = middleCenter;
 
     const photo = photos[i];
     if (photo) {

@@ -86,5 +86,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 043 | [043-inventario-excel-fotos.md](043-inventario-excel-fotos.md) | done | Inventario: descarga en Excel real con fotos y celdas combinadas |
 | 044 | [044-inventario-rediseno.md](044-inventario-rediseno.md) | done | Rediseño de /admin/inventario: tarjetas de resumen + agrupado por producto |
 | 045 | [045-inventario-valuado-sku.md](045-inventario-valuado-sku.md) | done | Inventario: valuación de stock + SKU original visible y buscable |
+| 046 | [046-excel-inventario-merge-filas.md](046-excel-inventario-merge-filas.md) | done | Excel de inventario: reduce alto de fila y combina todas las columnas repetidas |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
