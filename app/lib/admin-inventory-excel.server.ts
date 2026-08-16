@@ -62,11 +62,11 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     { header: "Producto", key: "producto", width: 28 },
     { header: "Nombre original", key: "nombreOriginal", width: 20 },
     { header: "Tipo", key: "tipo", width: 14 },
+    { header: "Precio", key: "precio", width: 12 },
     { header: "Color", key: "color", width: 14 },
     { header: "Talla", key: "talla", width: 8 },
     { header: "SKU", key: "sku", width: 20 },
     { header: "Stock", key: "stock", width: 10 },
-    { header: "Precio", key: "precio", width: 12 },
     { header: "Valor (stock × precio)", key: "valor", width: 18 },
     { header: "Estado", key: "estado", width: 12 },
   ];
@@ -82,13 +82,18 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   const ROW_HEIGHT = 30;
   // Columnas que se combinan en un solo cuadro por producto — igual en cada
   // renglón (a diferencia de Color/Talla/SKU/Stock/Valor, que sí cambian).
-  const MERGE_COLUMNS = ["A", "B", "C", "D", "E", "J", "L"] as const;
+  const MERGE_COLUMNS = ["A", "B", "C", "D", "E", "F", "L"] as const;
+  const middleCenter = { vertical: "middle" as const, horizontal: "center" as const };
+  const middleLeft = { vertical: "middle" as const, horizontal: "left" as const };
 
   let currentRow = 2;
   let totalValue = 0;
   groups.forEach((group, i) => {
     const startRow = currentRow;
-    for (const r of group) {
+    // Dentro de cada producto, las filas de un mismo color (una por talla)
+    // también se combinan en un solo cuadro en la columna Color.
+    let colorStart = currentRow;
+    for (const [idx, r] of group.entries()) {
       const value = (r.price ?? 0) * r.stock;
       totalValue += value;
       sheet.addRow({
@@ -96,15 +101,22 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
         producto: "",
         nombreOriginal: "",
         tipo: "",
-        color: r.colorName,
+        precio: "",
+        color: idx === 0 || r.colorName !== group[idx - 1].colorName ? r.colorName : "",
         talla: r.size,
         sku: r.sku ?? "",
         stock: r.stock,
-        precio: "",
         valor: value,
         estado: "",
       });
       sheet.getRow(currentRow).height = ROW_HEIGHT;
+
+      const isLastOfColor = idx === group.length - 1 || group[idx + 1].colorName !== r.colorName;
+      if (isLastOfColor) {
+        if (currentRow > colorStart) sheet.mergeCells(`G${colorStart}:G${currentRow}`);
+        sheet.getCell(`G${colorStart}`).alignment = middleCenter;
+        colorStart = currentRow + 1;
+      }
       currentRow++;
     }
     const endRow = currentRow - 1;
@@ -113,8 +125,6 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     if (endRow > startRow) {
       for (const col of MERGE_COLUMNS) sheet.mergeCells(`${col}${startRow}:${col}${endRow}`);
     }
-    const middleCenter = { vertical: "middle" as const, horizontal: "center" as const };
-    const middleLeft = { vertical: "middle" as const, horizontal: "left" as const };
 
     sheet.getCell(`B${startRow}`).value = baseSku(group);
     sheet.getCell(`B${startRow}`).alignment = middleCenter;
@@ -126,8 +136,10 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     sheet.getCell(`D${startRow}`).alignment = middleLeft;
     sheet.getCell(`E${startRow}`).value = first.kind;
     sheet.getCell(`E${startRow}`).alignment = middleCenter;
-    sheet.getCell(`J${startRow}`).value = first.price ?? "";
-    sheet.getCell(`J${startRow}`).alignment = middleCenter;
+    sheet.getCell(`F${startRow}`).value = first.price ?? "";
+    sheet.getCell(`F${startRow}`).alignment = middleCenter;
+    // "Publicado" = el producto está visible y a la venta en /tienda;
+    // "Borrador" = todavía no (normalmente porque le falta precio).
     sheet.getCell(`L${startRow}`).value = first.isDraft ? "Borrador" : "Publicado";
     sheet.getCell(`L${startRow}`).alignment = middleCenter;
 
