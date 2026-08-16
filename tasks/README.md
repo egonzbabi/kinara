@@ -91,5 +91,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 048 | [048-inventario-quita-tarjeta-sin-stock.md](048-inventario-quita-tarjeta-sin-stock.md) | done | Inventario: quitar la tarjeta "Sin stock" y unificar el color de celdas sin talla |
 | 049 | [049-excel-inventario-precio-color-merge.md](049-excel-inventario-precio-color-merge.md) | done | Excel de inventario: mueve Precio junto a Color y combina filas por color |
 | 050 | [050-excel-inventario-foto-tamano-fijo.md](050-excel-inventario-foto-tamano-fijo.md) | done | Excel de inventario: fotos de tamaño fijo (ya no se estiran a la celda) |
+| 051 | [051-excel-inventario-foto-margen-superior.md](051-excel-inventario-foto-margen-superior.md) | done | Excel de inventario: margen superior en la foto para que no se encime con el producto de arriba |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

@@ -79,9 +79,12 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   // número de colores/tallas).
   const photos = await Promise.all(groups.map((group) => fetchImage(group[0].photoUrl)));
 
-  const ROW_HEIGHT = 30;
+  const ROW_HEIGHT = 30; // puntos
   const PHOTO_WIDTH = 80;
   const PHOTO_HEIGHT = 100;
+  const PT_PER_PX = 0.75; // 1px = 0.75pt (96dpi)
+  const PHOTO_TOP_OFFSET_PX = 12; // margen para que no toque el borde de arriba
+  const PHOTO_TOP_OFFSET_FRACTION = (PHOTO_TOP_OFFSET_PX * PT_PER_PX) / ROW_HEIGHT;
   // Columnas que se combinan en un solo cuadro por producto — igual en cada
   // renglón (a diferencia de Color/Talla/SKU/Stock/Valor, que sí cambian).
   const MERGE_COLUMNS = ["A", "B", "C", "D", "E", "F", "L"] as const;
@@ -156,14 +159,17 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
       } as unknown as ExcelJS.Image);
       // Tamaño fijo para todas las fotos (no se estira para llenar la celda
       // combinada) — así un producto con muchos colores/tallas no se ve más
-      // grande que uno con pocos. Se ancla en la esquina superior de su
-      // bloque; si el bloque es más bajo que la foto, puede asomarse un poco
-      // sobre las filas de abajo (comportamiento normal de imágenes flotantes
-      // en Excel), pero nunca se deforma.
+      // grande que uno con pocos. `row` acepta un valor fraccionario: la
+      // parte entera es la fila donde empieza, la parte decimal es qué tan
+      // abajo de esa fila arranca la imagen (como fracción de su alto) — se
+      // usa para bajarla un poco y que no quede pegada al borde de arriba,
+      // encimada con el producto anterior. Si el bloque es más bajo que la
+      // foto, puede asomarse un poco sobre las filas de abajo (comportamiento
+      // normal de imágenes flotantes en Excel), pero nunca se deforma.
       sheet.addImage(imageId, {
-        tl: { col: 0, row: startRow - 1 },
+        tl: { col: 0, row: startRow - 1 + PHOTO_TOP_OFFSET_FRACTION },
         ext: { width: PHOTO_WIDTH, height: PHOTO_HEIGHT },
-      } as ExcelJS.ImagePosition);
+      });
     }
   });
 
