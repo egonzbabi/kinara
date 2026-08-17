@@ -93,5 +93,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 050 | [050-excel-inventario-foto-tamano-fijo.md](050-excel-inventario-foto-tamano-fijo.md) | done | Excel de inventario: fotos de tamaño fijo (ya no se estiran a la celda) |
 | 051 | [051-excel-inventario-foto-margen-superior.md](051-excel-inventario-foto-margen-superior.md) | done | Excel de inventario: margen superior en la foto para que no se encime con el producto de arriba |
 | 052 | [052-excel-inventario-alinear-titulos-arriba.md](052-excel-inventario-alinear-titulos-arriba.md) | done | Excel de inventario: alinear los títulos arriba, con la foto |
+| 053 | [053-excel-inventario-impresion-titulo-anchos.md](053-excel-inventario-impresion-titulo-anchos.md) | done | Excel de inventario: título con fecha/hora, columnas auto-ajustadas, impresión en una página |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

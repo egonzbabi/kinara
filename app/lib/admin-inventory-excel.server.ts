@@ -47,30 +47,86 @@ function groupByProduct(rows: InventoryRow[]): InventoryRow[][] {
   return groups;
 }
 
+// Ancho de columna Excel ≈ caracteres + relleno, acotado a un mínimo/máximo
+// por columna para que ninguna quede ilegible ni desmedida.
+const COLUMN_BOUNDS = {
+  skuOriginal: [10, 18],
+  producto: [12, 30],
+  nombreOriginal: [12, 26],
+  tipo: [8, 16],
+  precio: [8, 12],
+  color: [8, 18],
+  talla: [7, 8],
+  sku: [12, 22],
+  stock: [7, 9],
+  valor: [10, 24],
+  estado: [9, 12],
+} as const;
+
+const HEADERS: Record<keyof typeof COLUMN_BOUNDS, string> = {
+  skuOriginal: "SKU original",
+  producto: "Producto",
+  nombreOriginal: "Nombre original",
+  tipo: "Tipo",
+  precio: "Precio",
+  color: "Color",
+  talla: "Talla",
+  sku: "SKU",
+  stock: "Stock",
+  valor: "Valor (stock × precio)",
+  estado: "Estado",
+};
+
+const FOTO_COLUMN_WIDTH = 13; // fija — la foto no tiene texto que medir, se pidió que fuera más chica
+
 export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "KINARA Admin";
   workbook.created = new Date();
 
   const sheet = workbook.addWorksheet("Inventario", {
-    views: [{ state: "frozen", ySplit: 1 }],
+    views: [{ state: "frozen", ySplit: 3 }],
   });
 
-  sheet.columns = [
-    { header: "Foto", key: "foto", width: 26 },
-    { header: "SKU original", key: "skuOriginal", width: 16 },
-    { header: "Producto", key: "producto", width: 28 },
-    { header: "Nombre original", key: "nombreOriginal", width: 20 },
-    { header: "Tipo", key: "tipo", width: 14 },
-    { header: "Precio", key: "precio", width: 12 },
-    { header: "Color", key: "color", width: 14 },
-    { header: "Talla", key: "talla", width: 8 },
-    { header: "SKU", key: "sku", width: 20 },
-    { header: "Stock", key: "stock", width: 10 },
-    { header: "Valor (stock × precio)", key: "valor", width: 18 },
-    { header: "Estado", key: "estado", width: 12 },
-  ];
-  sheet.getRow(1).font = { bold: true };
+  const columnKeys = ["foto", ...Object.keys(HEADERS)] as ("foto" | keyof typeof COLUMN_BOUNDS)[];
+  sheet.columns = columnKeys.map((key) => ({ key, width: key === "foto" ? FOTO_COLUMN_WIDTH : 10 }));
+
+  // Impresión: horizontal, que quepa en el ancho de una página (el alto
+  // queda libre — con cientos de filas no cabe todo en una sola hoja de
+  // papel, pero nunca se corta una columna a la mitad). Las primeras 3
+  // filas (título, fecha de emisión, encabezados) se repiten en cada
+  // página impresa.
+  sheet.pageSetup = {
+    orientation: "landscape",
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+    printTitlesRow: "1:3",
+    margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
+  };
+
+  // Título + fecha/hora de emisión, combinados sobre todas las columnas.
+  const now = new Date();
+  const emittedAt = new Intl.DateTimeFormat("es-MX", {
+    dateStyle: "long",
+    timeStyle: "short",
+  }).format(now);
+  sheet.mergeCells(1, 1, 1, columnKeys.length);
+  const titleCell = sheet.getCell(1, 1);
+  titleCell.value = "Inventario KINARA";
+  titleCell.font = { bold: true, size: 16 };
+  sheet.getRow(1).height = 24;
+
+  sheet.mergeCells(2, 1, 2, columnKeys.length);
+  const dateCell = sheet.getCell(2, 1);
+  dateCell.value = `Fecha de emisión: ${emittedAt}`;
+  dateCell.font = { italic: true, color: { argb: "FF6F6457" } };
+  sheet.getRow(2).height = 16;
+
+  const headerRow = sheet.addRow(["Foto", ...Object.values(HEADERS)]);
+  headerRow.font = { bold: true };
+  headerRow.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
+  headerRow.height = 30;
 
   const groups = groupByProduct(rows);
 
@@ -96,7 +152,17 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   const topLeft = { vertical: "top" as const, horizontal: "left" as const };
   const middleCenter = { vertical: "middle" as const, horizontal: "center" as const };
 
-  let currentRow = 2;
+  // Ancho de cada columna según el texto más largo que le tocó mostrar
+  // (arranca en el largo del encabezado, que también cuenta).
+  const colMaxLen: Record<keyof typeof COLUMN_BOUNDS, number> = Object.fromEntries(
+    Object.entries(HEADERS).map(([key, label]) => [key, label.length]),
+  ) as Record<keyof typeof COLUMN_BOUNDS, number>;
+  const track = (key: keyof typeof COLUMN_BOUNDS, value: unknown) => {
+    const len = String(value ?? "").length;
+    if (len > colMaxLen[key]) colMaxLen[key] = len;
+  };
+
+  let currentRow = 4;
   let totalValue = 0;
   groups.forEach((group, i) => {
     const startRow = currentRow;
@@ -106,13 +172,14 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     for (const [idx, r] of group.entries()) {
       const value = (r.price ?? 0) * r.stock;
       totalValue += value;
+      const colorCell = idx === 0 || r.colorName !== group[idx - 1].colorName ? r.colorName : "";
       sheet.addRow({
         skuOriginal: "",
         producto: "",
         nombreOriginal: "",
         tipo: "",
         precio: "",
-        color: idx === 0 || r.colorName !== group[idx - 1].colorName ? r.colorName : "",
+        color: colorCell,
         talla: r.size,
         sku: r.sku ?? "",
         stock: r.stock,
@@ -120,6 +187,11 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
         estado: "",
       });
       sheet.getRow(currentRow).height = ROW_HEIGHT;
+      if (colorCell) track("color", colorCell);
+      track("talla", r.size);
+      track("sku", r.sku ?? "");
+      track("stock", r.stock);
+      track("valor", Math.round(value));
 
       const isLastOfColor = idx === group.length - 1 || group[idx + 1].colorName !== r.colorName;
       if (isLastOfColor) {
@@ -136,7 +208,8 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
       for (const col of MERGE_COLUMNS) sheet.mergeCells(`${col}${startRow}:${col}${endRow}`);
     }
 
-    sheet.getCell(`B${startRow}`).value = baseSku(group);
+    const skuOriginalValue = baseSku(group);
+    sheet.getCell(`B${startRow}`).value = skuOriginalValue;
     sheet.getCell(`B${startRow}`).alignment = topCenter;
     sheet.getCell(`C${startRow}`).value = first.productName;
     sheet.getCell(`C${startRow}`).alignment = topLeft;
@@ -150,8 +223,16 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     sheet.getCell(`F${startRow}`).alignment = topCenter;
     // "Publicado" = el producto está visible y a la venta en /tienda;
     // "Borrador" = todavía no (normalmente porque le falta precio).
-    sheet.getCell(`L${startRow}`).value = first.isDraft ? "Borrador" : "Publicado";
+    const estadoValue = first.isDraft ? "Borrador" : "Publicado";
+    sheet.getCell(`L${startRow}`).value = estadoValue;
     sheet.getCell(`L${startRow}`).alignment = topCenter;
+
+    track("skuOriginal", skuOriginalValue);
+    track("producto", first.productName);
+    track("nombreOriginal", first.productSlug);
+    track("tipo", first.kind);
+    track("precio", first.price ?? "");
+    track("estado", estadoValue);
 
     const photo = photos[i];
     if (photo) {
@@ -180,6 +261,15 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
 
   const totalRow = sheet.addRow({ producto: "Valor total del inventario", valor: totalValue });
   totalRow.font = { bold: true };
+  track("producto", "Valor total del inventario");
+  track("valor", Math.round(totalValue));
+
+  // Aplica el ancho calculado por columna (largo del contenido + relleno,
+  // acotado por COLUMN_BOUNDS) — la de Foto se deja fija más chica.
+  for (const [key, [min, max]] of Object.entries(COLUMN_BOUNDS)) {
+    const width = Math.min(max, Math.max(min, colMaxLen[key as keyof typeof COLUMN_BOUNDS] + 2));
+    sheet.getColumn(key).width = width;
+  }
 
   return workbook.xlsx.writeBuffer() as unknown as Promise<Buffer>;
 }
