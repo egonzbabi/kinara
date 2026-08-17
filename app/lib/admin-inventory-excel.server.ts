@@ -91,6 +91,11 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   const columnKeys = ["foto", ...Object.keys(HEADERS)] as ("foto" | keyof typeof COLUMN_BOUNDS)[];
   sheet.columns = columnKeys.map((key) => ({ key, width: key === "foto" ? FOTO_COLUMN_WIDTH : 10 }));
 
+  // Precio y Valor como moneda con 2 decimales fijos (ej. "$390.00").
+  const CURRENCY_FORMAT = '"$"#,##0.00';
+  sheet.getColumn("precio").numFmt = CURRENCY_FORMAT;
+  sheet.getColumn("valor").numFmt = CURRENCY_FORMAT;
+
   // Impresión: horizontal, que quepa en el ancho de una página (el alto
   // queda libre — con cientos de filas no cabe todo en una sola hoja de
   // papel, pero nunca se corta una columna a la mitad). Las primeras 3

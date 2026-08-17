@@ -95,5 +95,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 052 | [052-excel-inventario-alinear-titulos-arriba.md](052-excel-inventario-alinear-titulos-arriba.md) | done | Excel de inventario: alinear los títulos arriba, con la foto |
 | 053 | [053-excel-inventario-impresion-titulo-anchos.md](053-excel-inventario-impresion-titulo-anchos.md) | done | Excel de inventario: título con fecha/hora, columnas auto-ajustadas, impresión en una página |
 | 054 | [054-excel-inventario-rayas-numero-pagina.md](054-excel-inventario-rayas-numero-pagina.md) | done | Excel de inventario: rayas tenues en todos los renglones + número de página en el pie de impresión |
+| 055 | [055-excel-inventario-formato-moneda.md](055-excel-inventario-formato-moneda.md) | done | Excel de inventario: Precio y Valor con formato de moneda (2 decimales) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
