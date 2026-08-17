@@ -104,6 +104,8 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     printTitlesRow: "1:3",
     margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
   };
+  // Número de página en el pie de cada hoja impresa (ej. "Página 2 de 5").
+  sheet.headerFooter = { oddFooter: "&CPágina &P de &N", evenFooter: "&CPágina &P de &N" };
 
   // Título + fecha/hora de emisión, combinados sobre todas las columnas.
   const now = new Date();
@@ -269,6 +271,24 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   for (const [key, [min, max]] of Object.entries(COLUMN_BOUNDS)) {
     const width = Math.min(max, Math.max(min, colMaxLen[key as keyof typeof COLUMN_BOUNDS] + 2));
     sheet.getColumn(key).width = width;
+  }
+
+  // Rayas tenues en todos los renglones (encabezado, datos y total) — en las
+  // columnas combinadas por producto (Foto/SKU original/Producto/Nombre
+  // original/Tipo/Precio/Estado) esto dibuja el marco de todo el bloque, no
+  // líneas internas falsas entre renglones que en realidad son un solo dato.
+  const thinLightBorder: ExcelJS.Border = { style: "thin", color: { argb: "FFD9D9D9" } };
+  const gridBorder: Partial<ExcelJS.Borders> = {
+    top: thinLightBorder,
+    left: thinLightBorder,
+    bottom: thinLightBorder,
+    right: thinLightBorder,
+  };
+  for (let r = 3; r <= sheet.lastRow!.number; r++) {
+    const row = sheet.getRow(r);
+    for (let c = 1; c <= columnKeys.length; c++) {
+      row.getCell(c).border = gridBorder;
+    }
   }
 
   return workbook.xlsx.writeBuffer() as unknown as Promise<Buffer>;
