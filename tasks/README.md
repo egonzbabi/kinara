@@ -98,5 +98,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 055 | [055-excel-inventario-formato-moneda.md](055-excel-inventario-formato-moneda.md) | done | Excel de inventario: Precio y Valor con formato de moneda (2 decimales) |
 | 056 | [056-excel-inventario-pagina-sin-total.md](056-excel-inventario-pagina-sin-total.md) | done | Excel de inventario: pie de página solo con "Página X" (sin total, por limitación de Google Sheets) |
 | 057 | [057-excel-inventario-fecha-zona-horaria-mexico.md](057-excel-inventario-fecha-zona-horaria-mexico.md) | done | Excel de inventario: fecha usa hora de México, no UTC del servidor (bug de nombre de archivo adelantado un día) |
+| 058 | [058-tallas-reducidas-por-producto.md](058-tallas-reducidas-por-producto.md) | done | Leyenda "Tallas reducidas" pasa a ser opción por producto en el admin (default prendida) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

@@ -31,6 +31,7 @@ export async function action({ request }: Route.ActionArgs) {
     isNew: form.get("isNew") === "on",
     isBestseller: form.get("isBestseller") === "on",
     isOnSale: form.get("isOnSale") === "on",
+    showReducedSizesNotice: form.get("showReducedSizesNotice") === "on",
     colors: JSON.parse(String(form.get("colors_json") || "[]")),
     gallery: JSON.parse(String(form.get("gallery_json") || "[]")),
   };

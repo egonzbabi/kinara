@@ -27,6 +27,8 @@ export type AdminProductInput = {
   isNew: boolean;
   isBestseller: boolean;
   isOnSale: boolean;
+  /** Muestra la leyenda "· Tallas reducidas" junto a "Talla" en el detalle público. Default true. */
+  showReducedSizesNotice: boolean;
   colors: AdminColorInput[];
   gallery: string[];
 };
@@ -58,6 +60,7 @@ type ProductRow = {
   is_new: boolean;
   is_bestseller: boolean;
   is_on_sale: boolean;
+  show_reduced_sizes_notice: boolean;
   product_variants: {
     color_name: string;
     color_hex: string | null;
@@ -220,6 +223,7 @@ export async function getAdminProductById(id: string): Promise<AdminProductInput
     isNew: row.is_new,
     isBestseller: row.is_bestseller,
     isOnSale: row.is_on_sale,
+    showReducedSizesNotice: row.show_reduced_sizes_notice,
     colors: colorOrder.map((name) => colorsByName.get(name)!),
     gallery,
   };
@@ -312,6 +316,7 @@ export async function createProduct(input: AdminProductInput): Promise<string> {
     is_new: input.isNew,
     is_bestseller: input.isBestseller,
     is_on_sale: input.isOnSale,
+    show_reduced_sizes_notice: input.showReducedSizesNotice,
     is_draft: false,
   });
   if (insertError) throw new Error(`No se pudo crear el producto: ${insertError.message}`);
@@ -352,6 +357,7 @@ export async function updateProduct(id: string, input: AdminProductInput): Promi
       is_new: input.isNew,
       is_bestseller: input.isBestseller,
       is_on_sale: input.isOnSale,
+      show_reduced_sizes_notice: input.showReducedSizesNotice,
       is_draft: false,
     })
     .eq("id", id);

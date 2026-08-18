@@ -16,6 +16,7 @@ export type Database = {
           is_new: boolean;
           is_bestseller: boolean;
           is_on_sale: boolean;
+          show_reduced_sizes_notice: boolean;
           is_draft: boolean;
           created_at: string;
         };

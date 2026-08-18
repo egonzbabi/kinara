@@ -75,6 +75,11 @@ export function ProductForm({ product, productId, error }: Props) {
   const [isNew, setIsNew] = useState(product?.isNew ?? false);
   const [isBestseller, setIsBestseller] = useState(product?.isBestseller ?? false);
   const [isOnSale, setIsOnSale] = useState(product?.isOnSale ?? false);
+  // Prendida por default en todos los productos (nuevos y ya existentes) — se
+  // apaga caso por caso desde aquí.
+  const [showReducedSizesNotice, setShowReducedSizesNotice] = useState(
+    product?.showReducedSizesNotice ?? true,
+  );
   // La casilla marcada ES la etiqueta que se ve sobre la foto — un solo dato, no tres
   // campos separados. Si se marca más de una, gana en este orden: Nuevo, Best-seller, Oferta.
   const badge = isNew ? "Nuevo" : isBestseller ? "Best-seller" : isOnSale ? "Oferta" : "";
@@ -354,6 +359,21 @@ export function ProductForm({ product, productId, error }: Props) {
                 </p>
               </div>
             </div>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="flex items-center gap-2 text-sm text-espresso">
+              <input
+                type="checkbox"
+                name="showReducedSizesNotice"
+                checked={showReducedSizesNotice}
+                onChange={(e) => setShowReducedSizesNotice(e.target.checked)}
+              />
+              Mostrar leyenda "Tallas reducidas"
+            </label>
+            <p className="ml-6 text-xs text-muted">
+              Prendida por default en todos los productos. Aparece junto a "Talla" en el
+              detalle del producto — apágala aquí para los productos que no la necesiten.
+            </p>
           </div>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">

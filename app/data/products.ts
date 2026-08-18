@@ -26,6 +26,8 @@ export type Product = {
   isNew?: boolean;
   isBestseller?: boolean;
   isOnSale?: boolean;
+  /** Muestra la leyenda "· Tallas reducidas" junto a "Talla" en el detalle. Default true (ver tasks/058). */
+  showReducedSizesNotice?: boolean;
   description: string;
   materials: string;
 };

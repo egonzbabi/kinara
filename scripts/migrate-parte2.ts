@@ -54,6 +54,7 @@ async function main() {
         is_new: false,
         is_bestseller: false,
         is_on_sale: false,
+        show_reduced_sizes_notice: true,
         is_draft: true,
       });
       if (productError) throw new Error(`Insert products falló para ${p.name}: ${productError.message}`);
