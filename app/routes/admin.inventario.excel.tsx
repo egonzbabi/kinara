@@ -21,7 +21,15 @@ export async function loader({ request }: Route.LoaderArgs) {
   });
 
   const buffer = await buildInventoryExcel(rows);
-  const filename = `inventario-kinara-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  // Fecha en hora de México, no UTC (el servidor corre en UTC en Vercel) —
+  // si no, el nombre del archivo puede mostrar el día siguiente.
+  const todayMx = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const filename = `inventario-kinara-${todayMx}.xlsx`;
 
   return new Response(new Uint8Array(buffer), {
     headers: {

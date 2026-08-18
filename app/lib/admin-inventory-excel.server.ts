@@ -115,10 +115,13 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   sheet.headerFooter = { oddFooter: "&CPágina &P", evenFooter: "&CPágina &P" };
 
   // Título + fecha/hora de emisión, combinados sobre todas las columnas.
+  // Zona horaria fija de México (no la del servidor: en Vercel corre en UTC,
+  // y usar la hora del sistema desfasaba la fecha/hora hasta por 6 horas).
   const now = new Date();
   const emittedAt = new Intl.DateTimeFormat("es-MX", {
     dateStyle: "long",
     timeStyle: "short",
+    timeZone: "America/Mexico_City",
   }).format(now);
   sheet.mergeCells(1, 1, 1, columnKeys.length);
   const titleCell = sheet.getCell(1, 1);
