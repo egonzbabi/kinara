@@ -1,7 +1,11 @@
-const MESSAGES = [
-  "Envío calculado al finalizar la compra",
-  "No aceptamos devoluciones",
-  "Tejidos cómodos · Hecho con cuidado",
+import { Link } from "react-router";
+
+type Message = { text: string; to?: string };
+
+const MESSAGES: Message[] = [
+  { text: "Envío calculado al finalizar la compra" },
+  { text: "Política de cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
+  { text: "Tejidos cómodos · Hecho con cuidado" },
 ];
 
 export function AnnouncementBar() {
@@ -16,7 +20,13 @@ export function AnnouncementBar() {
               key={i}
               className="flex items-center text-[11px] font-medium uppercase tracking-[0.16em]"
             >
-              {m}
+              {m.to ? (
+                <Link to={m.to} className="hover:text-clay hover:underline">
+                  {m.text}
+                </Link>
+              ) : (
+                m.text
+              )}
               <span aria-hidden className="px-6 text-clay">
                 ✳
               </span>

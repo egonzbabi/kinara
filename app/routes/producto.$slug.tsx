@@ -294,7 +294,15 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
 
           <ul className="mt-5 flex flex-col gap-1.5 text-[13px] text-muted">
             <li>· Envío calculado al finalizar la compra</li>
-            <li>· NO HAY DEVOLUCIONES</li>
+            <li>
+              ·{" "}
+              <Link
+                to="/politica-de-cambios-y-devoluciones"
+                className="underline underline-offset-2 hover:text-clay"
+              >
+                Política de cambios y devoluciones
+              </Link>
+            </li>
           </ul>
 
           {/* Details */}
@@ -322,7 +330,15 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                   content: (
                     <p>
                       Envío calculado al finalizar la compra según tu
-                      dirección. NO HAY DEVOLUCIONES.
+                      dirección. Cambios solo por defecto de fábrica — consulta
+                      nuestra{" "}
+                      <Link
+                        to="/politica-de-cambios-y-devoluciones"
+                        className="underline underline-offset-2 hover:text-clay"
+                      >
+                        política de cambios y devoluciones
+                      </Link>
+                      .
                     </p>
                   ),
                 },

@@ -12,7 +12,7 @@ const COLS = [
     title: "Ayuda",
     links: [
       { label: "Envíos y entregas", to: "/tienda" },
-      { label: "Devoluciones", to: "/tienda" },
+      { label: "Cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
       { label: "Guía de tallas", to: "/tienda" },
       { label: "Contacto", to: "/contacto" },
     ],

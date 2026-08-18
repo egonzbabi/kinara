@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router";
 
-const ITEMS: { icon: ReactNode; title: string; copy: string }[] = [
+const ITEMS: { icon: ReactNode; title: string; copy: string; to?: string }[] = [
   {
     icon: <TruckIcon />,
     title: "Envío calculado",
@@ -8,8 +9,9 @@ const ITEMS: { icon: ReactNode; title: string; copy: string }[] = [
   },
   {
     icon: <ReturnIcon />,
-    title: "Sin devoluciones",
-    copy: "No aceptamos devoluciones",
+    title: "Cambios y devoluciones",
+    copy: "Ver política",
+    to: "/politica-de-cambios-y-devoluciones",
   },
   {
     icon: <LeafIcon />,
@@ -27,17 +29,30 @@ export function TrustStrip() {
   return (
     <section className="pad border-y border-line">
       <ul className="grid grid-cols-2 gap-x-6 gap-y-7 py-7 md:grid-cols-4">
-        {ITEMS.map((it) => (
-          <li key={it.title} className="flex items-center gap-3.5">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-bone text-clay">
-              {it.icon}
-            </span>
-            <div>
-              <p className="text-sm font-semibold leading-tight">{it.title}</p>
-              <p className="text-[13px] text-muted">{it.copy}</p>
-            </div>
-          </li>
-        ))}
+        {ITEMS.map((it) => {
+          const content = (
+            <>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-bone text-clay">
+                {it.icon}
+              </span>
+              <div>
+                <p className="text-sm font-semibold leading-tight">{it.title}</p>
+                <p className="text-[13px] text-muted">{it.copy}</p>
+              </div>
+            </>
+          );
+          return (
+            <li key={it.title} className="flex items-center gap-3.5">
+              {it.to ? (
+                <Link to={it.to} className="flex items-center gap-3.5 hover:text-clay">
+                  {content}
+                </Link>
+              ) : (
+                content
+              )}
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
