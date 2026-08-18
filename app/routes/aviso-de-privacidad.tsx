@@ -15,6 +15,8 @@ const h2Class = "font-display text-xl text-espresso";
 const pClass = "text-[15px] leading-relaxed text-espresso/80";
 const ulClass = "flex flex-col gap-1.5 text-[15px] leading-relaxed text-espresso/80";
 
+const CONTACT_EMAIL = "contacto@kinarafit.com.mx";
+
 export default function AvisoDePrivacidad() {
   return (
     <div className="pad py-12 sm:py-16">
@@ -23,109 +25,124 @@ export default function AvisoDePrivacidad() {
           <h1 className="font-display text-[clamp(30px,4vw,44px)]">
             Aviso de Privacidad
           </h1>
-          <p className="mt-2 text-sm text-muted">
-            Última actualización: 5 de agosto de 2026
-          </p>
+          <p className="mt-2 text-sm text-muted">Última actualización: Agosto de 2026</p>
         </div>
 
-        <section className={sectionClass}>
-          <h2 className={h2Class}>1. Identidad del responsable</h2>
-          <p className={pClass}>
-            KINARA ("nosotros") es responsable del tratamiento de tus datos
-            personales conforme a la Ley Federal de Protección de Datos
-            Personales en Posesión de los Particulares (LFPDPPP). Puedes
-            contactarnos en{" "}
-            <a href="mailto:hola@kinara.mx" className="text-clay underline underline-offset-2">
-              hola@kinara.mx
-            </a>{" "}
-            o a través de nuestro{" "}
-            <a href="/contacto" className="text-clay underline underline-offset-2">
-              formulario de contacto
-            </a>
-            .
-          </p>
-        </section>
+        <p className={pClass}>
+          En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los
+          Particulares, KINARA informa lo siguiente:
+        </p>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>2. Datos que recabamos</h2>
-          <p className={pClass}>
-            Cuando compras, te contactas o interactúas con nuestro sitio,
-            podemos recabar:
-          </p>
+          <h2 className={h2Class}>1. Responsable del tratamiento de datos</h2>
           <ul className={ulClass}>
-            <li>• Datos de identificación y contacto: nombre, correo electrónico, teléfono.</li>
+            <li>• Razón Social: Administradora Karay S.A. de C.V.</li>
+            <li>• Domicilio: Nunkini 234, Col. Jardines del Ajusco, Tlalpan, CDMX, México.</li>
             <li>
-              • Datos de envío: dirección (calle, colonia, código postal, municipio/alcaldía,
-              estado).
+              • Correo electrónico:{" "}
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-clay underline underline-offset-2"
+              >
+                {CONTACT_EMAIL}
+              </a>
             </li>
           </ul>
-          <p className={pClass}>
-            No recabamos ni almacenamos los datos de tu tarjeta de pago — tu compra se procesa
-            directamente por Stripe, quien tiene sus propias medidas de seguridad y aviso de
-            privacidad.
-          </p>
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>3. Para qué usamos tus datos</h2>
-          <p className={pClass}>Usamos tus datos para:</p>
+          <h2 className={h2Class}>2. Datos personales que recopilamos</h2>
+          <p className={pClass}>Podremos solicitar los siguientes datos:</p>
           <ul className={ulClass}>
-            <li>• Procesar y dar seguimiento a tus pedidos.</li>
-            <li>• Coordinar el envío de tus productos con nuestra paquetería.</li>
-            <li>• Responder tus dudas o solicitudes de contacto.</li>
-            <li>• Cumplir obligaciones fiscales y legales.</li>
+            <li>• Nombre completo.</li>
+            <li>• Correo electrónico.</li>
+            <li>• Número telefónico.</li>
+            <li>• Dirección de envío.</li>
+            <li>• Información necesaria para procesar pedidos.</li>
+          </ul>
+        </section>
+
+        <section className={sectionClass}>
+          <h2 className={h2Class}>3. Finalidad del tratamiento</h2>
+          <p className={pClass}>Los datos personales serán utilizados para:</p>
+          <ul className={ulClass}>
+            <li>• Procesar pedidos.</li>
+            <li>• Dar seguimiento a compras.</li>
+            <li>• Contactar al cliente respecto de su pedido.</li>
+            <li>• Emitir comprobantes cuando corresponda.</li>
+            <li>
+              • Enviar información comercial sobre promociones, lanzamientos, descuentos,
+              novedades y campañas de marketing propias de KINARA.
+            </li>
+            <li>• Mejorar la experiencia de compra.</li>
           </ul>
           <p className={pClass}>
-            No usamos tus datos con fines de mercadotecnia (envío de promociones) salvo que nos
-            des tu autorización expresa para ello.
+            <span className="font-semibold text-espresso">
+              KINARA únicamente utilizará el correo electrónico del cliente para el envío de
+              campañas de marketing, promociones, novedades y comunicaciones relacionadas con la
+              marca.
+            </span>{" "}
+            En cualquier momento el usuario podrá solicitar dejar de recibir dichas
+            comunicaciones.
           </p>
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>4. Con quién compartimos tus datos</h2>
+          <h2 className={h2Class}>4. Transferencia de datos</h2>
           <p className={pClass}>
-            Para operar la tienda, compartimos únicamente los datos necesarios con:
+            KINARA no vende, renta ni comparte los datos personales con terceros para fines
+            comerciales distintos a los necesarios para la operación del servicio.
+          </p>
+        </section>
+
+        <section className={sectionClass}>
+          <h2 className={h2Class}>5. Derechos ARCO</h2>
+          <p className={pClass}>
+            De conformidad con la legislación mexicana, el titular podrá ejercer en cualquier
+            momento sus derechos de:
           </p>
           <ul className={ulClass}>
-            <li>• Stripe — procesamiento de pagos.</li>
-            <li>• Skydropx — cotización y envío de tu pedido.</li>
-            <li>• Nuestros proveedores de hosting y correo (para operar el sitio y responder tus mensajes).</li>
+            <li>• Acceso.</li>
+            <li>• Rectificación.</li>
+            <li>• Cancelación.</li>
+            <li>• Oposición.</li>
           </ul>
           <p className={pClass}>
-            Estos proveedores solo usan tus datos para prestarnos el servicio contratado. No
-            vendemos ni rentamos tus datos personales a terceros.
+            Para ejercer cualquiera de estos derechos deberá enviar una solicitud al correo{" "}
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="text-clay underline underline-offset-2"
+            >
+              {CONTACT_EMAIL}
+            </a>
+            . La solicitud deberá contener:
+          </p>
+          <ul className={ulClass}>
+            <li>• Nombre completo.</li>
+            <li>• Medio para recibir respuesta.</li>
+            <li>• Documentos que acrediten su identidad.</li>
+            <li>• Descripción clara del derecho que desea ejercer.</li>
+          </ul>
+          <p className={pClass}>
+            KINARA responderá dentro de los plazos establecidos por la legislación aplicable.
           </p>
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>5. Tus derechos (ARCO)</h2>
+          <h2 className={h2Class}>6. Uso de cookies</h2>
           <p className={pClass}>
-            Tienes derecho a Acceder, Rectificar o Cancelar tus datos personales, así como a
-            Oponerte a su uso (derechos ARCO), y a revocar tu consentimiento en cualquier
-            momento. Para ejercerlos, escríbenos a{" "}
-            <a href="mailto:hola@kinara.mx" className="text-clay underline underline-offset-2">
-              hola@kinara.mx
-            </a>{" "}
-            indicando tu nombre y la solicitud específica. Te responderemos en un plazo máximo
-            de 20 días hábiles.
+            Nuestro sitio puede utilizar cookies, tecnologías similares y herramientas de
+            análisis para mejorar la experiencia del usuario, conocer estadísticas de navegación
+            y optimizar nuestras campañas publicitarias. El usuario puede configurar su navegador
+            para rechazar el uso de cookies.
           </p>
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>6. Cookies</h2>
+          <h2 className={h2Class}>7. Cambios al aviso</h2>
           <p className={pClass}>
-            Hoy nuestro sitio solo utiliza una cookie técnica, necesaria para el funcionamiento
-            del panel de administración — no recaba información personal de nuestros clientes.
-            Si en el futuro incorporamos herramientas de análisis (como Google Analytics),
-            actualizaremos esta sección y te pediremos tu consentimiento antes de activarlas.
-          </p>
-        </section>
-
-        <section className={sectionClass}>
-          <h2 className={h2Class}>7. Cambios a este aviso</h2>
-          <p className={pClass}>
-            Podemos actualizar este aviso de privacidad. Cualquier cambio se publicará en esta
-            misma página con su fecha de actualización correspondiente.
+            KINARA podrá modificar el presente Aviso de Privacidad en cualquier momento. Las
+            modificaciones serán publicadas en www.kinarafit.com.mx.
           </p>
         </section>
       </div>

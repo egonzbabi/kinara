@@ -102,5 +102,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 059 | [059-admin-productos-volver-a-fila-editada.md](059-admin-productos-volver-a-fila-editada.md) | done | Admin/Productos: al guardar, la lista regresa con scroll y resaltado a la fila del producto editado |
 | 060 | [060-inventario-imprimir-pdf-fijo.md](060-inventario-imprimir-pdf-fijo.md) | done | Inventario: "Imprimir" genera un PDF real y fijo (landscape, rayas, font grande, sin cortar fotos entre páginas) |
 | 061 | [061-politica-cambios-y-devoluciones.md](061-politica-cambios-y-devoluciones.md) | done | Página de Política de Cambios y Devoluciones + enlazar todos los mensajes de "no hay devoluciones" |
+| 062 | [062-aviso-de-privacidad-actualizado.md](062-aviso-de-privacidad-actualizado.md) | done | Aviso de Privacidad: reemplazo por el texto real del usuario (razón social, domicilio, marketing) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
