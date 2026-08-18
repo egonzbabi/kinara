@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import type { Route } from "./+types/admin.inventario";
 import { requireAdmin } from "~/lib/session.server";
-import { listInventory, type InventoryRow } from "~/lib/admin-catalog.server";
+import { listInventory } from "~/lib/admin-catalog.server";
+import { SIZE_ORDER, groupByProduct } from "~/lib/admin-inventory-groups";
 import { baseSkuFrom } from "~/lib/slug";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage } from "~/lib/productImage";
@@ -15,58 +16,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   await requireAdmin(request);
   const rows = await listInventory();
   return { rows };
-}
-
-const SIZE_ORDER = ["S", "M", "L", "XL"] as const;
-
-type ProductGroup = {
-  productId: string;
-  productName: string;
-  productSlug: string;
-  kind: string;
-  isDraft: boolean;
-  price: number | null;
-  photoUrl: string;
-  totalStock: number;
-  baseSku: string;
-  value: number;
-  colors: {
-    colorName: string;
-    photoUrl: string;
-    sizes: Partial<Record<(typeof SIZE_ORDER)[number], { stock: number; sku: string | null }>>;
-  }[];
-};
-
-function groupByProduct(rows: InventoryRow[]): ProductGroup[] {
-  const groups = new Map<string, ProductGroup>();
-  for (const r of rows) {
-    let group = groups.get(r.productId);
-    if (!group) {
-      group = {
-        productId: r.productId,
-        productName: r.productName,
-        productSlug: r.productSlug,
-        kind: r.kind,
-        isDraft: r.isDraft,
-        price: r.price,
-        photoUrl: r.photoUrl,
-        totalStock: 0,
-        baseSku: r.sku ? baseSkuFrom(r.sku) : "",
-        value: 0,
-        colors: [],
-      };
-      groups.set(r.productId, group);
-    }
-    group.totalStock += r.stock;
-    group.value += (r.price ?? 0) * r.stock;
-    let color = group.colors.find((c) => c.colorName === r.colorName);
-    if (!color) {
-      color = { colorName: r.colorName, photoUrl: r.photoUrl, sizes: {} };
-      group.colors.push(color);
-    }
-    color.sizes[r.size] = { stock: r.stock, sku: r.sku };
-  }
-  return Array.from(groups.values());
 }
 
 function StatCard({
@@ -178,13 +127,14 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
           >
             Descargar Excel
           </a>
-          <button
-            type="button"
-            onClick={() => window.print()}
+          <a
+            href={`/admin/inventario/pdf?search=${encodeURIComponent(search)}&kind=${encodeURIComponent(kind)}`}
+            target="_blank"
+            rel="noreferrer"
             className="btn btn-clay whitespace-nowrap px-5 py-2.5 text-[13px]"
           >
             Imprimir
-          </button>
+          </a>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import type { InventoryRow } from "./admin-catalog.server";
 import { baseSkuFrom } from "./slug";
+import { fetchImage } from "./fetch-image.server";
 
 /** SKU original del grupo — el primer SKU disponible del producto, sin -COLOR-TALLA. */
 function baseSku(rows: InventoryRow[]): string {
@@ -10,28 +11,14 @@ function baseSku(rows: InventoryRow[]): string {
 
 type ImageExtension = ExcelJS.Image["extension"];
 
+// Excel (vía exceljs) solo soporta jpeg/png/gif — si la foto es webp u otro
+// formato, se omite la imagen para ese producto en vez de romper todo el archivo.
 const SUPPORTED_IMAGE_TYPES: Record<string, ImageExtension> = {
   "image/jpeg": "jpeg",
   "image/jpg": "jpeg",
   "image/png": "png",
   "image/gif": "gif",
 };
-
-async function fetchImage(url: string): Promise<{ buffer: Buffer; extension: ImageExtension } | null> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const contentType = res.headers.get("content-type")?.split(";")[0].trim().toLowerCase() ?? "";
-    const extension = SUPPORTED_IMAGE_TYPES[contentType];
-    // Excel (vía exceljs) solo soporta jpeg/png/gif — si la foto es webp u otro
-    // formato, se omite la imagen para ese producto en vez de romper todo el archivo.
-    if (!extension) return null;
-    const buffer = Buffer.from(await res.arrayBuffer()) as Buffer;
-    return { buffer, extension };
-  } catch {
-    return null;
-  }
-}
 
 function groupByProduct(rows: InventoryRow[]): InventoryRow[][] {
   const groups: InventoryRow[][] = [];
@@ -145,7 +132,9 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
   // Se busca la foto de cada producto en paralelo antes de armar las filas
   // (una sola por producto, no una por SKU — así el fetch no crece con el
   // número de colores/tallas).
-  const photos = await Promise.all(groups.map((group) => fetchImage(group[0].photoUrl)));
+  const photos = await Promise.all(
+    groups.map((group) => fetchImage(group[0].photoUrl, SUPPORTED_IMAGE_TYPES)),
+  );
 
   const ROW_HEIGHT = 30; // puntos
   const PHOTO_WIDTH = 80;
