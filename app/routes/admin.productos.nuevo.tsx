@@ -40,13 +40,14 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: "Completa nombre, slug, tipo y precio." };
   }
 
+  let id: string;
   try {
-    await createProduct(input);
+    id = await createProduct(input);
   } catch (err) {
     return { error: err instanceof Error ? err.message : "No se pudo crear el producto." };
   }
 
-  throw redirect("/admin/productos");
+  throw redirect(`/admin/productos?editado=${id}`);
 }
 
 export default function AdminProductNew({ actionData }: Route.ComponentProps) {

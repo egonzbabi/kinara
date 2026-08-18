@@ -50,7 +50,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     return { error: err instanceof Error ? err.message : "No se pudo actualizar el producto." };
   }
 
-  throw redirect("/admin/productos");
+  throw redirect(`/admin/productos?editado=${params.id}`);
 }
 
 export default function AdminProductEdit({ loaderData, actionData, params }: Route.ComponentProps) {

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useFetcher } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useFetcher, useSearchParams } from "react-router";
 import type { Route } from "./+types/admin.productos";
 import { requireAdmin } from "~/lib/session.server";
 import { listAdminProducts } from "~/lib/admin-catalog.server";
@@ -22,6 +22,28 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
   const [category, setCategory] = useState("Todas");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const deleteFetcher = useFetcher();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+
+  // Al volver de editar/crear un producto, la lista hace scroll hasta esa fila y la
+  // resalta un momento — evita tener que buscarlo de nuevo en una lista larga.
+  useEffect(() => {
+    const editedId = searchParams.get("editado");
+    if (!editedId) return;
+    document.getElementById(`producto-${editedId}`)?.scrollIntoView({ block: "center" });
+    setHighlightId(editedId);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("editado");
+        return next;
+      },
+      { replace: true },
+    );
+    const timeout = setTimeout(() => setHighlightId(null), 2000);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const categories = ["Todas", ...new Set(products.map((p) => p.category))];
 
@@ -89,7 +111,14 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
               </thead>
               <tbody>
                 {filtered.map((p) => (
-                  <tr key={p.id} className="border-b border-line last:border-0 hover:bg-sand/60">
+                  <tr
+                    key={p.id}
+                    id={`producto-${p.id}`}
+                    className={cn(
+                      "border-b border-line transition-colors duration-1000 last:border-0 hover:bg-sand/60",
+                      p.id === highlightId && "bg-clay/10",
+                    )}
+                  >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-sand">
