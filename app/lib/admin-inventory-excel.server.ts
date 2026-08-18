@@ -109,8 +109,10 @@ export async function buildInventoryExcel(rows: InventoryRow[]): Promise<Buffer>
     printTitlesRow: "1:3",
     margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
   };
-  // Número de página en el pie de cada hoja impresa (ej. "Página 2 de 5").
-  sheet.headerFooter = { oddFooter: "&CPágina &P de &N", evenFooter: "&CPágina &P de &N" };
+  // Número de página en el pie de cada hoja impresa (ej. "Página 2"). Sin el
+  // total ("de N"): Google Sheets no calcula el total de páginas al importar
+  // un pie de página personalizado desde .xlsx, aunque el archivo sea válido.
+  sheet.headerFooter = { oddFooter: "&CPágina &P", evenFooter: "&CPágina &P" };
 
   // Título + fecha/hora de emisión, combinados sobre todas las columnas.
   const now = new Date();

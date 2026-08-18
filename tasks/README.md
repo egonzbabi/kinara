@@ -96,5 +96,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 053 | [053-excel-inventario-impresion-titulo-anchos.md](053-excel-inventario-impresion-titulo-anchos.md) | done | Excel de inventario: título con fecha/hora, columnas auto-ajustadas, impresión en una página |
 | 054 | [054-excel-inventario-rayas-numero-pagina.md](054-excel-inventario-rayas-numero-pagina.md) | done | Excel de inventario: rayas tenues en todos los renglones + número de página en el pie de impresión |
 | 055 | [055-excel-inventario-formato-moneda.md](055-excel-inventario-formato-moneda.md) | done | Excel de inventario: Precio y Valor con formato de moneda (2 decimales) |
+| 056 | [056-excel-inventario-pagina-sin-total.md](056-excel-inventario-pagina-sin-total.md) | done | Excel de inventario: pie de página solo con "Página X" (sin total, por limitación de Google Sheets) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
