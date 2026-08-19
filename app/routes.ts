@@ -12,6 +12,7 @@ export default [
   route("contacto", "routes/contacto.tsx"),
   route("aviso-de-privacidad", "routes/aviso-de-privacidad.tsx"),
   route("politica-de-cambios-y-devoluciones", "routes/politica-de-cambios-y-devoluciones.tsx"),
+  route("politica-de-envios", "routes/politica-de-envios.tsx"),
 
   route("admin", "routes/admin.login.tsx"),
   route("admin/logout", "routes/admin.logout.tsx"),
