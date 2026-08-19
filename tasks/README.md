@@ -106,5 +106,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 063 | [063-politica-de-envios.md](063-politica-de-envios.md) | done | Página de Política de Envíos + conectar el link "Envíos y entregas" del footer |
 | 064 | [064-movimientos-de-inventario.md](064-movimientos-de-inventario.md) | done | Entradas y salidas de inventario (registro con fecha/concepto que ajusta el stock) |
 | 065 | [065-admin-productos-columna-sku.md](065-admin-productos-columna-sku.md) | done | Admin/Productos: agregar columna SKU a la lista + buscar por SKU |
+| 066 | [066-movimientos-sku-usuario-fecha-real.md](066-movimientos-sku-usuario-fecha-real.md) | done | Movimientos de inventario: selección por SKU (con nombre original/actual), fecha real de registro y usuario |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

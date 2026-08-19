@@ -166,6 +166,8 @@ export type Database = {
           concept: string;
           movement_date: string;
           resulting_stock: number;
+          admin_id: string | null;
+          admin_name: string;
           created_at: string;
         };
         Insert: Omit<
@@ -203,6 +205,8 @@ export type Database = {
           p_quantity: number;
           p_concept: string;
           p_movement_date: string;
+          p_admin_id: string | null;
+          p_admin_name: string;
         };
         Returns: Database["public"]["Tables"]["inventory_movements"]["Row"];
       };

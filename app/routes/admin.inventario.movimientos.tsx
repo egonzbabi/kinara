@@ -14,8 +14,6 @@ export function meta(_: Route.MetaArgs) {
   return [{ title: "Movimientos de inventario · Admin · KINARA" }];
 }
 
-const SIZE_ORDER = ["S", "M", "L", "XL"] as const;
-
 export async function loader({ request }: Route.LoaderArgs) {
   await requireAdmin(request);
   const [rows, movements] = await Promise.all([listInventory(), listInventoryMovements()]);
@@ -25,7 +23,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 type ActionData = { error: string } | { success: true; resultingStock: number };
 
 export async function action({ request }: Route.ActionArgs) {
-  await requireAdmin(request);
+  const { adminId, adminName } = await requireAdmin(request);
   const form = await request.formData();
 
   const productId = String(form.get("productId") || "");
@@ -37,7 +35,7 @@ export async function action({ request }: Route.ActionArgs) {
   const movementDate = String(form.get("movementDate") || "");
 
   if (!productId || !colorName || !size) {
-    return { error: "Selecciona producto, color y talla." } satisfies ActionData;
+    return { error: "Selecciona un SKU válido." } satisfies ActionData;
   }
   if (type !== "entrada" && type !== "salida") {
     return { error: "Tipo de movimiento inválido." } satisfies ActionData;
@@ -53,6 +51,8 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   try {
+    // adminId/adminName vienen de la sesión verificada en el servidor (requireAdmin),
+    // no del formulario — así no se puede falsear quién hizo el movimiento.
     const resultingStock = await createInventoryMovement({
       productId,
       colorName,
@@ -61,6 +61,8 @@ export async function action({ request }: Route.ActionArgs) {
       quantity,
       concept,
       movementDate,
+      adminId,
+      adminName,
     });
     return { success: true, resultingStock } satisfies ActionData;
   } catch (err) {
@@ -99,6 +101,16 @@ function formatMovementDate(dateStr: string): string {
   );
 }
 
+/** Fecha/hora real de registro (created_at, un instante real con zona horaria) —
+ * a diferencia de movement_date, aquí sí corresponde convertir a hora de México. */
+function formatRegisteredAt(isoString: string): string {
+  return new Intl.DateTimeFormat("es-MX", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "America/Mexico_City",
+  }).format(new Date(isoString));
+}
+
 const labelClass = "text-sm font-medium text-espresso";
 const inputClass =
   "w-full rounded-lg border border-line bg-bone px-4 py-2.5 text-sm text-espresso placeholder:text-muted focus:border-clay focus:outline-none disabled:cursor-not-allowed disabled:opacity-50";
@@ -109,44 +121,29 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
   const isSubmitting = fetcher.state === "submitting";
 
   const [type, setType] = useState<MovementType>("entrada");
-  const [productId, setProductId] = useState("");
-  const [colorName, setColorName] = useState("");
-  const [size, setSize] = useState("");
+  const [skuInput, setSkuInput] = useState("");
   const [quantity, setQuantity] = useState("");
   const [concept, setConcept] = useState("");
   const [movementDate, setMovementDate] = useState(todayLocal());
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const products = useMemo(() => {
-    const seen = new Map<string, string>();
-    for (const r of rows) if (!seen.has(r.productId)) seen.set(r.productId, r.productName);
-    return Array.from(seen, ([id, name]) => ({ id, name })).sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
-  }, [rows]);
+  // Cada fila de listInventory() ya es una variante única (producto+color+talla)
+  // con su SKU — es el catálogo completo para el buscador y para resolver el SKU
+  // elegido de vuelta a producto/color/talla.
+  const skuRows = useMemo(() => rows.filter((r) => r.sku), [rows]);
+  const bySku = useMemo(() => {
+    const map = new Map<string, (typeof skuRows)[number]>();
+    for (const r of skuRows) if (r.sku) map.set(r.sku, r);
+    return map;
+  }, [skuRows]);
 
-  const colorsForProduct = useMemo(() => {
-    if (!productId) return [];
-    const seen: string[] = [];
-    for (const r of rows) {
-      if (r.productId === productId && !seen.includes(r.colorName)) seen.push(r.colorName);
-    }
-    return seen;
-  }, [rows, productId]);
-
-  const sizesForColor = useMemo(() => {
-    if (!productId || !colorName) return [];
-    return rows
-      .filter((r) => r.productId === productId && r.colorName === colorName)
-      .map((r) => ({ size: r.size, stock: r.stock }))
-      .sort((a, b) => SIZE_ORDER.indexOf(a.size) - SIZE_ORDER.indexOf(b.size));
-  }, [rows, productId, colorName]);
-
-  const currentStock = sizesForColor.find((s) => s.size === size)?.stock;
+  const selected = bySku.get(skuInput.trim());
+  const skuTyped = skuInput.trim().length > 0;
+  const skuNotFound = skuTyped && !selected;
 
   // Al llegar una respuesta exitosa: limpia cantidad/concepto para el siguiente
-  // registro (se deja producto/color/talla/tipo/fecha, lo normal es seguir
-  // cargando movimientos del mismo pedido o del mismo día).
+  // registro (se deja SKU/tipo/fecha, lo normal es seguir cargando movimientos
+  // del mismo pedido o del mismo día).
   useEffect(() => {
     if (fetcher.data && "success" in fetcher.data) {
       setQuantity("");
@@ -165,8 +162,8 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted">
-          Registra entradas y salidas de stock con fecha y concepto — cada movimiento ajusta el
-          inventario y queda en el historial de abajo.
+          Registra entradas y salidas de stock por SKU — cada movimiento ajusta el inventario y
+          queda en el historial de abajo, con fecha, usuario y hora de registro.
         </p>
         <Link
           to="/admin/inventario"
@@ -205,84 +202,50 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
             <input type="hidden" name="type" value={type} />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className={labelClass} htmlFor="mov-producto">
-                Producto
-              </label>
-              <select
-                id="mov-producto"
-                name="productId"
-                value={productId}
-                onChange={(e) => {
-                  setProductId(e.target.value);
-                  setColorName("");
-                  setSize("");
-                }}
-                className={cn(inputClass, "mt-1.5")}
-                required
-              >
-                <option value="">Selecciona…</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={labelClass} htmlFor="mov-color">
-                Color
-              </label>
-              <select
-                id="mov-color"
-                name="colorName"
-                value={colorName}
-                onChange={(e) => {
-                  setColorName(e.target.value);
-                  setSize("");
-                }}
-                className={cn(inputClass, "mt-1.5")}
-                disabled={!productId}
-                required
-              >
-                <option value="">Selecciona…</option>
-                {colorsForProduct.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={labelClass} htmlFor="mov-talla">
-                Talla
-              </label>
-              <select
-                id="mov-talla"
-                name="size"
-                value={size}
-                onChange={(e) => setSize(e.target.value)}
-                className={cn(inputClass, "mt-1.5")}
-                disabled={!colorName}
-                required
-              >
-                <option value="">Selecciona…</option>
-                {sizesForColor.map((s) => (
-                  <option key={s.size} value={s.size}>
-                    {s.size}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          <div>
+            <label className={labelClass} htmlFor="mov-sku">
+              SKU
+            </label>
+            <input
+              id="mov-sku"
+              type="text"
+              list="sku-options"
+              value={skuInput}
+              onChange={(e) => setSkuInput(e.target.value)}
+              placeholder="Escribe o elige un SKU…"
+              className={cn(inputClass, "mt-1.5 font-mono")}
+              autoComplete="off"
+              required
+            />
+            <datalist id="sku-options">
+              {skuRows.map((r) => (
+                <option key={r.sku} value={r.sku!}>
+                  {r.productName} · {r.colorName} · {r.size}
+                </option>
+              ))}
+            </datalist>
+            <input type="hidden" name="productId" value={selected?.productId ?? ""} />
+            <input type="hidden" name="colorName" value={selected?.colorName ?? ""} />
+            <input type="hidden" name="size" value={selected?.size ?? ""} />
 
-          {currentStock !== undefined && (
-            <p className="text-sm text-muted">
-              Stock actual: <span className="font-semibold text-espresso">{currentStock}</span>{" "}
-              unidades
-            </p>
-          )}
+            {skuNotFound && (
+              <p className="mt-1.5 text-sm text-clay">No se encontró ningún SKU con ese valor.</p>
+            )}
+            {selected && (
+              <div className="mt-2.5 rounded-lg bg-sand p-3 text-sm">
+                <p className="text-espresso">
+                  <span className="font-semibold">{selected.productName}</span>
+                  {selected.productName !== selected.productSlug && (
+                    <span className="text-muted"> (nombre original: {selected.productSlug})</span>
+                  )}
+                </p>
+                <p className="mt-0.5 text-muted">
+                  {selected.colorName} · {selected.size} — Stock actual:{" "}
+                  <span className="font-semibold text-espresso">{selected.stock}</span> unidades
+                </p>
+              </div>
+            )}
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
@@ -326,7 +289,7 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
 
           <div className="sm:w-56">
             <label className={labelClass} htmlFor="mov-fecha">
-              Fecha
+              Fecha del movimiento
             </label>
             <input
               id="mov-fecha"
@@ -338,6 +301,10 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
               className={cn(inputClass, "mt-1.5")}
               required
             />
+            <p className="mt-1.5 text-xs text-muted">
+              El día al que corresponde el movimiento — la fecha y hora reales de registro se
+              guardan aparte, junto con tu usuario.
+            </p>
           </div>
 
           {errorMessage && <p className="text-sm font-medium text-clay">{errorMessage}</p>}
@@ -350,7 +317,7 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
           <div>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !selected}
               className="btn btn-clay px-6 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Registrando…" : "Registrar movimiento"}
@@ -370,7 +337,7 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
               <thead>
                 <tr className="border-b border-line">
                   <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Fecha
+                    Fecha del movimiento
                   </th>
                   <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
                     Tipo
@@ -389,6 +356,9 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
                   </th>
                   <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted">
                     Stock resultante
+                  </th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                    Registrado
                   </th>
                 </tr>
               </thead>
@@ -426,6 +396,11 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
                     <td className="px-5 py-3 text-sm text-espresso">{m.concept}</td>
                     <td className="px-5 py-3 text-right text-sm tabular-nums text-muted">
                       {m.resultingStock}
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-3 text-[13px] text-muted">
+                      {formatRegisteredAt(m.createdAt)}
+                      <br />
+                      <span className="text-espresso">{m.adminName}</span>
                     </td>
                   </tr>
                 ))}

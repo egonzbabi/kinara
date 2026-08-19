@@ -9,8 +9,10 @@ export type InventoryMovementInput = {
   type: MovementType;
   quantity: number;
   concept: string;
-  /** YYYY-MM-DD */
+  /** YYYY-MM-DD, la fecha que digita quien registra el movimiento. */
   movementDate: string;
+  adminId: string | null;
+  adminName: string;
 };
 
 export type InventoryMovement = {
@@ -22,8 +24,11 @@ export type InventoryMovement = {
   type: MovementType;
   quantity: number;
   concept: string;
+  /** Fecha digitada por el admin (el día al que corresponde el movimiento). */
   movementDate: string;
   resultingStock: number;
+  adminName: string;
+  /** Fecha/hora real en que quedó registrado (reloj del servidor, no editable). */
   createdAt: string;
 };
 
@@ -44,6 +49,7 @@ export async function listInventoryMovements(): Promise<InventoryMovement[]> {
     concept: string;
     movement_date: string;
     resulting_stock: number;
+    admin_name: string;
     created_at: string;
     products: { name: string } | null;
   }>).map((row) => ({
@@ -57,6 +63,7 @@ export async function listInventoryMovements(): Promise<InventoryMovement[]> {
     concept: row.concept,
     movementDate: row.movement_date,
     resultingStock: row.resulting_stock,
+    adminName: row.admin_name,
     createdAt: row.created_at,
   }));
 }
@@ -74,6 +81,8 @@ export async function createInventoryMovement(input: InventoryMovementInput): Pr
       p_quantity: input.quantity,
       p_concept: input.concept,
       p_movement_date: input.movementDate,
+      p_admin_id: input.adminId,
+      p_admin_name: input.adminName,
     })
     .single();
   if (error) throw new Error(error.message);
