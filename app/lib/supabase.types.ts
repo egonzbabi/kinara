@@ -155,12 +155,56 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["contact_messages"]["Insert"]>;
         Relationships: [];
       };
+      inventory_movements: {
+        Row: {
+          id: string;
+          product_id: string;
+          color_name: string;
+          size: "S" | "M" | "L" | "XL";
+          type: "entrada" | "salida";
+          quantity: number;
+          concept: string;
+          movement_date: string;
+          resulting_stock: number;
+          created_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["inventory_movements"]["Row"],
+          "id" | "created_at" | "resulting_stock"
+        > & {
+          id?: string;
+          created_at?: string;
+          resulting_stock?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["inventory_movements"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
       decrement_variant_stock: {
         Args: { p_variant_id: string; p_qty: number };
         Returns: number;
+      };
+      register_inventory_movement: {
+        Args: {
+          p_product_id: string;
+          p_color_name: string;
+          p_size: string;
+          p_type: string;
+          p_quantity: number;
+          p_concept: string;
+          p_movement_date: string;
+        };
+        Returns: Database["public"]["Tables"]["inventory_movements"]["Row"];
       };
     };
     Enums: Record<string, never>;

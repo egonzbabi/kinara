@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 import type { Route } from "./+types/admin.inventario";
 import { requireAdmin } from "~/lib/session.server";
 import { listInventory } from "~/lib/admin-catalog.server";
@@ -121,6 +122,12 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
           </select>
         </div>
         <div className="flex gap-3">
+          <Link
+            to="/admin/inventario/movimientos"
+            className="btn btn-outline whitespace-nowrap px-5 py-2.5 text-[13px]"
+          >
+            Movimientos
+          </Link>
           <a
             href={`/admin/inventario/excel?search=${encodeURIComponent(search)}&kind=${encodeURIComponent(kind)}`}
             className="btn btn-outline whitespace-nowrap px-5 py-2.5 text-[13px]"

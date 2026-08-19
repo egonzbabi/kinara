@@ -104,5 +104,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 061 | [061-politica-cambios-y-devoluciones.md](061-politica-cambios-y-devoluciones.md) | done | Página de Política de Cambios y Devoluciones + enlazar todos los mensajes de "no hay devoluciones" |
 | 062 | [062-aviso-de-privacidad-actualizado.md](062-aviso-de-privacidad-actualizado.md) | done | Aviso de Privacidad: reemplazo por el texto real del usuario (razón social, domicilio, marketing) |
 | 063 | [063-politica-de-envios.md](063-politica-de-envios.md) | done | Página de Política de Envíos + conectar el link "Envíos y entregas" del footer |
+| 064 | [064-movimientos-de-inventario.md](064-movimientos-de-inventario.md) | done | Entradas y salidas de inventario (registro con fecha/concepto que ajusta el stock) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

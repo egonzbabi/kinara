@@ -10,6 +10,7 @@ const TITLES: Record<string, string> = {
   "/admin/pedidos": "Pedidos",
   "/admin/mensajes": "Mensajes",
   "/admin/inventario": "Inventario",
+  "/admin/inventario/movimientos": "Movimientos de inventario",
 };
 
 export async function loader({ request }: Route.LoaderArgs) {
