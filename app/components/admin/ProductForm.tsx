@@ -92,6 +92,11 @@ export function ProductForm({ product, productId, error }: Props) {
   // formulario antes de que terminara una subida y la foto se perdía en silencio.
   const [pendingUploads, setPendingUploads] = useState(0);
   const [modeloBase, setModeloBase] = useState(() => guessModeloBase(product?.colors ?? []));
+  // Tallas cuyo SKU el admin ya editó a mano — el auto-llenado de abajo nunca
+  // las vuelve a tocar, ni siquiera si el campo queda vacío momentáneamente
+  // mientras se borra para escribir uno nuevo (si no, el auto-llenado lo
+  // rellenaba de vuelta con el valor viejo antes de que el admin terminara).
+  const [touchedModelos, setTouchedModelos] = useState<Set<string>>(() => new Set());
 
   // productId de referencia para subir fotos: el producto ya guardado, o un slug
   // provisional derivado del nombre mientras se crea uno nuevo.
@@ -104,10 +109,11 @@ export function ProductForm({ product, productId, error }: Props) {
     if (!modeloBase) return;
     setColors((prev) => {
       let changed = false;
-      const next = prev.map((c) => {
+      const next = prev.map((c, ci) => {
         const colorCode = modeloColorCode(c.name || "");
         const sizes = c.sizes.map((s) => {
-          if (s.stock > 0 && !s.modelo && colorCode) {
+          const key = `${ci}:${s.size}`;
+          if (s.stock > 0 && !s.modelo && colorCode && !touchedModelos.has(key)) {
             changed = true;
             return { ...s, modelo: `${modeloBase}-${colorCode}-${s.size}` };
           }
@@ -117,7 +123,7 @@ export function ProductForm({ product, productId, error }: Props) {
       });
       return changed ? next : prev;
     });
-  }, [modeloBase, colors]);
+  }, [modeloBase, colors, touchedModelos]);
 
   const updateColor = (index: number, patch: Partial<AdminColorInput>) => {
     setColors((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
@@ -134,6 +140,11 @@ export function ProductForm({ product, productId, error }: Props) {
   };
 
   const updateModelo = (colorIndex: number, size: SizeStock["size"], modelo: string) => {
+    setTouchedModelos((prev) => {
+      const next = new Set(prev);
+      next.add(`${colorIndex}:${size}`);
+      return next;
+    });
     setColors((prev) =>
       prev.map((c, i) =>
         i === colorIndex

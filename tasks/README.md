@@ -107,5 +107,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 064 | [064-movimientos-de-inventario.md](064-movimientos-de-inventario.md) | done | Entradas y salidas de inventario (registro con fecha/concepto que ajusta el stock) |
 | 065 | [065-admin-productos-columna-sku.md](065-admin-productos-columna-sku.md) | done | Admin/Productos: agregar columna SKU a la lista + buscar por SKU |
 | 066 | [066-movimientos-sku-usuario-fecha-real.md](066-movimientos-sku-usuario-fecha-real.md) | done | Movimientos de inventario: selección por SKU (con nombre original/actual), fecha real de registro y usuario |
+| 067 | [067-fix-sku-no-se-guarda-al-cambiarlo.md](067-fix-sku-no-se-guarda-al-cambiarlo.md) | done | Fix: al cambiar un SKU existente en el admin, el auto-llenado lo revertía |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
