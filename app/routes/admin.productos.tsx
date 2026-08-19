@@ -48,8 +48,10 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
   const categories = ["Todas", ...new Set(products.map((p) => p.category))];
 
   const filtered = useMemo(() => {
+    const q = search.toLowerCase();
     return products.filter((p) => {
-      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      const matchSearch =
+        p.name.toLowerCase().includes(q) || p.baseSku.toLowerCase().includes(q);
       const matchCat = category === "Todas" || p.category === category;
       return matchSearch && matchCat;
     });
@@ -64,7 +66,7 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
         <div className="flex flex-1 flex-col gap-3 sm:flex-row">
           <input
             type="text"
-            placeholder="Buscar producto…"
+            placeholder="Buscar producto o SKU…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={cn(inputClass, "sm:max-w-xs")}
@@ -94,6 +96,9 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
                 <tr className="border-b border-line">
                   <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
                     Producto
+                  </th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                    SKU
                   </th>
                   <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
                     Precio
@@ -147,6 +152,9 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
                           )}
                         </div>
                       </div>
+                    </td>
+                    <td className="px-5 py-3 font-mono text-[13px] text-muted">
+                      {p.baseSku || <span className="text-muted/60">—</span>}
                     </td>
                     <td className="px-5 py-3 text-sm text-espresso">
                       {p.price === null ? (

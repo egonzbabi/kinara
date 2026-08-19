@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "./supabase.server";
-import { slugify, generateShortId } from "./slug";
+import { slugify, generateShortId, baseSkuFrom } from "./slug";
 import { VALID_BADGES } from "./catalog-constants";
 
 const BUCKET = "product-images";
@@ -43,6 +43,8 @@ export type AdminProductListItem = {
   totalStock: number;
   colors: { name: string; hex: string | null }[];
   thumbnailUrl: string;
+  /** SKU original (base, sin -COLOR-TALLA) — vacío si ninguna variante tiene modelo cargado. */
+  baseSku: string;
 };
 
 type ProductRow = {
@@ -98,6 +100,7 @@ export async function listAdminProducts(): Promise<AdminProductListItem[]> {
       if (!colorMap.has(v.color_name)) colorMap.set(v.color_name, v.color_hex);
       totalStock += v.stock;
     }
+    const withSku = row.product_variants.find((v) => v.modelo);
     return {
       id: row.id,
       slug: row.slug,
@@ -108,6 +111,7 @@ export async function listAdminProducts(): Promise<AdminProductListItem[]> {
       totalStock,
       colors: Array.from(colorMap.entries()).map(([name, hex]) => ({ name, hex })),
       thumbnailUrl: pickThumbnail(row),
+      baseSku: withSku?.modelo ? baseSkuFrom(withSku.modelo) : "",
     };
   });
 }
