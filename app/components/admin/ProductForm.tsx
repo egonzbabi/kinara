@@ -102,9 +102,10 @@ export function ProductForm({ product, productId, error }: Props) {
   // provisional derivado del nombre mientras se crea uno nuevo.
   const uploadProductId = productId || slugify(name) || "borrador";
 
-  // Completa automáticamente el modelo (código-color-talla) de cualquier talla dada de
-  // alta (con stock) que todavía no tenga uno, usando el código base de arriba. Nunca
-  // pisa un modelo que el admin ya escribió a mano.
+  // Mantiene el modelo (código-color-talla) de cualquier talla con stock al día con
+  // el código base de arriba — tanto para completar una talla nueva sin SKU como
+  // para regenerar el de una talla existente si el admin cambia el código base.
+  // Nunca pisa una talla que el admin ya editó a mano (touchedModelos).
   useEffect(() => {
     if (!modeloBase) return;
     setColors((prev) => {
@@ -113,9 +114,12 @@ export function ProductForm({ product, productId, error }: Props) {
         const colorCode = modeloColorCode(c.name || "");
         const sizes = c.sizes.map((s) => {
           const key = `${ci}:${s.size}`;
-          if (s.stock > 0 && !s.modelo && colorCode && !touchedModelos.has(key)) {
-            changed = true;
-            return { ...s, modelo: `${modeloBase}-${colorCode}-${s.size}` };
+          if (s.stock > 0 && colorCode && !touchedModelos.has(key)) {
+            const generated = `${modeloBase}-${colorCode}-${s.size}`;
+            if (s.modelo !== generated) {
+              changed = true;
+              return { ...s, modelo: generated };
+            }
           }
           return s;
         });
@@ -232,10 +236,10 @@ export function ProductForm({ product, productId, error }: Props) {
       <section className="rounded-xl bg-bone p-5">
         <h2 className="font-display text-lg text-espresso">SKU</h2>
         <p className="mt-1 text-[13px] text-muted">
-          Código base (ej. el número del Excel/proveedor). Al dar de alta un color y su
-          stock por talla, se completa solo el SKU de esa talla como{" "}
-          <span className="font-medium">CÓDIGO-COLOR-TALLA</span> — puedes editarlo
-          manualmente en cualquier talla si necesitas otro valor.
+          Código base (ej. el número del Excel/proveedor). El SKU de cada talla con stock se
+          arma solo como <span className="font-medium">CÓDIGO-COLOR-TALLA</span> — si cambias
+          el código base aquí, se actualiza en todas las tallas, excepto las que hayas editado
+          tú a mano directamente (esas ya no se tocan automáticamente).
         </p>
         <input
           value={modeloBase}
