@@ -26,7 +26,10 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
   const [highlightId, setHighlightId] = useState<string | null>(null);
 
   // Al volver de editar/crear un producto, la lista hace scroll hasta esa fila y la
-  // resalta un momento — evita tener que buscarlo de nuevo en una lista larga.
+  // resalta un momento. El scroll se hace a mano (no basta con el #hash de la URL:
+  // <ScrollRestoration> de React Router arranca con restoreScrollPosition en false
+  // en toda carga con datos de SSR —como esta, siempre— así que ni siquiera llega a
+  // mirar el hash; confirmado leyendo su código fuente en node_modules).
   useEffect(() => {
     const editedId = searchParams.get("editado");
     if (!editedId) return;

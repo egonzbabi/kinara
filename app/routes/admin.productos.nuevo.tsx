@@ -47,6 +47,9 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: err instanceof Error ? err.message : "No se pudo crear el producto." };
   }
 
+  // ?editado= le indica a la lista (admin.productos.tsx) a qué fila hacer scroll
+  // y resaltar — el scroll se hace ahí con JS, no con un #hash (ScrollRestoration
+  // de React Router no llega a mirar el hash en una carga con datos de SSR).
   throw redirect(`/admin/productos?editado=${id}`);
 }
 

@@ -108,5 +108,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 065 | [065-admin-productos-columna-sku.md](065-admin-productos-columna-sku.md) | done | Admin/Productos: agregar columna SKU a la lista + buscar por SKU |
 | 066 | [066-movimientos-sku-usuario-fecha-real.md](066-movimientos-sku-usuario-fecha-real.md) | done | Movimientos de inventario: selección por SKU (con nombre original/actual), fecha real de registro y usuario |
 | 067 | [067-fix-sku-no-se-guarda-al-cambiarlo.md](067-fix-sku-no-se-guarda-al-cambiarlo.md) | done | Fix: al cambiar un SKU existente en el admin, el auto-llenado lo revertía |
+| 068 | [068-fix-scroll-fila-editada-no-funcionaba.md](068-fix-scroll-fila-editada-no-funcionaba.md) | done | Fix: al guardar un producto, la lista no regresaba a esa fila (ScrollRestoration ignora el #hash en cargas SSR) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
