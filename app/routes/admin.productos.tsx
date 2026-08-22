@@ -30,6 +30,13 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
   // <ScrollRestoration> de React Router arranca con restoreScrollPosition en false
   // en toda carga con datos de SSR —como esta, siempre— así que ni siquiera llega a
   // mirar el hash; confirmado leyendo su código fuente en node_modules).
+  //
+  // El setSearchParams de abajo (para limpiar ?editado=) dispara una SEGUNDA
+  // navegación interna — y ahí restoreScrollPosition ya no es false sino null,
+  // así que <ScrollRestoration> sí ejecuta su window.scrollTo(0,0) por default,
+  // deshaciendo el scroll manual de arriba (efecto visible: "salta al lugar
+  // correcto un instante y luego regresa arriba"). preventScrollReset evita
+  // justo esa segunda pisada.
   useEffect(() => {
     const editedId = searchParams.get("editado");
     if (!editedId) return;
@@ -41,7 +48,7 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
         next.delete("editado");
         return next;
       },
-      { replace: true },
+      { replace: true, preventScrollReset: true },
     );
     const timeout = setTimeout(() => setHighlightId(null), 2000);
     return () => clearTimeout(timeout);
