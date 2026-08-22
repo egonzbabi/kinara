@@ -148,6 +148,9 @@ export default function AdminProductos({ loaderData }: Route.ComponentProps) {
                               </span>
                             )}
                           </p>
+                          {/* Nombre original (slug/URL) — a veces conserva el nombre
+                              anterior si el producto se renombró después, ver tarea 042. */}
+                          <p className="font-mono text-[12px] text-muted">{p.slug}</p>
                           {p.colors.length > 0 && (
                             <div className="mt-1 flex gap-1">
                               {p.colors.slice(0, 5).map((c) => (
