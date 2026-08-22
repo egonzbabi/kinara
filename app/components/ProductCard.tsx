@@ -14,6 +14,7 @@ export function ProductCard({
   product,
   priority = false,
   activeFamily,
+  forceBadge,
 }: {
   product: Product;
   priority?: boolean;
@@ -23,6 +24,12 @@ export function ProductCard({
    * muestra esa en vez de la genérica — nunca la foto de otro color (mismo
    * patrón que la página de detalle de producto, tareas 009/018). */
   activeFamily?: string;
+  /** Reemplaza la etiqueta a mostrar (product.badge es una sola bandera con
+   * prioridad Nuevo > Best-seller > Oferta — un producto con las dos primero
+   * nunca muestra "Oferta" por sí solo). Para secciones que agrupan por un
+   * criterio específico, como Ofertas en el home, se fuerza esa etiqueta sin
+   * tocar el dato guardado del producto. */
+  forceBadge?: string;
 }) {
   const { add } = useCart();
   const [hover, setHover] = useState(false);
@@ -51,6 +58,7 @@ export function ProductCard({
     (familyColorWithPhoto && product.colorImages?.[familyColorWithPhoto.name]) ||
     product.gallery[0];
   const hasSecond = product.gallery.length > 1;
+  const displayBadge = forceBadge ?? product.badge;
 
   const resetQuickAdd = () => {
     setQuickAddOpen(false);
@@ -121,22 +129,22 @@ export function ProductCard({
             />
           )}
 
-          {product.badge && (
+          {displayBadge && (
             <span
               className={cn(
                 "absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide",
-                product.badge === "Best-seller"
+                displayBadge === "Best-seller"
                   ? "bg-espresso text-bone"
-                  : product.badge === "Nuevo"
+                  : displayBadge === "Nuevo"
                     ? "bg-sage text-bone"
-                    : product.badge === "Oferta"
+                    : displayBadge === "Oferta"
                       ? "bg-clay-deep text-bone"
-                      : product.badge === "Edición"
+                      : displayBadge === "Edición"
                         ? "bg-clay text-bone"
                         : "bg-bone text-espresso",
               )}
             >
-              {product.badge}
+              {displayBadge}
             </span>
           )}
 

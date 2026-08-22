@@ -44,7 +44,9 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   const { products } = loaderData;
 
   const novedades = products.filter((p) => p.isNew).slice(0, 4);
-  const ofertas = products.filter((p) => p.isOnSale).slice(0, 4);
+  // Sin límite: a diferencia de "Lo nuevo" (una vitrina acotada), esta sección
+  // debe mostrar todos los productos en oferta, no solo los primeros 4.
+  const ofertas = products.filter((p) => p.isOnSale);
 
   return (
     <>
@@ -69,7 +71,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
               Ver todo →
             </Link>
           </div>
-          <ProductGrid products={ofertas} priorityCount={2} />
+          <ProductGrid products={ofertas} priorityCount={2} forceBadge="Oferta" />
         </section>
       )}
 
