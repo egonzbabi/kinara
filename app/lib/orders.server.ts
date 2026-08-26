@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 import { supabaseAdmin } from "./supabase.server";
 import { sendOrderConfirmationEmail } from "./resend.server";
+import { markDiscountCodeUsed } from "./discount-signups.server";
 
 export interface OrderItem {
   productId: string;
@@ -140,6 +141,7 @@ export async function ensureOrderFromCheckoutSession(
   const shippingDays = shippingDaysRaw ? Number(shippingDaysRaw) : null;
   const shippingProviderName = session.metadata?.shipping_provider_name || null;
   const shippingServiceCode = session.metadata?.shipping_service_code || null;
+  const discountCode = session.metadata?.discount_code || null;
 
   const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
@@ -164,6 +166,7 @@ export async function ensureOrderFromCheckoutSession(
     tracking_url: null,
     label_url: null,
     stripe_session_id: session.id,
+    discount_code: discountCode,
   });
 
   if (insertError) {
@@ -180,6 +183,10 @@ export async function ensureOrderFromCheckoutSession(
   }
 
   await decrementStockForItems(items);
+
+  if (discountCode) {
+    await markDiscountCodeUsed(discountCode);
+  }
 
   // Nunca bloquea la creación de la orden: si Resend no está configurado o
   // el envío falla, solo se registra — el pedido ya está creado y pagado.

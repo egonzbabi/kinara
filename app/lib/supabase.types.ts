@@ -111,6 +111,7 @@ export type Database = {
           tracking_url: string | null;
           label_url: string | null;
           stripe_session_id: string;
+          discount_code: string | null;
           created_at: string;
         };
         Insert: Omit<Database["public"]["Tables"]["orders"]["Row"], "created_at" | "status"> & {
@@ -188,6 +189,25 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      discount_signups: {
+        Row: {
+          id: string;
+          email: string;
+          code: string;
+          used_at: string | null;
+          created_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["discount_signups"]["Row"],
+          "id" | "used_at" | "created_at"
+        > & {
+          id?: string;
+          used_at?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["discount_signups"]["Insert"]>;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

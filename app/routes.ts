@@ -24,6 +24,7 @@ export default [
     route("admin/productos/:id/eliminar", "routes/admin.productos.$id.eliminar.tsx"),
     route("admin/pedidos", "routes/admin.pedidos.tsx"),
     route("admin/mensajes", "routes/admin.mensajes.tsx"),
+    route("admin/registros", "routes/admin.registros.tsx"),
     route("admin/inventario", "routes/admin.inventario.tsx"),
     route("admin/inventario/excel", "routes/admin.inventario.excel.tsx"),
     route("admin/inventario/pdf", "routes/admin.inventario.pdf.tsx"),
@@ -31,6 +32,7 @@ export default [
   ]),
 
   route("api/create-checkout-session", "routes/api.create-checkout-session.tsx"),
+  route("api/newsletter-signup", "routes/api.newsletter-signup.tsx"),
   route("api/shipping-quote", "routes/api.shipping-quote.tsx"),
   route("api/postal-code", "routes/api.postal-code.tsx"),
   route("api/stripe-webhook", "routes/api.stripe-webhook.tsx"),

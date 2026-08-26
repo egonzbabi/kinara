@@ -5,6 +5,7 @@ import { TrustStrip } from "~/components/TrustStrip";
 import { CategoryTiles } from "~/components/CategoryTiles";
 import { ProductGrid } from "~/components/ProductGrid";
 import { EditorialSplit } from "~/components/EditorialSplit";
+import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { LookbookBand } from "~/components/LookbookBand";
 import { getAllProducts } from "~/lib/catalog";
@@ -93,6 +94,8 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </div>
         <ProductGrid products={novedades} priorityCount={2} />
       </section>
+
+      <WelcomeDiscountBanner />
 
       <EditorialSplit />
       <BestsellerRail products={products} />

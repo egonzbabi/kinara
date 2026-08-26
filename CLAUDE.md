@@ -11,6 +11,7 @@ Este archivo se carga automáticamente al inicio de cada sesión de Claude Code 
   1. Crear una cuenta en [resend.com](https://resend.com) y dar el API key → `RESEND_API_KEY` (local: `.env`; producción: variable de entorno en Vercel).
   2. El correo real del cliente al que deben llegar los mensajes → `CONTACT_EMAIL_TO` (mismos dos lugares).
   Mientras tanto, los mensajes del formulario **sí se guardan** en la tabla `contact_messages` de Supabase (nunca se pierden), solo no se manda el correo hasta que se carguen estas 2 variables. Ya se pueden ver en `/admin/mensajes` (agregado en la tarea 032b).
+  **`RESEND_API_KEY`** (el punto 1 de arriba) también hace falta para el correo de confirmación de pedido (tarea 037) y para el correo con el código de descuento de bienvenida (tarea 070) — sin él, los pedidos y los registros al 10% de bienvenida se guardan igual, solo no se manda el correo. `CONTACT_EMAIL_TO` es específico del formulario de contacto, no afecta a estos otros dos correos.
 
 ## Stack
 

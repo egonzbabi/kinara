@@ -2,6 +2,11 @@ import "dotenv/config";
 import { Resend } from "resend";
 import { formatPrice } from "./formatPrice";
 import type { OrderItem } from "./orders.server";
+import {
+  DISCOUNT_PERCENT,
+  DISCOUNT_MIN_SUBTOTAL_MXN,
+  DISCOUNT_EXPIRY_DAYS,
+} from "./discount-constants";
 
 /**
  * Envío de correo del formulario de contacto vía Resend. A propósito nunca
@@ -273,4 +278,117 @@ export async function sendOrderConfirmationEmail(params: {
   } catch (err) {
     return { sent: false, error: err instanceof Error ? err.message : "Error desconocido" };
   }
+}
+
+/**
+ * Correo con el código de descuento de bienvenida (10% en la primera compra).
+ * Mismas garantías que los demás correos de este archivo: nunca lanza si falta
+ * configuración de Resend — el código ya se guardó antes de llamar esto, así
+ * que un correo no enviado nunca debe verse como que el registro falló.
+ */
+export async function sendWelcomeDiscountEmail(params: {
+  email: string;
+  code: string;
+}): Promise<SendContactEmailResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return { sent: false, error: "RESEND_API_KEY no configurado" };
+  }
+
+  const from = process.env.CONTACT_EMAIL_FROM || "KINARA <onboarding@resend.dev>";
+
+  try {
+    const resend = new Resend(apiKey);
+    const { error } = await resend.emails.send({
+      from,
+      to: params.email,
+      subject: `Tu código de ${DISCOUNT_PERCENT}% de descuento · KINARA`,
+      html: buildWelcomeDiscountHtml(params),
+    });
+    if (error) return { sent: false, error: error.message };
+    return { sent: true };
+  } catch (err) {
+    return { sent: false, error: err instanceof Error ? err.message : "Error desconocido" };
+  }
+}
+
+function buildWelcomeDiscountHtml(params: { code: string }): string {
+  const { code } = params;
+  return `
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tu código de descuento · KINARA</title>
+  </head>
+  <body style="margin:0;padding:0;background:${SAND};font-family:Georgia,'Times New Roman',serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${SAND};padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:${BONE};border-radius:20px;overflow:hidden;">
+            <tr>
+              <td style="padding:40px 40px 24px;text-align:center;">
+                <span style="font-size:22px;letter-spacing:6px;color:${ESPRESSO};font-weight:600;">KINARA</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 40px;">
+                <hr style="border:none;border-top:1px solid ${LINE};margin:0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 40px 0;font-family:Georgia,'Times New Roman',serif;text-align:center;">
+                <h1 style="margin:0 0 8px;font-size:26px;color:${ESPRESSO};font-weight:500;">
+                  Bienvenida a KINARA.
+                </h1>
+                <p style="margin:0;font-size:15px;line-height:1.6;color:${MUTED};font-family:Helvetica,Arial,sans-serif;">
+                  Aquí está tu código para tu primera compra.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 40px 0;text-align:center;">
+                <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="background:${SAND};border-radius:12px;">
+                  <tr>
+                    <td style="padding:20px 32px;text-align:center;">
+                      <p style="margin:0;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};font-family:Helvetica,Arial,sans-serif;">
+                        ${DISCOUNT_PERCENT}% de descuento
+                      </p>
+                      <p style="margin:6px 0 0;font-size:24px;letter-spacing:0.08em;color:${CLAY};font-weight:700;font-family:Helvetica,Arial,sans-serif;">
+                        ${escapeHtml(code)}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 0;font-family:Helvetica,Arial,sans-serif;text-align:center;">
+                <p style="margin:0;font-size:13px;line-height:1.6;color:${MUTED};">
+                  Válido en compras desde ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)}, solo en tu primera
+                  compra, con este correo. Vence en ${DISCOUNT_EXPIRY_DAYS} días.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 40px 40px;text-align:center;font-family:Helvetica,Arial,sans-serif;">
+                <a href="https://kinara-ecommerce.vercel.app/tienda" style="display:inline-block;background:${CLAY};color:${BONE};text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:999px;">
+                  Ir a la tienda
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 40px 32px;text-align:center;font-family:Helvetica,Arial,sans-serif;">
+                <p style="margin:0;font-size:12px;color:${MUTED};">
+                  Ingresa el código en el checkout, en el paso de pago.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 }

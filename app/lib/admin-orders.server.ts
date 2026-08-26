@@ -40,11 +40,12 @@ export type AdminOrderListItem = {
   trackingUrl: string | null;
   labelUrl: string | null;
   stripeSessionId: string;
+  discountCode: string | null;
   createdAt: string;
 };
 
 const ORDER_SELECT =
-  "id, customer_name, customer_email, customer_phone, items, subtotal, shipping_fee, total, currency, status, shipping_address, shipping_carrier, shipping_days, shipping_provider_name, shipping_service_code, skydropx_shipment_id, tracking_number, tracking_url, label_url, stripe_session_id, created_at";
+  "id, customer_name, customer_email, customer_phone, items, subtotal, shipping_fee, total, currency, status, shipping_address, shipping_carrier, shipping_days, shipping_provider_name, shipping_service_code, skydropx_shipment_id, tracking_number, tracking_url, label_url, stripe_session_id, discount_code, created_at";
 
 function mapOrder(o: OrderRow): AdminOrderListItem {
   return {
@@ -68,6 +69,7 @@ function mapOrder(o: OrderRow): AdminOrderListItem {
     trackingUrl: o.tracking_url,
     labelUrl: o.label_url,
     stripeSessionId: o.stripe_session_id,
+    discountCode: o.discount_code,
     createdAt: o.created_at,
   };
 }

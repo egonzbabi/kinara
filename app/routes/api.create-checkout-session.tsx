@@ -1,9 +1,12 @@
 import type { Route } from "./+types/api.create-checkout-session";
-import { getStripe } from "~/lib/stripe.server";
+import { getStripe, getOrCreateWelcomeCoupon } from "~/lib/stripe.server";
 import { supabaseAdmin } from "~/lib/supabase.server";
 import { chunkMetadata } from "~/lib/orders.server";
 import { estimateParcel, SHIPPING_FEE_MXN } from "~/lib/shipping";
 import { getShippingRates, type ShippingAddress } from "~/lib/skydropx.server";
+import { validateDiscountCode } from "~/lib/discount-signups.server";
+import { DISCOUNT_MIN_SUBTOTAL_MXN } from "~/lib/discount-constants";
+import { formatPrice } from "~/lib/formatPrice";
 import type { CartItem } from "~/context/CartContext";
 
 interface ChosenShipping {
@@ -16,6 +19,7 @@ interface CheckoutRequest {
   items: CartItem[];
   address: ShippingAddress;
   shipping: ChosenShipping;
+  discountCode?: string;
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -171,6 +175,33 @@ export async function action({ request }: Route.ActionArgs) {
     shippingServiceCode = match.serviceCode;
   }
 
+  // ── Código de descuento de bienvenida: se valida aquí (correo, primera
+  // compra, código sin usar/vencido) contra el subtotal de PRODUCTOS que ya se
+  // recalculó arriba — nunca contra lo que mande el cliente, ni contra el total
+  // con envío incluido (ver tarea 070).
+  let discountCouponId: string | null = null;
+  const discountCode = body.discountCode?.trim();
+  if (discountCode) {
+    if (subtotal < DISCOUNT_MIN_SUBTOTAL_MXN) {
+      return Response.json(
+        {
+          error: `Ese código requiere una compra mínima de ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos.`,
+        },
+        { status: 400 },
+      );
+    }
+    const validation = await validateDiscountCode(discountCode, address.email);
+    if (!validation.valid) {
+      return Response.json({ error: validation.error }, { status: 400 });
+    }
+    try {
+      discountCouponId = await getOrCreateWelcomeCoupon();
+    } catch (err) {
+      console.error("[checkout] error creando/obteniendo el coupon de bienvenida:", err);
+      return Response.json({ error: "No se pudo aplicar el código, intenta de nuevo." }, { status: 500 });
+    }
+  }
+
   const itemsJson = JSON.stringify(trustedItems);
   const addressJson = JSON.stringify(address);
   const metadata: Record<string, string> = {
@@ -182,6 +213,7 @@ export async function action({ request }: Route.ActionArgs) {
     shipping_carrier: shippingCarrier,
     shipping_provider_name: shippingProviderName ?? "",
     shipping_service_code: shippingServiceCode ?? "",
+    discount_code: discountCode && discountCouponId ? discountCode.toUpperCase() : "",
   };
 
   const line_items: Array<{
@@ -221,6 +253,7 @@ export async function action({ request }: Route.ActionArgs) {
       cancel_url: `${origin}/checkout/cancelado`,
       metadata,
       payment_intent_data: { metadata },
+      ...(discountCouponId ? { discounts: [{ coupon: discountCouponId }] } : {}),
     });
     return Response.json({ url: session.url });
   } catch (err) {

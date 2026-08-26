@@ -267,6 +267,7 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
           <Row label="Envío" value={formatPrice(order.shippingFee)} />
           <Row label="Total" value={formatPrice(order.total)} />
           <Row label="Moneda" value={order.currency.toUpperCase()} />
+          {order.discountCode && <Row label="Código de descuento" value={order.discountCode} />}
         </dl>
       </section>
 

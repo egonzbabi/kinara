@@ -3,6 +3,7 @@ import { Link } from "react-router";
 type Message = { text: string; to?: string };
 
 const MESSAGES: Message[] = [
+  { text: "10% de descuento en tu primera compra — regístrate", to: "/#bienvenida" },
   { text: "Envío calculado al finalizar la compra" },
   { text: "Política de cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
   { text: "Tejidos cómodos · Hecho con cuidado" },

@@ -66,6 +66,7 @@ export default function Checkout() {
 
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  const [discountCode, setDiscountCode] = useState("");
 
   useEffect(() => {
     if (hydrated && items.length === 0) navigate("/tienda");
@@ -167,6 +168,7 @@ export default function Checkout() {
             serviceCode: selectedRate.serviceCode,
             total: selectedRate.total,
           },
+          discountCode: discountCode.trim() || undefined,
         }),
       });
       const data = await res.json();
@@ -343,6 +345,16 @@ export default function Checkout() {
                 <span className="whitespace-nowrap font-medium">{formatPrice(rate.total)}</span>
               </label>
             ))}
+          </div>
+
+          <div className="mt-5 max-w-xs">
+            <label className={labelClass}>¿Tienes un código de descuento?</label>
+            <input
+              value={discountCode}
+              onChange={(e) => setDiscountCode(e.target.value)}
+              placeholder="ej. KINARA10-A3F9K2"
+              className={cn(inputClass, "font-mono uppercase")}
+            />
           </div>
 
           <button
