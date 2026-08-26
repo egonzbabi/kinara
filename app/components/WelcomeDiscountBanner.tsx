@@ -40,14 +40,14 @@ export function WelcomeDiscountBanner() {
         </h2>
         <p className="mx-auto mt-3 max-w-[46ch] text-sm text-bone/70">
           Regístrate con tu correo y te mandamos tu código — válido desde{" "}
-          {formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)}.
+          {formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos, sin contar el envío.
         </p>
 
         {success ? (
           <p className="mx-auto mt-7 max-w-[40ch] text-sm font-medium text-bone">
             {data && "emailSent" in data && data.emailSent
-              ? "Listo — revisa tu correo, ahí te mandamos tu código."
-              : "Listo — ya quedó tu código registrado."}
+              ? "Listo — revisa tu correo, ahí te mandamos tu código. Cuando pagues, ingrésalo en el checkout para aplicar tu descuento."
+              : "Listo — ya quedó tu código registrado. Úsalo en el checkout al momento de pagar para aplicar tu descuento."}
           </p>
         ) : (
           <fetcher.Form

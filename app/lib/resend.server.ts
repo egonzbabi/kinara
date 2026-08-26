@@ -366,8 +366,9 @@ function buildWelcomeDiscountHtml(params: { code: string }): string {
             <tr>
               <td style="padding:24px 40px 0;font-family:Helvetica,Arial,sans-serif;text-align:center;">
                 <p style="margin:0;font-size:13px;line-height:1.6;color:${MUTED};">
-                  Válido en compras desde ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)}, solo en tu primera
-                  compra, con este correo. Vence en ${DISCOUNT_EXPIRY_DAYS} días.
+                  Válido en compras desde ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos (sin
+                  contar el envío), solo en tu primera compra, con este correo. Vence en
+                  ${DISCOUNT_EXPIRY_DAYS} días.
                 </p>
               </td>
             </tr>

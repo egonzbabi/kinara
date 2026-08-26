@@ -185,7 +185,7 @@ export async function action({ request }: Route.ActionArgs) {
     if (subtotal < DISCOUNT_MIN_SUBTOTAL_MXN) {
       return Response.json(
         {
-          error: `Ese código requiere una compra mínima de ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos.`,
+          error: `Ese código requiere una compra mínima de ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos, sin contar el envío.`,
         },
         { status: 400 },
       );
