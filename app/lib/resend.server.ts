@@ -18,6 +18,30 @@ import {
  */
 export type SendContactEmailResult = { sent: boolean; error?: string };
 
+/**
+ * Reintenta un envío de Resend hasta 2 veces (con una pausa de 1.5s entre
+ * intentos) antes de darse por vencido — un correo transaccional real
+ * (confirmación de pedido, código de bienvenida) no debería perderse por un
+ * error puntual de Resend (límite de envíos por minuto, timeout, etc.).
+ */
+async function sendWithRetry(
+  send: () => Promise<{ error: { message: string } | null }>,
+): Promise<SendContactEmailResult> {
+  const maxAttempts = 2;
+  let lastError: string | undefined;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const { error } = await send();
+      if (!error) return { sent: true };
+      lastError = error.message;
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : "Error desconocido";
+    }
+    if (attempt < maxAttempts) await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+  return { sent: false, error: lastError };
+}
+
 export async function sendContactEmail(params: {
   name: string;
   email: string;
@@ -30,21 +54,17 @@ export async function sendContactEmail(params: {
   }
 
   const from = process.env.CONTACT_EMAIL_FROM || "KINARA <onboarding@resend.dev>";
+  const resend = new Resend(apiKey);
 
-  try {
-    const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
+  return sendWithRetry(() =>
+    resend.emails.send({
       from,
       to,
       replyTo: params.email,
       subject: `Nuevo mensaje de contacto — ${params.name}`,
       text: `De: ${params.name} <${params.email}>\n\n${params.message}`,
-    });
-    if (error) return { sent: false, error: error.message };
-    return { sent: true };
-  } catch (err) {
-    return { sent: false, error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+    }),
+  );
 }
 
 /**
@@ -264,20 +284,16 @@ export async function sendOrderConfirmationEmail(params: {
   }
 
   const from = process.env.CONTACT_EMAIL_FROM || "KINARA <onboarding@resend.dev>";
+  const resend = new Resend(apiKey);
 
-  try {
-    const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
+  return sendWithRetry(() =>
+    resend.emails.send({
       from,
       to: params.customerEmail,
       subject: `Pedido confirmado · ${params.orderId}`,
       html: buildOrderConfirmationHtml(params),
-    });
-    if (error) return { sent: false, error: error.message };
-    return { sent: true };
-  } catch (err) {
-    return { sent: false, error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+    }),
+  );
 }
 
 /**
@@ -296,20 +312,16 @@ export async function sendWelcomeDiscountEmail(params: {
   }
 
   const from = process.env.CONTACT_EMAIL_FROM || "KINARA <onboarding@resend.dev>";
+  const resend = new Resend(apiKey);
 
-  try {
-    const resend = new Resend(apiKey);
-    const { error } = await resend.emails.send({
+  return sendWithRetry(() =>
+    resend.emails.send({
       from,
       to: params.email,
       subject: `Tu código de ${DISCOUNT_PERCENT}% de descuento · KINARA`,
       html: buildWelcomeDiscountHtml(params),
-    });
-    if (error) return { sent: false, error: error.message };
-    return { sent: true };
-  } catch (err) {
-    return { sent: false, error: err instanceof Error ? err.message : "Error desconocido" };
-  }
+    }),
+  );
 }
 
 function buildWelcomeDiscountHtml(params: { code: string }): string {

@@ -112,5 +112,7 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 069 | [069-ofertas-completas-y-etiqueta-correcta.md](069-ofertas-completas-y-etiqueta-correcta.md) | done | Home/Ofertas: mostrar todos los productos en oferta, siempre con la etiqueta "Oferta" |
 | 070 | [070-descuento-de-bienvenida-registro.md](070-descuento-de-bienvenida-registro.md) | done | 10% de descuento en la primera compra al dejar el correo (mínimo $799) |
 | 071 | [071-admin-productos-nombre-original.md](071-admin-productos-nombre-original.md) | done | Admin/Productos: mostrar el nombre original (slug/URL) debajo del nombre actual |
+| 072 | [072-fix-formatprice-sin-decimales.md](072-fix-formatprice-sin-decimales.md) | done | Fix: formatPrice no mostraba siempre 2 decimales (854.1 en vez de 854.10) |
+| 073 | [073-reintento-correos-resend.md](073-reintento-correos-resend.md) | done | Reintento automático (1 vez) al enviar correos con Resend, para no perder el correo si falla la primera vez |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
