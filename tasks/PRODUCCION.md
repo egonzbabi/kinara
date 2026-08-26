@@ -17,17 +17,19 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 - [ ] Cargar los datos fiscales (RFC, razón social, uso de CFDI) en `pro.skydropx.com` si quieren facturas deducibles de las guías.
 - [ ] Probar cotizaciones reales en producción para varias ciudades (no solo CDMX) — el sandbox demostró ser poco confiable (tarea 030), producción debería ser más estable pero hay que confirmarlo antes de lanzar.
 
-## Resend (correo de contacto)
+## Resend (correo de contacto, confirmación de pedido, código de bienvenida)
 
-- [ ] Crear cuenta en resend.com y generar `RESEND_API_KEY`.
-- [ ] Definir `CONTACT_EMAIL_TO` (a qué correo real deben llegar los mensajes de `/contacto`).
-- [ ] Opcional: verificar un dominio propio en Resend (`kinara.mx` o el que se use) para mandar desde una dirección con marca en vez del remitente de pruebas `onboarding@resend.dev`.
-- [ ] Cargar las 3 variables en `.env` local y en Vercel → Production.
+- [x] Cuenta en resend.com creada, `RESEND_API_KEY` generada y cargada en `.env` local — verificada con un envío real de prueba (2026-08-26).
+- [x] Dominio propio `kinarafit.com.mx` verificado en Resend (DKIM + SPF vía subdominio `send.`, sin conflicto con el correo existente del dominio en GoDaddy) — ya no se manda desde `onboarding@resend.dev`.
+- [x] `CONTACT_EMAIL_FROM=KINARA <contacto@kinarafit.com.mx>` cargado en `.env` local.
+- [ ] Definir `CONTACT_EMAIL_TO` (a qué correo real deben llegar los mensajes de `/contacto` — sigue sin definirse).
+- [ ] Cargar `RESEND_API_KEY` y `CONTACT_EMAIL_FROM` (y `CONTACT_EMAIL_TO` cuando se defina) en Vercel → Production — hoy solo están en `.env` local, así que en el sitio real (`.vercel.app`) estos 3 correos (contacto, confirmación de pedido, código de bienvenida) todavía no se mandan.
 
 ## Dominio y Vercel
 
-- [ ] Decidir y conectar el dominio real (ej. `kinara.mx`) al proyecto de Vercel — hoy el sitio solo vive en `kinara-ecommerce.vercel.app`.
+- [ ] Decidir y conectar el dominio real (`kinarafit.com.mx`) al proyecto de Vercel — hoy el sitio solo vive en `kinara-ecommerce.vercel.app`.
 - [ ] Una vez el dominio esté activo, actualizar los webhooks de Stripe (arriba) para que apunten al dominio real, no al `.vercel.app`.
+- [ ] **Actualizar los 2 enlaces fijos en `app/lib/resend.server.ts`** ("Ver tienda" del correo de confirmación de pedido) — hoy apuntan a `https://kinara-ecommerce.vercel.app/tienda`, hay que cambiarlos al dominio real cuando esté conectado (si no, el botón del correo siempre manda al sitio de Vercel, aunque el cliente ya esté comprando desde el dominio real).
 - [ ] Actualizar todas las variables de entorno de arriba en Vercel → Production, y disparar un redeploy.
 - [ ] Decidir si conectar el repo original del compañero (`maxruizg/Kinara-ecommerce`, remoto `origin`) a Vercel, o mantener el proyecto solo enlazado a `mio` (`egonzbabi/kinara`).
 
