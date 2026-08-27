@@ -242,7 +242,14 @@ function validateInput(input: AdminProductInput) {
 async function insertVariantsAndImages(productId: string, input: AdminProductInput) {
   const variantRows = input.colors.flatMap((color) =>
     color.sizes
-      .filter((s) => s.stock > 0)
+      // El formulario manda las 4 tallas de cada color siempre (aunque el admin
+      // no las haya tocado, ver `sizesFor` en ProductForm), así que una talla en
+      // 0 sin SKU es "no aplica" y se descarta. Pero una talla con SKU cargado sí
+      // se guarda aunque esté en 0 — es como el admin da de alta un color/talla
+      // real que existe físicamente pero todavía no tiene existencias (ver tarea
+      // 076: antes se perdía en silencio, sin poder registrarla para compararla
+      // después en el conteo físico de inventario).
+      .filter((s) => s.stock > 0 || Boolean(s.modelo?.trim()))
       .map((s) => ({
         product_id: productId,
         color_name: color.name,

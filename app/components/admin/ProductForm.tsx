@@ -479,6 +479,11 @@ export function ProductForm({ product, productId, error }: Props) {
                     </div>
                   ))}
                 </div>
+                <p className="mt-1.5 text-[11px] text-muted">
+                  Una talla en 0 sin SKU no se guarda (se asume que no aplica). Para dar de alta un
+                  color/talla que existe pero todavía no tiene existencias, ponle su SKU aunque
+                  dejes el número en 0.
+                </p>
 
                 <div>
                   <label className={labelClass}>
