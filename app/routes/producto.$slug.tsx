@@ -58,7 +58,15 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   // Cuando el color elegido tiene varias fotos, la primera es la principal (mostrada
   // arriba) y el resto aparece en el carrusel de abajo — elegir una foto del
   // carrusel la pasa a ser la principal, sin cambiar de color.
-  const colorPhotos = (color && product.colorGallery?.[color]) || [];
+  //
+  // Antes de que el cliente elija color a propósito, la galería ya muestra la
+  // foto del primer color como principal (ver `activeGalleryIndex` más abajo)
+  // — para que el carrusel de fotos extra coincida con lo que ya se ve, usa
+  // ese mismo color "de vista" (displayColor) en vez de solo el color ya
+  // confirmado (`color`, que sigue siendo `null` hasta que el cliente hace
+  // clic, y es lo que sigue exigiendo el botón de agregar al carrito).
+  const displayColor = color ?? product.colors[0]?.name;
+  const colorPhotos = (displayColor && product.colorGallery?.[displayColor]) || [];
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   useEffect(() => {
     setActivePhotoIndex(0);
@@ -156,7 +164,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                   <button
                     key={src}
                     onClick={() => setActivePhotoIndex(i)}
-                    aria-label={`Ver foto ${i + 1} de ${color}`}
+                    aria-label={`Ver foto ${i + 1} de ${displayColor}`}
                     className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border border-line opacity-80 transition-opacity hover:opacity-100"
                   >
                     <img
