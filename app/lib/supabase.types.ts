@@ -190,6 +190,36 @@ export type Database = {
           },
         ];
       };
+      inventory_counts: {
+        Row: {
+          id: string;
+          product_id: string;
+          color_name: string;
+          size: "S" | "M" | "L" | "XL";
+          system_stock: number;
+          counted_stock: number;
+          counted_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database["public"]["Tables"]["inventory_counts"]["Row"],
+          "id" | "counted_at" | "updated_at"
+        > & {
+          id?: string;
+          counted_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["inventory_counts"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "inventory_counts_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       discount_signups: {
         Row: {
           id: string;

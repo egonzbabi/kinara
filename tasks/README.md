@@ -115,5 +115,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 072 | [072-fix-formatprice-sin-decimales.md](072-fix-formatprice-sin-decimales.md) | done | Fix: formatPrice no mostraba siempre 2 decimales (854.1 en vez de 854.10) |
 | 073 | [073-reintento-correos-resend.md](073-reintento-correos-resend.md) | done | Reintento automático (1 vez) al enviar correos con Resend, para no perder el correo si falla la primera vez |
 | 074 | [074-fix-carrusel-fotos-extra-color.md](074-fix-carrusel-fotos-extra-color.md) | done | Fix: el carrusel de fotos extra del color no aparecía hasta hacer clic explícito en el color |
+| 075 | [075-conteo-fisico-inventario.md](075-conteo-fisico-inventario.md) | done | Conteo físico de inventario: capturar el conteo en papel y comparar contra el sistema |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

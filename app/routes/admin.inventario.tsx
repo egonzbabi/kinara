@@ -128,6 +128,12 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
           >
             Movimientos
           </Link>
+          <Link
+            to="/admin/inventario/conteo"
+            className="btn btn-outline whitespace-nowrap px-5 py-2.5 text-[13px]"
+          >
+            Conteo físico
+          </Link>
           <a
             href={`/admin/inventario/excel?search=${encodeURIComponent(search)}&kind=${encodeURIComponent(kind)}`}
             className="btn btn-outline whitespace-nowrap px-5 py-2.5 text-[13px]"
