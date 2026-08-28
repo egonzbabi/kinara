@@ -97,15 +97,33 @@ export function ProductForm({ product, productId, error }: Props) {
   // mientras se borra para escribir uno nuevo (si no, el auto-llenado lo
   // rellenaba de vuelta con el valor viejo antes de que el admin terminara).
   const [touchedModelos, setTouchedModelos] = useState<Set<string>>(() => new Set());
+  // Tallas en 0 existencias que el admin marcó a propósito como "sí existen"
+  // (tarea 076/077) — solo importa cuando el stock está en 0: con stock > 0 la
+  // talla ya se guarda igual, sin necesidad de esto. Se precarga con las que
+  // ya vinieran guardadas en 0 con SKU (guardadas antes bajo esta misma regla),
+  // para no perderlas sin querer al reabrir el formulario.
+  const [includedZeroStock, setIncludedZeroStock] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    product?.colors.forEach((c, ci) => {
+      c.sizes.forEach((s) => {
+        if (s.stock === 0 && s.modelo) initial.add(`${ci}:${s.size}`);
+      });
+    });
+    return initial;
+  });
 
   // productId de referencia para subir fotos: el producto ya guardado, o un slug
   // provisional derivado del nombre mientras se crea uno nuevo.
   const uploadProductId = productId || slugify(name) || "borrador";
 
-  // Mantiene el modelo (código-color-talla) de cualquier talla con stock al día con
-  // el código base de arriba — tanto para completar una talla nueva sin SKU como
-  // para regenerar el de una talla existente si el admin cambia el código base.
-  // Nunca pisa una talla que el admin ya editó a mano (touchedModelos).
+  // Mantiene el modelo (código-color-talla) de cualquier talla con stock —o
+  // marcada a propósito como "existe sin stock" (includedZeroStock, tarea
+  // 077)— al día con el código base de arriba: completa una talla nueva sin
+  // SKU y regenera el de una existente si el admin cambia el código base.
+  // Nunca pisa una talla que el admin ya editó a mano (touchedModelos). El SKU
+  // es justo lo que hace que una talla en 0 se guarde (ver insertVariantsAndImages,
+  // tarea 076) — por eso al marcar el checkbox de "existe sin stock" alcanza
+  // con esto para que se guarde, sin que el admin tenga que escribir el SKU él mismo.
   useEffect(() => {
     if (!modeloBase) return;
     setColors((prev) => {
@@ -114,7 +132,8 @@ export function ProductForm({ product, productId, error }: Props) {
         const colorCode = modeloColorCode(c.name || "");
         const sizes = c.sizes.map((s) => {
           const key = `${ci}:${s.size}`;
-          if (s.stock > 0 && colorCode && !touchedModelos.has(key)) {
+          const shouldHaveSku = (s.stock > 0 || includedZeroStock.has(key)) && !touchedModelos.has(key);
+          if (shouldHaveSku && colorCode) {
             const generated = `${modeloBase}-${colorCode}-${s.size}`;
             if (s.modelo !== generated) {
               changed = true;
@@ -127,7 +146,7 @@ export function ProductForm({ product, productId, error }: Props) {
       });
       return changed ? next : prev;
     });
-  }, [modeloBase, colors, touchedModelos]);
+  }, [modeloBase, colors, touchedModelos, includedZeroStock]);
 
   const updateColor = (index: number, patch: Partial<AdminColorInput>) => {
     setColors((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
@@ -141,6 +160,42 @@ export function ProductForm({ product, productId, error }: Props) {
           : c,
       ),
     );
+  };
+
+  // "Existe sin stock" (tarea 077): decide si una talla en 0 se guarda o no —
+  // sin esto marcado (y sin SKU manual), la talla se descarta al guardar (ver
+  // insertVariantsAndImages). Al desmarcar, si el admin nunca tocó el SKU a
+  // mano, se lo borra de vuelta — si no, quedaría un SKU generado "fantasma"
+  // que igual la mantendría guardada aunque el admin ya no la quiera.
+  //
+  // `wasIncluded` es el valor que se ve ahora mismo en el checkbox (viene del
+  // render, ver más abajo: Set o ya trae SKU) — no basta con mirar el Set solo,
+  // porque una talla que ya traía SKU de antes (ej. tenía stock y se bajó a 0)
+  // se muestra marcada sin haber pasado nunca por este Set.
+  const toggleIncludedZeroStock = (
+    colorIndex: number,
+    size: SizeStock["size"],
+    wasIncluded: boolean,
+  ) => {
+    const key = `${colorIndex}:${size}`;
+    setIncludedZeroStock((prev) => {
+      const next = new Set(prev);
+      if (wasIncluded) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+    if (wasIncluded && !touchedModelos.has(key)) {
+      setColors((prevColors) =>
+        prevColors.map((c, i) =>
+          i === colorIndex
+            ? { ...c, sizes: c.sizes.map((s) => (s.size === size ? { ...s, modelo: null } : s)) }
+            : c,
+        ),
+      );
+    }
   };
 
   const updateModelo = (colorIndex: number, size: SizeStock["size"], modelo: string) => {
@@ -458,31 +513,49 @@ export function ProductForm({ product, productId, error }: Props) {
                 </div>
 
                 <div className="flex gap-3">
-                  {color.sizes.map((s) => (
-                    <div key={s.size}>
-                      <label className="text-xs text-muted">{s.size}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={s.stock}
-                        onChange={(e) => updateStock(i, s.size, Number(e.target.value))}
-                        className={cn(inputClass, "mt-1 w-16")}
-                      />
-                      <input
-                        type="text"
-                        placeholder="SKU"
-                        title="Código de SKU (código-color-talla)"
-                        value={s.modelo ?? ""}
-                        onChange={(e) => updateModelo(i, s.size, e.target.value)}
-                        className={cn(inputClass, "mt-1 w-24 text-xs")}
-                      />
-                    </div>
-                  ))}
+                  {color.sizes.map((s) => {
+                    const key = `${i}:${s.size}`;
+                    // Ya cargada aunque nunca se haya marcado el checkbox (ej. una talla
+                    // que tenía stock y ya SKU, y el admin la bajó a 0 ahora) cuenta como
+                    // incluida igual — si no, el checkbox se vería sin marcar aunque esa
+                    // talla sí se vaya a guardar (por el SKU que ya trae).
+                    const included = includedZeroStock.has(key) || Boolean(s.modelo);
+                    return (
+                      <div key={s.size}>
+                        <label className="text-xs text-muted">{s.size}</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={s.stock}
+                          onChange={(e) => updateStock(i, s.size, Number(e.target.value))}
+                          className={cn(inputClass, "mt-1 w-16")}
+                        />
+                        <input
+                          type="text"
+                          placeholder="SKU"
+                          title="Código de SKU (código-color-talla)"
+                          value={s.modelo ?? ""}
+                          onChange={(e) => updateModelo(i, s.size, e.target.value)}
+                          className={cn(inputClass, "mt-1 w-24 text-xs")}
+                        />
+                        {s.stock === 0 && (
+                          <label className="mt-1 flex items-center gap-1 text-[11px] text-muted">
+                            <input
+                              type="checkbox"
+                              checked={included}
+                              onChange={() => toggleIncludedZeroStock(i, s.size, included)}
+                            />
+                            Existe sin stock
+                          </label>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 <p className="mt-1.5 text-[11px] text-muted">
-                  Una talla en 0 sin SKU no se guarda (se asume que no aplica). Para dar de alta un
-                  color/talla que existe pero todavía no tiene existencias, ponle su SKU aunque
-                  dejes el número en 0.
+                  Una talla en 0 sin marcar "Existe sin stock" no se guarda (se asume que no
+                  aplica) — márcala para dar de alta un color/talla que existe pero todavía no
+                  tiene existencias; el SKU se completa solo.
                 </p>
 
                 <div>

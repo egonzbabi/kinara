@@ -117,5 +117,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 074 | [074-fix-carrusel-fotos-extra-color.md](074-fix-carrusel-fotos-extra-color.md) | done | Fix: el carrusel de fotos extra del color no aparecía hasta hacer clic explícito en el color |
 | 075 | [075-conteo-fisico-inventario.md](075-conteo-fisico-inventario.md) | done | Conteo físico de inventario: capturar el conteo en papel y comparar contra el sistema |
 | 076 | [076-fix-guardar-talla-sin-existencias.md](076-fix-guardar-talla-sin-existencias.md) | done | Fix: no se podía dar de alta un color/talla con 0 existencias (se perdía en silencio al guardar) |
+| 077 | [077-checkbox-existe-sin-stock.md](077-checkbox-existe-sin-stock.md) | done | Checkbox "Existe sin stock" — dar de alta talla en 0 sin escribir el SKU a mano |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
