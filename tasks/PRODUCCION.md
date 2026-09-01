@@ -56,6 +56,16 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 - [ ] **Tarea 005** (Auditoría UI/UX y accesibilidad WCAG AA) — pendiente.
 - [ ] Re-medir Lighthouse (mobile) contra el dominio real ya en producción (las mediciones locales dieron buenos resultados pero sin la red/CDN real de producción).
 
+## Fase futura: vender también en Amazon, Mercado Libre y Liverpool
+
+No es parte del lanzamiento — el usuario confirmó que por ahora solo importa que el inventario de la página quede bien estructurado; los 3 canales se agregan después, uno a la vez. Se deja anotado aquí el plan para no perderlo:
+
+- **Arquitectura decidida**: Kinara (Supabase) es la única fuente de verdad del stock — es el "hub", los marketplaces son "satélites" que se sincronizan contra ella, nunca llevan su propio conteo independiente. Coincide con la práctica estándar de la industria para multi-canal.
+- El sistema de inventario ya construido (tareas 064/075/076/077/078: movimientos atómicos, conteo físico, bloqueo de edición directa) es compatible con esto sin rediseño — cuando se agregue un canal, sus pedidos bajarán stock por el mismo RPC atómico que ya usa el checkout (`decrement_variant_stock`), y cada cambio de stock se podrá empujar hacia los demás canales igual.
+- Falta por construir cuando se retome (no antes): una tabla de mapeo `producto+color+talla` ↔ SKU/ID de cada marketplace, sincronización de salida (stock → marketplace) y de entrada (pedido del marketplace → stock local).
+- Orden sugerido: probar el patrón completo con un solo canal primero, no los 3 a la vez. Cada uno requiere que el usuario tenga cuenta de vendedor aprobada + acceso de API/developer en esa plataforma (Claude no puede crear esas cuentas) — confirmar eso antes de empezar cada integración.
+- Liverpool tiene API para vendedores vía su Portal de Proveedores, pero la documentación detallada solo es visible una vez aprobado como vendedor ahí — es el canal con más incertidumbre técnica de los 3 hasta no tener acceso real.
+
 ## Notas
 
 - El placeholder de envío de $150 MXN (`SHIPPING_FEE_MXN` en `app/lib/shipping.ts`) no es lo que se cobra por defecto — es solo un fallback si Skydropx no responde (tarea 017). No hace falta tocarlo al pasar a producción, salvo que se quiera ajustar el monto del fallback.

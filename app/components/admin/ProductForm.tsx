@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigation } from "react-router";
+import { Link, useNavigation } from "react-router";
 import { slugify, modeloColorCode } from "~/lib/slug";
 import { SIZE_ORDER } from "~/lib/catalog-constants";
 import { cn } from "~/lib/cn";
@@ -62,6 +62,11 @@ async function uploadImage(
 export function ProductForm({ product, productId, error }: Props) {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
+  // Un producto ya existente no puede cambiar sus existencias desde aquí — solo
+  // por /admin/inventario/movimientos (tarea 078), para evitar errores al editar
+  // otra cosa (precio, fotos, etc.) y tocar el número de stock sin querer. Al
+  // crear un producto nuevo sí se captura el stock inicial aquí normalmente.
+  const isExistingProduct = Boolean(productId);
 
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
@@ -528,7 +533,17 @@ export function ProductForm({ product, productId, error }: Props) {
                           min="0"
                           value={s.stock}
                           onChange={(e) => updateStock(i, s.size, Number(e.target.value))}
-                          className={cn(inputClass, "mt-1 w-16")}
+                          disabled={isExistingProduct}
+                          title={
+                            isExistingProduct
+                              ? "Las existencias de un producto ya creado solo se cambian desde Movimientos"
+                              : undefined
+                          }
+                          className={cn(
+                            inputClass,
+                            "mt-1 w-16",
+                            isExistingProduct && "cursor-not-allowed bg-sand text-muted",
+                          )}
                         />
                         <input
                           type="text"
@@ -556,6 +571,16 @@ export function ProductForm({ product, productId, error }: Props) {
                   Una talla en 0 sin marcar "Existe sin stock" no se guarda (se asume que no
                   aplica) — márcala para dar de alta un color/talla que existe pero todavía no
                   tiene existencias; el SKU se completa solo.
+                  {isExistingProduct && (
+                    <>
+                      {" "}
+                      El número de existencias ya no se edita aquí — usa{" "}
+                      <Link to="/admin/inventario/movimientos" className="underline hover:text-clay">
+                        Movimientos
+                      </Link>{" "}
+                      para registrar entradas/salidas, así queda con fecha y motivo.
+                    </>
+                  )}
                 </p>
 
                 <div>

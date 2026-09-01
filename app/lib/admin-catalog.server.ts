@@ -239,7 +239,21 @@ function validateInput(input: AdminProductInput) {
   }
 }
 
-async function insertVariantsAndImages(productId: string, input: AdminProductInput) {
+/**
+ * `preserveStock`: cuando se pasa (solo al editar un producto ya existente,
+ * ver `updateProduct`), el stock que llega del formulario se IGNORA por
+ * completo para cualquier talla que ya existiera — se usa el stock real que
+ * ya tenía en la base en su lugar. Así el número de existencias solo puede
+ * cambiar por `/admin/inventario/movimientos` (tarea 078), nunca por accidente
+ * al editar nombre/precio/fotos/etc. de un producto. Una talla nueva (que no
+ * existía antes) siempre arranca en 0, sin importar qué número traiga el
+ * formulario — se le sube el stock real después, también por Movimientos.
+ */
+async function insertVariantsAndImages(
+  productId: string,
+  input: AdminProductInput,
+  preserveStock?: Map<string, number>,
+) {
   const variantRows = input.colors.flatMap((color) =>
     color.sizes
       // El formulario manda las 4 tallas de cada color siempre (aunque el admin
@@ -250,14 +264,18 @@ async function insertVariantsAndImages(productId: string, input: AdminProductInp
       // 076: antes se perdía en silencio, sin poder registrarla para compararla
       // después en el conteo físico de inventario).
       .filter((s) => s.stock > 0 || Boolean(s.modelo?.trim()))
-      .map((s) => ({
-        product_id: productId,
-        color_name: color.name,
-        color_hex: color.hex,
-        size: s.size,
-        stock: s.stock,
-        modelo: s.modelo,
-      })),
+      .map((s) => {
+        const key = `${color.name}|${s.size}`;
+        const stock = preserveStock ? (preserveStock.get(key) ?? 0) : s.stock;
+        return {
+          product_id: productId,
+          color_name: color.name,
+          color_hex: color.hex,
+          size: s.size,
+          stock,
+          modelo: s.modelo,
+        };
+      }),
   );
   if (variantRows.length > 0) {
     const { error } = await supabaseAdmin.from("product_variants").insert(variantRows);
@@ -374,6 +392,20 @@ export async function updateProduct(id: string, input: AdminProductInput): Promi
     .eq("id", id);
   if (updateError) throw new Error(`No se pudo actualizar el producto: ${updateError.message}`);
 
+  // El stock real se lee de aquí ANTES de borrar — nunca del formulario (ver
+  // insertVariantsAndImages/tarea 078): editar un producto no debe poder
+  // cambiar existencias por accidente, eso solo pasa por Movimientos.
+  const { data: existingVariants, error: existingVariantsError } = await supabaseAdmin
+    .from("product_variants")
+    .select("color_name, size, stock")
+    .eq("product_id", id);
+  if (existingVariantsError) {
+    throw new Error(`No se pudo leer el stock actual: ${existingVariantsError.message}`);
+  }
+  const preserveStock = new Map<string, number>(
+    (existingVariants ?? []).map((v) => [`${v.color_name}|${v.size}`, v.stock]),
+  );
+
   const { error: deleteVariantsError } = await supabaseAdmin
     .from("product_variants")
     .delete()
@@ -398,7 +430,7 @@ export async function updateProduct(id: string, input: AdminProductInput): Promi
     throw new Error(`No se pudieron limpiar las imágenes previas: ${deleteImagesError.message}`);
   }
 
-  await insertVariantsAndImages(id, input);
+  await insertVariantsAndImages(id, input, preserveStock);
 
   // Limpiar en Storage las imágenes que ya no están en el set nuevo (si no, quedan huérfanas).
   const newUrls = new Set([
