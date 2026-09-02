@@ -122,5 +122,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 079 | [079-carga-inicial-como-movimiento.md](079-carga-inicial-como-movimiento.md) | done | El stock inicial de un producto nuevo también queda registrado en Movimientos |
 | 080 | [080-descargar-diferencias-conteo-excel.md](080-descargar-diferencias-conteo-excel.md) | done | Botón para descargar en Excel las diferencias del conteo físico vs el sistema |
 | 081 | [081-talla-unica-accesorios.md](081-talla-unica-accesorios.md) | done | Talla "Única" para accesorios (productos sin S/M/L/XL) |
+| 082 | [082-talla-unica-checkbox-independiente.md](082-talla-unica-checkbox-independiente.md) | done | Talla única: checkbox independiente de la categoría (guantes sí tienen talla) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

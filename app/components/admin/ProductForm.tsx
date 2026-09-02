@@ -29,21 +29,21 @@ type Props = {
 
 /** Tallas que se muestran para un color: las 4 de ropa, o solo "Única" para
  * accesorios (tarea 081) — un producto de "accesorios" no maneja S/M/L/XL. */
-function sizeTemplate(isAccessory: boolean): readonly SizeStock["size"][] {
-  return isAccessory ? [ACCESSORY_SIZE] : SIZE_ORDER;
+function sizeTemplate(singleSize: boolean): readonly SizeStock["size"][] {
+  return singleSize ? [ACCESSORY_SIZE] : SIZE_ORDER;
 }
 
-function emptyColor(isAccessory: boolean): AdminColorInput {
+function emptyColor(singleSize: boolean): AdminColorInput {
   return {
     name: "",
     hex: "#CCCCCC",
-    sizes: sizeTemplate(isAccessory).map((size) => ({ size, stock: 0, modelo: null })),
+    sizes: sizeTemplate(singleSize).map((size) => ({ size, stock: 0, modelo: null })),
     imageUrls: [],
   };
 }
 
-function sizesFor(sizes: SizeStock[], isAccessory: boolean): SizeStock[] {
-  return sizeTemplate(isAccessory).map(
+function sizesFor(sizes: SizeStock[], singleSize: boolean): SizeStock[] {
+  return sizeTemplate(singleSize).map(
     (size) => sizes.find((s) => s.size === size) ?? { size, stock: 0, modelo: null },
   );
 }
@@ -78,9 +78,13 @@ export function ProductForm({ product, productId, error }: Props) {
   const [slug, setSlug] = useState(product?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(product));
   const [category, setCategory] = useState(product?.category ?? "mujer");
-  // Un accesorio no maneja tallas S/M/L/XL — cada color solo tiene "Única"
-  // (tarea 081). No es un checkbox aparte: se deriva directo de la categoría.
-  const isAccessory = category === "accesorios";
+  // "Talla única" es una elección aparte de la categoría (tarea 082) — no todo
+  // accesorio es de talla única (ej. unos guantes sí traen S/M/L), así que no
+  // se deriva de "category === accesorios", el admin lo marca a propósito.
+  // Al editar, se detecta solo si el producto ya venía guardado así.
+  const [singleSize, setSingleSize] = useState(
+    () => product?.colors.some((c) => c.sizes.some((s) => s.size === ACCESSORY_SIZE)) ?? false,
+  );
   const [kind, setKind] = useState(product?.kind ?? "");
   const [price, setPrice] = useState(product?.price?.toString() ?? "");
   const [compareAt, setCompareAt] = useState(product?.compareAt?.toString() ?? "");
@@ -98,18 +102,18 @@ export function ProductForm({ product, productId, error }: Props) {
   // campos separados. Si se marca más de una, gana en este orden: Nuevo, Best-seller, Oferta.
   const badge = isNew ? "Nuevo" : isBestseller ? "Best-seller" : isOnSale ? "Oferta" : "";
   const [colors, setColors] = useState<AdminColorInput[]>(
-    product?.colors.map((c) => ({ ...c, sizes: sizesFor(c.sizes, isAccessory) })) ?? [
-      emptyColor(isAccessory),
+    product?.colors.map((c) => ({ ...c, sizes: sizesFor(c.sizes, singleSize) })) ?? [
+      emptyColor(singleSize),
     ],
   );
-  // Si se cambia la categoría a/desde "accesorios", re-arma las tallas de
-  // cada color al molde correspondiente (4 tallas <-> solo "Única") — sin
-  // esto, cambiar la categoría dejaría el formulario con tallas que ya no
-  // aplican, o sin la única que sí aplica.
+  // Si se marca/desmarca "Talla única", re-arma las tallas de cada color al
+  // molde correspondiente (4 tallas <-> solo "Única") — sin esto, cambiar el
+  // toggle dejaría el formulario con tallas que ya no aplican, o sin la única
+  // que sí aplica.
   useEffect(() => {
-    setColors((prev) => prev.map((c) => ({ ...c, sizes: sizesFor(c.sizes, isAccessory) })));
+    setColors((prev) => prev.map((c) => ({ ...c, sizes: sizesFor(c.sizes, singleSize) })));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAccessory]);
+  }, [singleSize]);
 
   const [gallery, setGallery] = useState<string[]>(product?.gallery ?? []);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -501,11 +505,28 @@ export function ProductForm({ product, productId, error }: Props) {
           <h2 className="font-display text-lg text-espresso">Colores</h2>
           <button
             type="button"
-            onClick={() => setColors((prev) => [...prev, emptyColor(isAccessory)])}
+            onClick={() => setColors((prev) => [...prev, emptyColor(singleSize)])}
             className="btn btn-outline px-4 py-2 text-[13px]"
           >
             + Agregar color
           </button>
+        </div>
+
+        <div className="mt-4">
+          <label className="flex items-center gap-2 text-sm text-espresso">
+            <input
+              type="checkbox"
+              name="singleSize"
+              checked={singleSize}
+              onChange={(e) => setSingleSize(e.target.checked)}
+            />
+            Talla única (sin S/M/L/XL)
+          </label>
+          <p className="ml-6 text-xs text-muted">
+            Para productos que no manejan tallas de ropa, como bolsas o gorras. No todos los
+            accesorios aplican — unos guantes o una gorra ajustable, por ejemplo, sí pueden tener
+            S/M/L/XL, así que esto se marca aparte de la categoría.
+          </p>
         </div>
 
         <div className="mt-4 flex flex-col gap-4">

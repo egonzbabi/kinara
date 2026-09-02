@@ -31,7 +31,7 @@ Se puede dar de alta un accesorio con una sola talla ("Única") por color, tanto
 
 ## Restricciones específicas de esta tarea
 
-- **Se deriva de la categoría, no es una opción manual**: un producto de categoría "accesorios" siempre usa talla única; no hay forma de que un accesorio tenga tallas S/M/L/XL reales en este cambio — si algún día se necesita eso (ej. guantes con talla), sería una decisión aparte, no cubierta aquí.
+- ~~Se deriva de la categoría, no es una opción manual~~ **Corregido en la tarea 082**: se descubrió que no todo accesorio es de talla única (ej. guantes sí traen S/M/L) — ahora es un checkbox aparte ("Talla única"), independiente de la categoría. Ver tarea 082 para el detalle.
 - **No se tocó el flujo de "Tallas reducidas"**: el toggle `showReducedSizesNotice` (ya existente por producto) sigue funcionando igual — se verificó que, apagado, un accesorio de talla única no muestra ningún texto de "Tallas reducidas" junto a "Talla" (se probó con un producto real).
 - **`/admin/inventario` y `/admin/inventario/conteo` ahora siempre muestran 5 columnas** (S/M/L/XL/Única) en vez de 4 — es un cambio visual menor en pantallas internas de admin (no en el sitio público), necesario para que el stock de accesorios sea visible ahí; se optó por esto en vez de columnas dinámicas por simplicidad, dado que ya era el criterio existente ("mostrar siempre todas las tallas posibles").
 
