@@ -33,7 +33,7 @@ export type Database = {
           product_id: string;
           color_name: string;
           color_hex: string | null;
-          size: "S" | "M" | "L" | "XL";
+          size: "S" | "M" | "L" | "XL" | "Única";
           stock: number;
           modelo: string | null;
         };
@@ -161,7 +161,7 @@ export type Database = {
           id: string;
           product_id: string;
           color_name: string;
-          size: "S" | "M" | "L" | "XL";
+          size: "S" | "M" | "L" | "XL" | "Única";
           type: "entrada" | "salida";
           quantity: number;
           concept: string;
@@ -195,7 +195,7 @@ export type Database = {
           id: string;
           product_id: string;
           color_name: string;
-          size: "S" | "M" | "L" | "XL";
+          size: "S" | "M" | "L" | "XL" | "Única";
           system_stock: number;
           counted_stock: number;
           counted_at: string;

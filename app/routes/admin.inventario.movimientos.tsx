@@ -8,6 +8,7 @@ import {
   listInventoryMovements,
   type MovementType,
 } from "~/lib/admin-inventory-movements.server";
+import type { ProductSize } from "~/lib/catalog-constants";
 import { cn } from "~/lib/cn";
 
 export function meta(_: Route.MetaArgs) {
@@ -56,7 +57,7 @@ export async function action({ request }: Route.ActionArgs) {
     const resultingStock = await createInventoryMovement({
       productId,
       colorName,
-      size: size as "S" | "M" | "L" | "XL",
+      size: size as ProductSize,
       type,
       quantity,
       concept,

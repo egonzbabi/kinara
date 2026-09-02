@@ -1,10 +1,10 @@
 import { supabaseAdmin } from "./supabase.server";
 import { slugify, generateShortId, baseSkuFrom } from "./slug";
-import { VALID_BADGES } from "./catalog-constants";
+import { VALID_BADGES, type ProductSize } from "./catalog-constants";
 
 const BUCKET = "product-images";
 
-export type SizeStock = { size: "S" | "M" | "L" | "XL"; stock: number; modelo: string | null };
+export type SizeStock = { size: ProductSize; stock: number; modelo: string | null };
 
 export type AdminColorInput = {
   name: string;
@@ -66,7 +66,7 @@ type ProductRow = {
   product_variants: {
     color_name: string;
     color_hex: string | null;
-    size: "S" | "M" | "L" | "XL";
+    size: ProductSize;
     stock: number;
     modelo: string | null;
   }[];
@@ -125,7 +125,7 @@ export type InventoryRow = {
   kind: string;
   isDraft: boolean;
   colorName: string;
-  size: "S" | "M" | "L" | "XL";
+  size: ProductSize;
   sku: string | null;
   stock: number;
   price: number | null;

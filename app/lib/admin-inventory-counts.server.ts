@@ -1,10 +1,11 @@
 import ExcelJS from "exceljs";
 import { supabaseAdmin } from "./supabase.server";
+import type { ProductSize } from "./catalog-constants";
 
 export type InventoryCount = {
   productId: string;
   colorName: string;
-  size: "S" | "M" | "L" | "XL";
+  size: ProductSize;
   systemStock: number;
   countedStock: number;
   countedAt: string;
@@ -14,7 +15,7 @@ export type InventoryCount = {
 export type InventoryCountInput = {
   productId: string;
   colorName: string;
-  size: "S" | "M" | "L" | "XL";
+  size: ProductSize;
   systemStock: number;
   countedStock: number;
 };
@@ -73,7 +74,7 @@ export type InventoryCountDiff = {
   productName: string;
   productSlug: string;
   colorName: string;
-  size: "S" | "M" | "L" | "XL";
+  size: ProductSize;
   sku: string;
   systemStock: number;
   countedStock: number;

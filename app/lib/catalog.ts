@@ -1,6 +1,10 @@
 import { supabase } from "./supabase";
 import type { Product, ColorOption } from "~/data/products";
-import { SIZE_ORDER, VALID_BADGES as VALID_BADGES_LIST } from "./catalog-constants";
+import { SIZE_ORDER, ACCESSORY_SIZE, VALID_BADGES as VALID_BADGES_LIST } from "./catalog-constants";
+
+// Orden en el que se evalúan/muestran las tallas disponibles de un producto —
+// las de ropa primero, "Única" (accesorios) al final (tarea 081).
+const ALL_SIZES = [...SIZE_ORDER, ACCESSORY_SIZE];
 
 const VALID_BADGES = new Set<string>(VALID_BADGES_LIST);
 
@@ -42,7 +46,7 @@ function mapRow(row: ProductRow): Product {
     if (v.modelo) skuByVariant[`${v.color_name}|${v.size}`] = v.modelo;
   }
 
-  const sizes = SIZE_ORDER.filter((s) => (stockBySize.get(s) ?? 0) > 0);
+  const sizes = ALL_SIZES.filter((s) => (stockBySize.get(s) ?? 0) > 0);
 
   const genericImages = row.product_images
     .filter((img) => img.color_name === null)

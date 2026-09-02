@@ -121,5 +121,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 078 | [078-bloquear-existencias-fuera-de-movimientos.md](078-bloquear-existencias-fuera-de-movimientos.md) | done | Bloquea el stock al editar un producto — solo se cambia desde Movimientos |
 | 079 | [079-carga-inicial-como-movimiento.md](079-carga-inicial-como-movimiento.md) | done | El stock inicial de un producto nuevo también queda registrado en Movimientos |
 | 080 | [080-descargar-diferencias-conteo-excel.md](080-descargar-diferencias-conteo-excel.md) | done | Botón para descargar en Excel las diferencias del conteo físico vs el sistema |
+| 081 | [081-talla-unica-accesorios.md](081-talla-unica-accesorios.md) | done | Talla "Única" para accesorios (productos sin S/M/L/XL) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

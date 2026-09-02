@@ -1,11 +1,12 @@
 import { supabaseAdmin } from "./supabase.server";
+import type { ProductSize } from "./catalog-constants";
 
 export type MovementType = "entrada" | "salida";
 
 export type InventoryMovementInput = {
   productId: string;
   colorName: string;
-  size: "S" | "M" | "L" | "XL";
+  size: ProductSize;
   type: MovementType;
   quantity: number;
   concept: string;
@@ -20,7 +21,7 @@ export type InventoryMovement = {
   productId: string;
   productName: string;
   colorName: string;
-  size: "S" | "M" | "L" | "XL";
+  size: ProductSize;
   type: MovementType;
   quantity: number;
   concept: string;
@@ -43,7 +44,7 @@ export async function listInventoryMovements(): Promise<InventoryMovement[]> {
     id: string;
     product_id: string;
     color_name: string;
-    size: "S" | "M" | "L" | "XL";
+    size: ProductSize;
     type: MovementType;
     quantity: number;
     concept: string;

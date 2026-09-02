@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigation } from "react-router";
 import { slugify, modeloColorCode } from "~/lib/slug";
-import { SIZE_ORDER } from "~/lib/catalog-constants";
+import { SIZE_ORDER, ACCESSORY_SIZE } from "~/lib/catalog-constants";
 import { cn } from "~/lib/cn";
 import type { AdminProductInput, AdminColorInput, SizeStock } from "~/lib/admin-catalog.server";
 
@@ -27,17 +27,23 @@ type Props = {
   error?: string;
 };
 
-function emptyColor(): AdminColorInput {
+/** Tallas que se muestran para un color: las 4 de ropa, o solo "Única" para
+ * accesorios (tarea 081) — un producto de "accesorios" no maneja S/M/L/XL. */
+function sizeTemplate(isAccessory: boolean): readonly SizeStock["size"][] {
+  return isAccessory ? [ACCESSORY_SIZE] : SIZE_ORDER;
+}
+
+function emptyColor(isAccessory: boolean): AdminColorInput {
   return {
     name: "",
     hex: "#CCCCCC",
-    sizes: SIZE_ORDER.map((size) => ({ size, stock: 0, modelo: null })),
+    sizes: sizeTemplate(isAccessory).map((size) => ({ size, stock: 0, modelo: null })),
     imageUrls: [],
   };
 }
 
-function sizesFor(sizes: SizeStock[]): SizeStock[] {
-  return SIZE_ORDER.map(
+function sizesFor(sizes: SizeStock[], isAccessory: boolean): SizeStock[] {
+  return sizeTemplate(isAccessory).map(
     (size) => sizes.find((s) => s.size === size) ?? { size, stock: 0, modelo: null },
   );
 }
@@ -72,6 +78,9 @@ export function ProductForm({ product, productId, error }: Props) {
   const [slug, setSlug] = useState(product?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(product));
   const [category, setCategory] = useState(product?.category ?? "mujer");
+  // Un accesorio no maneja tallas S/M/L/XL — cada color solo tiene "Única"
+  // (tarea 081). No es un checkbox aparte: se deriva directo de la categoría.
+  const isAccessory = category === "accesorios";
   const [kind, setKind] = useState(product?.kind ?? "");
   const [price, setPrice] = useState(product?.price?.toString() ?? "");
   const [compareAt, setCompareAt] = useState(product?.compareAt?.toString() ?? "");
@@ -89,8 +98,19 @@ export function ProductForm({ product, productId, error }: Props) {
   // campos separados. Si se marca más de una, gana en este orden: Nuevo, Best-seller, Oferta.
   const badge = isNew ? "Nuevo" : isBestseller ? "Best-seller" : isOnSale ? "Oferta" : "";
   const [colors, setColors] = useState<AdminColorInput[]>(
-    product?.colors.map((c) => ({ ...c, sizes: sizesFor(c.sizes) })) ?? [emptyColor()],
+    product?.colors.map((c) => ({ ...c, sizes: sizesFor(c.sizes, isAccessory) })) ?? [
+      emptyColor(isAccessory),
+    ],
   );
+  // Si se cambia la categoría a/desde "accesorios", re-arma las tallas de
+  // cada color al molde correspondiente (4 tallas <-> solo "Única") — sin
+  // esto, cambiar la categoría dejaría el formulario con tallas que ya no
+  // aplican, o sin la única que sí aplica.
+  useEffect(() => {
+    setColors((prev) => prev.map((c) => ({ ...c, sizes: sizesFor(c.sizes, isAccessory) })));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAccessory]);
+
   const [gallery, setGallery] = useState<string[]>(product?.gallery ?? []);
   const [uploadError, setUploadError] = useState<string | null>(null);
   // Cuenta subidas de foto en curso — sin esto, "Guardar" podía enviar el
@@ -481,7 +501,7 @@ export function ProductForm({ product, productId, error }: Props) {
           <h2 className="font-display text-lg text-espresso">Colores</h2>
           <button
             type="button"
-            onClick={() => setColors((prev) => [...prev, emptyColor()])}
+            onClick={() => setColors((prev) => [...prev, emptyColor(isAccessory)])}
             className="btn btn-outline px-4 py-2 text-[13px]"
           >
             + Agregar color

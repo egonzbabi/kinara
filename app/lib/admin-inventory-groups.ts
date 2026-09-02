@@ -1,7 +1,10 @@
 import type { InventoryRow } from "./admin-catalog.server";
 import { baseSkuFrom } from "./slug";
+import { SIZE_ORDER as APPAREL_SIZE_ORDER, ACCESSORY_SIZE } from "./catalog-constants";
 
-export const SIZE_ORDER = ["S", "M", "L", "XL"] as const;
+// La "Única" de accesorios se agrega como una columna más al final (tarea
+// 081) — para no rediseñar la matriz por producto según si tiene tallas o no.
+export const SIZE_ORDER = [...APPAREL_SIZE_ORDER, ACCESSORY_SIZE] as const;
 
 export type ProductGroup = {
   productId: string;

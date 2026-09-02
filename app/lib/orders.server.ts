@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import { supabaseAdmin } from "./supabase.server";
 import { sendOrderConfirmationEmail } from "./resend.server";
 import { markDiscountCodeUsed } from "./discount-signups.server";
+import type { ProductSize } from "./catalog-constants";
 
 export interface OrderItem {
   productId: string;
@@ -85,7 +86,7 @@ async function decrementStockForItems(items: OrderItem[]) {
       .select("id")
       .eq("product_id", item.productId)
       .eq("color_name", item.colorName ?? "")
-      .eq("size", item.size as "S" | "M" | "L" | "XL")
+      .eq("size", item.size as ProductSize)
       .maybeSingle();
 
     if (error || !variant) {
