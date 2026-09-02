@@ -291,6 +291,12 @@ export default function AdminInventarioConteo({ loaderData }: Route.ComponentPro
           </select>
         </div>
         <div className="flex gap-3">
+          <a
+            href="/admin/inventario/conteo/excel"
+            className="btn btn-outline whitespace-nowrap px-5 py-2.5 text-[13px]"
+          >
+            Descargar diferencias (Excel)
+          </a>
           <button
             type="button"
             onClick={handleClear}

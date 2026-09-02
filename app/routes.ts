@@ -30,6 +30,7 @@ export default [
     route("admin/inventario/pdf", "routes/admin.inventario.pdf.tsx"),
     route("admin/inventario/movimientos", "routes/admin.inventario.movimientos.tsx"),
     route("admin/inventario/conteo", "routes/admin.inventario.conteo.tsx"),
+    route("admin/inventario/conteo/excel", "routes/admin.inventario.conteo.excel.tsx"),
   ]),
 
   route("api/create-checkout-session", "routes/api.create-checkout-session.tsx"),
