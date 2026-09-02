@@ -14,7 +14,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  await requireAdmin(request);
+  const { adminId, adminName } = await requireAdmin(request);
   const form = await request.formData();
 
   const compareAtRaw = String(form.get("compareAt") || "");
@@ -42,7 +42,7 @@ export async function action({ request }: Route.ActionArgs) {
 
   let id: string;
   try {
-    id = await createProduct(input);
+    id = await createProduct(input, { adminId, adminName });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "No se pudo crear el producto." };
   }

@@ -119,5 +119,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 076 | [076-fix-guardar-talla-sin-existencias.md](076-fix-guardar-talla-sin-existencias.md) | done | Fix: no se podía dar de alta un color/talla con 0 existencias (se perdía en silencio al guardar) |
 | 077 | [077-checkbox-existe-sin-stock.md](077-checkbox-existe-sin-stock.md) | done | Checkbox "Existe sin stock" — dar de alta talla en 0 sin escribir el SKU a mano |
 | 078 | [078-bloquear-existencias-fuera-de-movimientos.md](078-bloquear-existencias-fuera-de-movimientos.md) | done | Bloquea el stock al editar un producto — solo se cambia desde Movimientos |
+| 079 | [079-carga-inicial-como-movimiento.md](079-carga-inicial-como-movimiento.md) | done | El stock inicial de un producto nuevo también queda registrado en Movimientos |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

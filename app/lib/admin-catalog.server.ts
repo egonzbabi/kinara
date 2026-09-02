@@ -302,9 +302,14 @@ async function insertVariantsAndImages(
     const { error } = await supabaseAdmin.from("product_images").insert(imageRows);
     if (error) throw new Error(`No se pudieron guardar las imágenes: ${error.message}`);
   }
+
+  return variantRows;
 }
 
-export async function createProduct(input: AdminProductInput): Promise<string> {
+export async function createProduct(
+  input: AdminProductInput,
+  admin: { adminId: string | null; adminName: string },
+): Promise<string> {
   validateInput(input);
 
   const safeSlug = slugify(input.slug);
@@ -351,7 +356,36 @@ export async function createProduct(input: AdminProductInput): Promise<string> {
   if (insertError) throw new Error(`No se pudo crear el producto: ${insertError.message}`);
 
   try {
-    await insertVariantsAndImages(id, input);
+    const variantRows = await insertVariantsAndImages(id, input);
+    // Tarea 079: el stock inicial también queda registrado en Movimientos (tipo
+    // "entrada", concepto "Carga inicial de producto") — así ningún número de
+    // existencias existe sin un origen auditable, ni siquiera el primero. Se
+    // inserta directo (no vía register_inventory_movement) porque esa función
+    // espera una variante YA existente para bloquearla/ajustarla; aquí la
+    // variante se acaba de crear con el stock ya puesto, no hay nada que ajustar.
+    const today = new Date().toISOString().slice(0, 10);
+    const movementRows = variantRows
+      .filter((v) => v.stock > 0)
+      .map((v) => ({
+        product_id: id,
+        color_name: v.color_name,
+        size: v.size,
+        type: "entrada" as const,
+        quantity: v.stock,
+        concept: "Carga inicial de producto",
+        movement_date: today,
+        resulting_stock: v.stock,
+        admin_id: admin.adminId,
+        admin_name: admin.adminName,
+      }));
+    if (movementRows.length > 0) {
+      const { error: movementError } = await supabaseAdmin
+        .from("inventory_movements")
+        .insert(movementRows);
+      if (movementError) {
+        throw new Error(`No se pudo registrar la carga inicial en Movimientos: ${movementError.message}`);
+      }
+    }
   } catch (err) {
     // No dejar un producto huérfano visible en la tienda si falló algo después.
     await supabaseAdmin.from("products").delete().eq("id", id);
