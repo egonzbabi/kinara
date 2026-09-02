@@ -53,6 +53,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
     () => params.get("tipo")?.split(",").filter(Boolean) ?? [],
     [params],
   );
+  const onlyOnSale = params.get("oferta") === "1";
 
   // Filtro por familia de color (ej. "Rosa" agrupa Rosa/Fresa/Melon/Palo De
   // Rosa/Lila), no por cada nombre exacto de color del catálogo — ver
@@ -107,6 +108,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
         p.colors.some((c) => colors.includes(getColorFamily(c.name))),
       );
     if (types.length) list = list.filter((p) => types.includes(p.kind));
+    if (onlyOnSale) list = list.filter((p) => p.isOnSale);
 
     switch (sort) {
       case "precio-asc":
@@ -124,7 +126,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
         );
     }
     return list;
-  }, [products, cat, sizes, colors, types, sort]);
+  }, [products, cat, sizes, colors, types, onlyOnSale, sort]);
 
   const heading =
     types.length === 1

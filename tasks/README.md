@@ -123,5 +123,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 080 | [080-descargar-diferencias-conteo-excel.md](080-descargar-diferencias-conteo-excel.md) | done | Botón para descargar en Excel las diferencias del conteo físico vs el sistema |
 | 081 | [081-talla-unica-accesorios.md](081-talla-unica-accesorios.md) | done | Talla "Única" para accesorios (productos sin S/M/L/XL) |
 | 082 | [082-talla-unica-checkbox-independiente.md](082-talla-unica-checkbox-independiente.md) | done | Talla única: checkbox independiente de la categoría (guantes sí tienen talla) |
+| 083 | [083-ofertas-en-menu-principal.md](083-ofertas-en-menu-principal.md) | done | Enlace "Ofertas" en el menú principal, filtra /tienda por isOnSale |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

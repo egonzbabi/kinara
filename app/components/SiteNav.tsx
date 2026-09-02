@@ -5,6 +5,7 @@ import { cn } from "~/lib/cn";
 
 export const LINKS = [
   { to: "/tienda", label: "Tienda" },
+  { to: "/tienda?oferta=1", label: "Ofertas" },
   { to: "/tienda?tipo=Top", label: "Top" },
   { to: "/tienda?tipo=Bottom", label: "Bottom" },
   { to: "/tienda?tipo=Legging", label: "Legging" },
