@@ -159,6 +159,7 @@ export type Database = {
       inventory_movements: {
         Row: {
           id: string;
+          folio: number;
           product_id: string;
           color_name: string;
           size: "S" | "M" | "L" | "XL" | "Única";
@@ -173,9 +174,10 @@ export type Database = {
         };
         Insert: Omit<
           Database["public"]["Tables"]["inventory_movements"]["Row"],
-          "id" | "created_at" | "resulting_stock"
+          "id" | "folio" | "created_at" | "resulting_stock"
         > & {
           id?: string;
+          folio?: number;
           created_at?: string;
           resulting_stock?: number;
         };

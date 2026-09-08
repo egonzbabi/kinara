@@ -18,6 +18,9 @@ export type InventoryMovementInput = {
 
 export type InventoryMovement = {
   id: string;
+  /** Número de referencia corto y secuencial (#1, #2...) — para citar un
+   * movimiento puntual (ej. al aclarar algo por teléfono) sin usar el uuid. */
+  folio: number;
   productId: string;
   productName: string;
   colorName: string;
@@ -42,6 +45,7 @@ export async function listInventoryMovements(): Promise<InventoryMovement[]> {
 
   return (data as unknown as Array<{
     id: string;
+    folio: number;
     product_id: string;
     color_name: string;
     size: ProductSize;
@@ -55,6 +59,7 @@ export async function listInventoryMovements(): Promise<InventoryMovement[]> {
     products: { name: string } | null;
   }>).map((row) => ({
     id: row.id,
+    folio: row.folio,
     productId: row.product_id,
     productName: row.products?.name ?? "(producto eliminado)",
     colorName: row.color_name,
@@ -71,8 +76,10 @@ export async function listInventoryMovements(): Promise<InventoryMovement[]> {
 
 /** Ajusta el stock de la variante y registra el movimiento en una sola transacción
  * (RPC `register_inventory_movement`, mismo patrón atómico que el checkout). Devuelve
- * el stock resultante para mostrarlo de inmediato en la confirmación. */
-export async function createInventoryMovement(input: InventoryMovementInput): Promise<number> {
+ * el stock resultante y el folio, para mostrarlos de inmediato en la confirmación. */
+export async function createInventoryMovement(
+  input: InventoryMovementInput,
+): Promise<{ resultingStock: number; folio: number }> {
   const { data, error } = await supabaseAdmin
     .rpc("register_inventory_movement", {
       p_product_id: input.productId,
@@ -87,5 +94,6 @@ export async function createInventoryMovement(input: InventoryMovementInput): Pr
     })
     .single();
   if (error) throw new Error(error.message);
-  return (data as { resulting_stock: number }).resulting_stock;
+  const row = data as { resulting_stock: number; folio: number };
+  return { resultingStock: row.resulting_stock, folio: row.folio };
 }

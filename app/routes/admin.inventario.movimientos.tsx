@@ -21,7 +21,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   return { rows, movements };
 }
 
-type ActionData = { error: string } | { success: true; resultingStock: number };
+type ActionData =
+  | { error: string }
+  | { success: true; resultingStock: number; folio: number };
 
 export async function action({ request }: Route.ActionArgs) {
   const { adminId, adminName } = await requireAdmin(request);
@@ -54,7 +56,7 @@ export async function action({ request }: Route.ActionArgs) {
   try {
     // adminId/adminName vienen de la sesión verificada en el servidor (requireAdmin),
     // no del formulario — así no se puede falsear quién hizo el movimiento.
-    const resultingStock = await createInventoryMovement({
+    const { resultingStock, folio } = await createInventoryMovement({
       productId,
       colorName,
       size: size as ProductSize,
@@ -65,7 +67,7 @@ export async function action({ request }: Route.ActionArgs) {
       adminId,
       adminName,
     });
-    return { success: true, resultingStock } satisfies ActionData;
+    return { success: true, resultingStock, folio } satisfies ActionData;
   } catch (err) {
     return {
       error: err instanceof Error ? err.message : "No se pudo registrar el movimiento.",
@@ -158,6 +160,7 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
   const errorMessage = fetcher.data && "error" in fetcher.data ? fetcher.data.error : null;
   const resultingStock =
     fetcher.data && "success" in fetcher.data ? fetcher.data.resultingStock : null;
+  const newFolio = fetcher.data && "success" in fetcher.data ? fetcher.data.folio : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -311,7 +314,8 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
           {errorMessage && <p className="text-sm font-medium text-clay">{errorMessage}</p>}
           {showSuccess && resultingStock !== null && (
             <p className="text-sm font-medium text-espresso">
-              Movimiento registrado — nuevo stock: {resultingStock} unidades.
+              Movimiento <span className="font-mono">#{newFolio}</span> registrado — nuevo stock:{" "}
+              {resultingStock} unidades.
             </p>
           )}
 
@@ -337,6 +341,9 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
             <table className="w-full">
               <thead>
                 <tr className="border-b border-line">
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                    Ref.
+                  </th>
                   <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
                     Fecha del movimiento
                   </th>
@@ -366,6 +373,9 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
               <tbody>
                 {movements.map((m) => (
                   <tr key={m.id} className="border-b border-line last:border-0 hover:bg-sand/60">
+                    <td className="whitespace-nowrap px-5 py-3 font-mono text-sm text-muted">
+                      #{m.folio}
+                    </td>
                     <td className="whitespace-nowrap px-5 py-3 text-sm text-muted">
                       {formatMovementDate(m.movementDate)}
                     </td>

@@ -124,5 +124,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 081 | [081-talla-unica-accesorios.md](081-talla-unica-accesorios.md) | done | Talla "Única" para accesorios (productos sin S/M/L/XL) |
 | 082 | [082-talla-unica-checkbox-independiente.md](082-talla-unica-checkbox-independiente.md) | done | Talla única: checkbox independiente de la categoría (guantes sí tienen talla) |
 | 083 | [083-ofertas-en-menu-principal.md](083-ofertas-en-menu-principal.md) | done | Enlace "Ofertas" en el menú principal, filtra /tienda por isOnSale |
+| 084 | [084-folio-movimientos-inventario.md](084-folio-movimientos-inventario.md) | done | Número de referencia (folio) secuencial en cada movimiento de inventario |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
