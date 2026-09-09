@@ -305,6 +305,12 @@ export function ProductForm({ product, productId, error }: Props) {
     }
   };
 
+  // Reutiliza una foto ya subida a algún color como foto genérica de galería
+  // — sin volver a subir el archivo, solo agrega la misma URL (tarea 086).
+  const addGalleryFromColor = (url: string) => {
+    setGallery((prev) => (prev.includes(url) ? prev : [...prev, url]));
+  };
+
   const moveGalleryImage = (index: number, dir: -1 | 1) => {
     setGallery((prev) => {
       const next = [...prev];
@@ -761,6 +767,46 @@ export function ProductForm({ product, productId, error }: Props) {
           }}
           className="mt-4 text-sm"
         />
+
+        {colors.some((c) => c.imageUrls.length > 0) && (
+          <div className="mt-5 border-t border-line pt-4">
+            <p className={labelClass}>O elige una foto ya subida arriba, por color</p>
+            <p className="mt-1 text-xs text-muted">
+              Reutiliza la misma foto sin volver a subirla — haz clic para agregarla a la galería.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-4">
+              {colors
+                .filter((c) => c.imageUrls.length > 0)
+                .map((c) => (
+                  <div key={c.name || c.hex} className="flex flex-col gap-1.5">
+                    <span className="text-[11px] text-muted">{c.name || "(sin nombre)"}</span>
+                    <div className="flex flex-wrap gap-2">
+                      {c.imageUrls.map((url) => {
+                        const alreadyAdded = gallery.includes(url);
+                        return (
+                          <button
+                            key={url}
+                            type="button"
+                            disabled={alreadyAdded}
+                            onClick={() => addGalleryFromColor(url)}
+                            title={alreadyAdded ? "Ya está en la galería" : `Agregar foto de ${c.name}`}
+                            className={cn(
+                              "relative h-16 w-14 overflow-hidden rounded-lg border",
+                              alreadyAdded
+                                ? "cursor-not-allowed border-line opacity-40"
+                                : "border-transparent hover:border-clay",
+                            )}
+                          >
+                            <img src={url} alt="" className="h-full w-full object-cover" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <button

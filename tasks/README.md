@@ -126,5 +126,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 083 | [083-ofertas-en-menu-principal.md](083-ofertas-en-menu-principal.md) | done | Enlace "Ofertas" en el menú principal, filtra /tienda por isOnSale |
 | 084 | [084-folio-movimientos-inventario.md](084-folio-movimientos-inventario.md) | done | Número de referencia (folio) secuencial en cada movimiento de inventario |
 | 085 | [085-permitir-stock-inicial-color-nuevo.md](085-permitir-stock-inicial-color-nuevo.md) | done | Permite cargar stock real al agregar un color/talla nueva a un producto existente |
+| 086 | [086-galeria-elegir-foto-de-color.md](086-galeria-elegir-foto-de-color.md) | done | Galería genérica: elegir una foto ya subida a un color, sin volver a subirla |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
