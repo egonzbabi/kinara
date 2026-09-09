@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigation } from "react-router";
 import { slugify, modeloColorCode } from "~/lib/slug";
 import { SIZE_ORDER, ACCESSORY_SIZE } from "~/lib/catalog-constants";
@@ -73,6 +73,20 @@ export function ProductForm({ product, productId, error }: Props) {
   // otra cosa (precio, fotos, etc.) y tocar el número de stock sin querer. Al
   // crear un producto nuevo sí se captura el stock inicial aquí normalmente.
   const isExistingProduct = Boolean(productId);
+  // Pero eso solo protege tallas que YA tenían un registro real (tarea 085) —
+  // un color o talla agregado en esta misma edición (ej. un color nuevo a un
+  // producto ya existente) no tiene nada que proteger todavía, así que su
+  // casilla de existencias queda editable y sí se guarda el número real.
+  // `product` no cambia durante la vida del componente, por eso el useMemo
+  // sin dependencias reactivas (solo se calcula una vez, al montar).
+  const originalTrackedKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const c of product?.colors ?? []) {
+      for (const s of c.sizes) keys.add(`${c.name}|${s.size}`);
+    }
+    return keys;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [name, setName] = useState(product?.name ?? "");
   const [slug, setSlug] = useState(product?.slug ?? "");
@@ -566,6 +580,8 @@ export function ProductForm({ product, productId, error }: Props) {
                     // incluida igual — si no, el checkbox se vería sin marcar aunque esa
                     // talla sí se vaya a guardar (por el SKU que ya trae).
                     const included = includedZeroStock.has(key) || Boolean(s.modelo);
+                    const isProtected =
+                      isExistingProduct && originalTrackedKeys.has(`${color.name}|${s.size}`);
                     return (
                       <div key={s.size}>
                         <label className="text-xs text-muted">{s.size}</label>
@@ -574,16 +590,16 @@ export function ProductForm({ product, productId, error }: Props) {
                           min="0"
                           value={s.stock}
                           onChange={(e) => updateStock(i, s.size, Number(e.target.value))}
-                          disabled={isExistingProduct}
+                          disabled={isProtected}
                           title={
-                            isExistingProduct
-                              ? "Las existencias de un producto ya creado solo se cambian desde Movimientos"
+                            isProtected
+                              ? "Las existencias de una talla ya registrada solo se cambian desde Movimientos"
                               : undefined
                           }
                           className={cn(
                             inputClass,
                             "mt-1 w-16",
-                            isExistingProduct && "cursor-not-allowed bg-sand text-muted",
+                            isProtected && "cursor-not-allowed bg-sand text-muted",
                           )}
                         />
                         <input
@@ -615,11 +631,12 @@ export function ProductForm({ product, productId, error }: Props) {
                   {isExistingProduct && (
                     <>
                       {" "}
-                      El número de existencias ya no se edita aquí — usa{" "}
+                      Una talla que ya tenía existencias no se edita aquí (aparece bloqueada) — usa{" "}
                       <Link to="/admin/inventario/movimientos" className="underline hover:text-clay">
                         Movimientos
                       </Link>{" "}
-                      para registrar entradas/salidas, así queda con fecha y motivo.
+                      para registrar entradas/salidas, así queda con fecha y motivo. Un color o
+                      talla nueva sí se puede cargar con su cantidad real directamente aquí.
                     </>
                   )}
                 </p>

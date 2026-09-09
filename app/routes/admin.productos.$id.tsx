@@ -18,7 +18,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-  await requireAdmin(request);
+  const { adminId, adminName } = await requireAdmin(request);
   const form = await request.formData();
 
   const compareAtRaw = String(form.get("compareAt") || "");
@@ -45,7 +45,7 @@ export async function action({ request, params }: Route.ActionArgs) {
   }
 
   try {
-    await updateProduct(params.id, input);
+    await updateProduct(params.id, input, { adminId, adminName });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "No se pudo actualizar el producto." };
   }

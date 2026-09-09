@@ -243,11 +243,14 @@ function validateInput(input: AdminProductInput) {
  * `preserveStock`: cuando se pasa (solo al editar un producto ya existente,
  * ver `updateProduct`), el stock que llega del formulario se IGNORA por
  * completo para cualquier talla que ya existiera — se usa el stock real que
- * ya tenía en la base en su lugar. Así el número de existencias solo puede
- * cambiar por `/admin/inventario/movimientos` (tarea 078), nunca por accidente
- * al editar nombre/precio/fotos/etc. de un producto. Una talla nueva (que no
- * existía antes) siempre arranca en 0, sin importar qué número traiga el
- * formulario — se le sube el stock real después, también por Movimientos.
+ * ya tenía en la base en su lugar. Así el número de existencias de una talla
+ * ya existente solo puede cambiar por `/admin/inventario/movimientos` (tarea
+ * 078), nunca por accidente al editar nombre/precio/fotos/etc. de un
+ * producto. Una talla genuinamente NUEVA (que no está en `preserveStock`,
+ * osea que nunca existió antes de este guardado) sí puede tomar el stock que
+ * se escriba — no hay nada que proteger ahí (tarea 085: antes se forzaba a 0
+ * sin importar qué se escribiera, bloqueando dar de alta un color nuevo con
+ * su cantidad real de una sola vez).
  */
 async function insertVariantsAndImages(
   productId: string,
@@ -266,7 +269,9 @@ async function insertVariantsAndImages(
       .filter((s) => s.stock > 0 || Boolean(s.modelo?.trim()))
       .map((s) => {
         const key = `${color.name}|${s.size}`;
-        const stock = preserveStock ? (preserveStock.get(key) ?? 0) : s.stock;
+        const stock = preserveStock
+          ? (preserveStock.has(key) ? preserveStock.get(key)! : s.stock)
+          : s.stock;
         return {
           product_id: productId,
           color_name: color.name,
@@ -274,11 +279,16 @@ async function insertVariantsAndImages(
           size: s.size,
           stock,
           modelo: s.modelo,
+          isNewVariant: preserveStock ? !preserveStock.has(key) : true,
         };
       }),
   );
   if (variantRows.length > 0) {
-    const { error } = await supabaseAdmin.from("product_variants").insert(variantRows);
+    // isNewVariant es solo para el valor de retorno (decidir qué registrar
+    // como "Carga inicial" en Movimientos, ver updateProduct) — no es una
+    // columna real de product_variants, no se manda al insert.
+    const dbRows = variantRows.map(({ isNewVariant: _isNewVariant, ...row }) => row);
+    const { error } = await supabaseAdmin.from("product_variants").insert(dbRows);
     if (error) throw new Error(`No se pudieron guardar las variantes: ${error.message}`);
   }
 
@@ -402,7 +412,11 @@ function extractStoragePath(url: string): string | null {
   return url.slice(idx + marker.length);
 }
 
-export async function updateProduct(id: string, input: AdminProductInput): Promise<void> {
+export async function updateProduct(
+  id: string,
+  input: AdminProductInput,
+  admin: { adminId: string | null; adminName: string },
+): Promise<void> {
   validateInput(input);
 
   const { error: updateError } = await supabaseAdmin
@@ -464,7 +478,36 @@ export async function updateProduct(id: string, input: AdminProductInput): Promi
     throw new Error(`No se pudieron limpiar las imágenes previas: ${deleteImagesError.message}`);
   }
 
-  await insertVariantsAndImages(id, input, preserveStock);
+  const variantRows = await insertVariantsAndImages(id, input, preserveStock);
+
+  // Una talla genuinamente nueva (no estaba en preserveStock) que se guardó
+  // con stock > 0 también queda registrada en Movimientos — mismo criterio
+  // que la carga inicial de un producto nuevo (tarea 079), para que ningún
+  // número de existencias exista sin origen auditable, ni siquiera el de un
+  // color agregado después.
+  const today = new Date().toISOString().slice(0, 10);
+  const newMovementRows = variantRows
+    .filter((v) => v.isNewVariant && v.stock > 0)
+    .map((v) => ({
+      product_id: id,
+      color_name: v.color_name,
+      size: v.size,
+      type: "entrada" as const,
+      quantity: v.stock,
+      concept: "Carga inicial de color/talla nueva",
+      movement_date: today,
+      resulting_stock: v.stock,
+      admin_id: admin.adminId,
+      admin_name: admin.adminName,
+    }));
+  if (newMovementRows.length > 0) {
+    const { error: movementError } = await supabaseAdmin
+      .from("inventory_movements")
+      .insert(newMovementRows);
+    if (movementError) {
+      throw new Error(`No se pudo registrar la carga inicial en Movimientos: ${movementError.message}`);
+    }
+  }
 
   // Limpiar en Storage las imágenes que ya no están en el set nuevo (si no, quedan huérfanas).
   const newUrls = new Set([
