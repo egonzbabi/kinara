@@ -131,5 +131,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 088 | [088-hero-video-completo-y-optimizado.md](088-hero-video-completo-y-optimizado.md) | done | Hero: video completo (sin recortar ropa) + optimizado para carga rápida |
 | 089 | [089-hero-video-rediseno-tarjeta-flotante.md](089-hero-video-rediseno-tarjeta-flotante.md) | done | Rediseño del hero: video como tarjeta flotante sobre fondo ambiental, sin barras de color |
 | 090 | [090-hero-critica-profesional-y-mejoras.md](090-hero-critica-profesional-y-mejoras.md) | done | Hero: crítica profesional del rediseño (089) — respeto a `prefers-reduced-motion`, color grading de marca, entrada animada y micro-interacción del CTA |
+| 091 | [091-hero-tarjeta-video-mas-ancha.md](091-hero-tarjeta-video-mas-ancha.md) | done | Hero: tarjeta de video más grande y con proporción menos vertical (cuerpo completo, sin recorte) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

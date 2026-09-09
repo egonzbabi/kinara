@@ -29,7 +29,7 @@ export function Hero() {
 
   return (
     <section className="pad pt-4">
-      <div className="relative h-[clamp(520px,82vh,860px)] w-full overflow-hidden rounded-[28px] bg-espresso">
+      <div className="relative h-[clamp(560px,90vh,960px)] w-full overflow-hidden rounded-[28px] bg-espresso">
         {/* Fondo ambiental: el mismo video, agrandado y desenfocado, para llenar
             la franja horizontal con color y movimiento reales en vez de una
             barra sólida — el video es vertical (1080×1920, formato celular) y
@@ -89,8 +89,8 @@ export function Hero() {
           aria-label={HERO_COLLAGE.main.alt}
           className={cn(
             "absolute inset-0 z-[1] h-full w-full object-contain",
-            "md:inset-auto md:right-[clamp(20px,5vw,64px)] md:top-1/2 md:h-[86%] md:w-auto",
-            "md:-translate-y-1/2 md:rounded-2xl md:object-cover",
+            "md:inset-auto md:right-[clamp(16px,4vw,56px)] md:top-1/2 md:h-[92%] md:w-[58%]",
+            "md:-translate-y-1/2 md:rounded-2xl md:object-contain",
             "md:shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6)] md:ring-1 md:ring-bone/10",
             "md:transition-transform md:duration-500 md:ease-out md:hover:scale-[1.015]",
             revealBase,
