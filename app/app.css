@@ -5,10 +5,12 @@
 @import "@fontsource-variable/fraunces/opsz.css";
 @import "@fontsource-variable/fraunces/opsz-italic.css";
 @import "@fontsource-variable/hanken-grotesk/wght.css";
-/* Syne: fuente de acento moderna y llamativa, solo para la frase grande del
-   hero de home (tarea 094) — deliberadamente distinta a Fraunces (serif) para
-   que contraste; no reemplaza la tipografía de marca en el resto del sitio. */
-@import "@fontsource-variable/syne/wght.css";
+/* Bodoni Moda: fuente de acento sofisticada (serif de alto contraste, look
+   editorial de moda) para la frase grande del hero de home (tarea 096,
+   reemplaza a Syne de la tarea 094 tras comparar varias opciones en vivo con
+   el usuario) — deliberadamente distinta a Fraunces para que contraste; no
+   reemplaza la tipografía de marca en el resto del sitio. */
+@import "@fontsource-variable/bodoni-moda/wght.css";
 
 /* ---------------------------------------------------------------
    KINARA — "Warm Studio"
@@ -33,8 +35,8 @@
     -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: "Fraunces Variable", "Hanken Grotesk Variable", ui-serif,
     Georgia, serif;
-  --font-accent: "Syne Variable", "Hanken Grotesk Variable", ui-sans-serif,
-    sans-serif;
+  --font-accent: "Bodoni Moda Variable", "Fraunces Variable", ui-serif, Georgia,
+    serif;
 
   /* Easing */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);

@@ -136,5 +136,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 093 | [093-hero-copy-y-posicion-texto.md](093-hero-copy-y-posicion-texto.md) | done | Hero: nuevo copy ("El mundo de las mujeres"), se quita el párrafo de tejidos y el texto sube de posición |
 | 094 | [094-hero-fuente-acento-syne.md](094-hero-fuente-acento-syne.md) | done | Hero: fuente de acento (Syne) para la frase grande, "El mundo de las mujeres" pasa a texto secundario más chico |
 | 095 | [095-hero-corazon-y-comparativo-fuente.md](095-hero-corazon-y-comparativo-fuente.md) | done | Hero: corazón rojo al final de "El mundo de las mujeres" + comparativo de fuentes itálicas (se mantiene Fraunces) |
+| 096 | [096-hero-corazon-grande-y-bodoni-moda.md](096-hero-corazon-grande-y-bodoni-moda.md) | done | Hero: corazón más grande + fuente sofisticada (Bodoni Moda) para la frase grande, reemplaza a Syne |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

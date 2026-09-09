@@ -135,12 +135,14 @@ export function Hero() {
               mounted || reducedMotion ? revealShown : revealHidden,
             )}
           >
-            {/* Frase grande: fuente de acento (Syne, tarea 094) — deliberadamente
-                distinta a Fraunces para que contraste, moderna y llamativa,
-                solo aquí (no reemplaza la tipografía de marca en el resto del
+            {/* Frase grande: fuente de acento (Bodoni Moda, tarea 096 —
+                reemplaza a Syne de la tarea 094 tras comparar varias
+                opciones "sofisticadas" en vivo con el usuario) —
+                deliberadamente distinta a Fraunces para que contraste, solo
+                aquí (no reemplaza la tipografía de marca en el resto del
                 sitio). El h1 semántico (abajo) es el mensaje de marca de
                 siempre, ahora en un tamaño secundario más discreto. */}
-            <p className="max-w-[18ch] font-accent text-[clamp(30px,5.2vw,58px)] font-bold leading-[1.02] tracking-[-0.02em]">
+            <p className="max-w-[20ch] font-accent text-[clamp(28px,4.6vw,52px)] font-bold leading-[1.05] tracking-[-0.01em]">
               Tu fuerza no tiene edad. Tu mejor versión está por comenzar...
             </p>
             <h1 className="mt-5 font-display text-[clamp(20px,2.4vw,30px)] italic leading-snug tracking-[-0.005em] text-bone/85">
@@ -149,7 +151,7 @@ export function Hero() {
                 aria-hidden
                 viewBox="0 0 24 24"
                 fill="#e0303d"
-                className="ml-1.5 inline-block h-[0.75em] w-[0.75em] align-[-0.05em]"
+                className="ml-2 inline-block h-[1.15em] w-[1.15em] align-[-0.12em]"
               >
                 <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
               </svg>
