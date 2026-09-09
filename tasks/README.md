@@ -133,5 +133,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 090 | [090-hero-critica-profesional-y-mejoras.md](090-hero-critica-profesional-y-mejoras.md) | done | Hero: crítica profesional del rediseño (089) — respeto a `prefers-reduced-motion`, color grading de marca, entrada animada y micro-interacción del CTA |
 | 091 | [091-hero-tarjeta-video-mas-ancha.md](091-hero-tarjeta-video-mas-ancha.md) | done | Hero: tarjeta de video más grande y con proporción menos vertical (cuerpo completo, sin recorte) |
 | 092 | [092-hero-video-formato-cuadrado.md](092-hero-video-formato-cuadrado.md) | done | Hero: el archivo de video pasa a formato cuadrado (recortado, sin fondo blanco de sobra) |
+| 093 | [093-hero-copy-y-posicion-texto.md](093-hero-copy-y-posicion-texto.md) | done | Hero: nuevo copy ("El mundo de las mujeres"), se quita el párrafo de tejidos y el texto sube de posición |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

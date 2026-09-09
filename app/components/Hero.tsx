@@ -120,22 +120,30 @@ export function Hero() {
           className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-espresso/50 via-espresso/10 to-transparent md:from-espresso/60 md:via-espresso/25"
         />
 
-        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end p-[clamp(24px,5vw,72px)]">
+        {/* El texto se posiciona con `top` en porcentaje (no con flex
+            justify-center ni con translate-y) a propósito: en mobile la
+            tarjeta de video vive arriba (tarea 092) y centrar el bloque
+            completo lo hacía encimarse con ella; con `top` fijamos su
+            posición relativa al alto real del hero, dejando aire debajo
+            de la tarjeta, y evitamos otro choque con el translate-y de la
+            animación de entrada (misma razón que la tarjeta de video). */}
+        <div className="pointer-events-none absolute inset-0 z-10">
           <div
             className={cn(
-              "pointer-events-auto max-w-2xl text-bone md:max-w-lg",
+              "pointer-events-auto absolute left-0 right-0 top-[47%] max-w-2xl px-[clamp(24px,5vw,72px)] text-bone md:top-[28%] md:max-w-xl",
               revealBase,
               mounted || reducedMotion ? revealShown : revealHidden,
             )}
           >
-            <h1 className="mt-3 font-display text-[clamp(40px,7vw,92px)] font-medium leading-[0.98] tracking-[-0.01em]">
-              El mundo de la
+            <h1 className="font-display text-[clamp(40px,7vw,92px)] font-semibold italic leading-[0.98] tracking-[-0.01em]">
+              El mundo
               <br />
-              mujer en <span className="italic text-[#f0c9b5]">movimiento</span>.
+              de las
+              <br />
+              <span className="text-[#f0c9b5]">mujeres</span>.
             </h1>
-            <p className="mt-5 max-w-[46ch] text-[clamp(15px,1.6vw,18px)] text-bone/80">
-              Tejidos técnicos con tacto de segunda piel. Diseñado en tonos
-              cálidos para entrenar, respirar y seguir con tu día.
+            <p className="mt-5 max-w-[42ch] text-[clamp(15px,1.6vw,18px)] text-bone/80">
+              Tu fuerza no tiene edad. Tu mejor versión está por comenzar.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <LinkButton to="/tienda" variant="clay" size="lg" className="group">
