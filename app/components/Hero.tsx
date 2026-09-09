@@ -130,20 +130,21 @@ export function Hero() {
         <div className="pointer-events-none absolute inset-0 z-10">
           <div
             className={cn(
-              "pointer-events-auto absolute left-0 right-0 top-[47%] max-w-2xl px-[clamp(24px,5vw,72px)] text-bone md:top-[28%] md:max-w-xl",
+              "pointer-events-auto absolute left-0 right-0 top-[47%] max-w-2xl px-[clamp(24px,5vw,72px)] text-bone md:top-[30%] md:max-w-xl",
               revealBase,
               mounted || reducedMotion ? revealShown : revealHidden,
             )}
           >
-            <p className="max-w-[42ch] text-[clamp(15px,1.6vw,18px)] text-bone/80">
+            {/* Frase grande: fuente de acento (Syne, tarea 094) — deliberadamente
+                distinta a Fraunces para que contraste, moderna y llamativa,
+                solo aquí (no reemplaza la tipografía de marca en el resto del
+                sitio). El h1 semántico (abajo) es el mensaje de marca de
+                siempre, ahora en un tamaño secundario más discreto. */}
+            <p className="max-w-[18ch] font-accent text-[clamp(30px,5.2vw,58px)] font-bold leading-[1.02] tracking-[-0.02em]">
               Tu fuerza no tiene edad. Tu mejor versión está por comenzar...
             </p>
-            <h1 className="mt-4 font-display text-[clamp(40px,7vw,92px)] font-semibold italic leading-[0.98] tracking-[-0.01em]">
-              El mundo
-              <br />
-              de las
-              <br />
-              <span className="text-[#f0c9b5]">mujeres</span>.
+            <h1 className="mt-5 font-display text-[clamp(20px,2.4vw,30px)] italic leading-snug tracking-[-0.005em] text-bone/85">
+              El mundo de las <span className="text-[#f0c9b5]">mujeres</span>.
             </h1>
             <div className="mt-8 flex flex-wrap gap-3">
               <LinkButton to="/tienda" variant="clay" size="lg" className="group">
