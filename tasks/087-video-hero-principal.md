@@ -24,7 +24,11 @@ El hero de home muestra únicamente el video, siempre visible (sin rotar a otras
 
 - Video subido a Supabase Storage: `product-images/site/hero-video.mp4` (mismo bucket/carpeta que las fotos que reemplazó).
 - `app/data/images.ts`: `HERO_COLLAGE` se simplificó a solo `{ main: { url, alt } }` — se quitó `support` (las 3 fotos de apoyo) y el discriminador `type`, ya no hace falta distinguir foto/video porque ya no conviven en el mismo carrusel.
-- `app/components/Hero.tsx`: reescrito para quitar todo el carrusel — sin `active`/`prevActive`/`paused`, sin el efecto de rotación cada 5s, sin los puntos indicadores, sin el clic para avanzar de foto. Ahora solo renderiza un `<video autoPlay muted loop playsInline>` a pantalla completa del contenedor, con `object-center` (antes `object-[center_62%]`, que recortaba la parte de arriba). El texto/botones encima se mantienen exactamente igual.
+- `app/components/Hero.tsx`: reescrito para quitar todo el carrusel — sin `active`/`prevActive`/`paused`, sin el efecto de rotación cada 5s, sin los puntos indicadores, sin el clic para avanzar de foto. Ahora solo renderiza un `<video autoPlay muted loop playsInline>` a pantalla completa del contenedor. El texto/botones encima se mantienen exactamente igual.
+
+### Corrección de recorte (mismo día)
+
+El primer valor usado (`object-center`) sí recortaba las caras: el video es vertical (1080×1920, formato celular) dentro de una franja horizontal ancha — con `object-cover`, el recorte es enorme (en escritorio, ~1566px de los 1920px originales del video quedan fuera). Con el punto de recorte al centro (50%), la ventana visible cae a la altura del torso, cortando las cabezas; con el punto arriba (0%/`object-top`) se veía techo por encima de las cabezas. Se midió el recorte real (`videoWidth`/`videoHeight`/tamaño del contenedor vía JS en el navegador) y se ajustó a `object-[center_30%]` — deja las caras dentro del recorte tanto en escritorio (franja ancha, recorte severo) como en mobile (contenedor más alto, recorte mínimo, con margen de sobra arriba en vez de corte).
 
 ## Restricciones específicas de esta tarea
 
@@ -55,3 +59,4 @@ El hero de home muestra únicamente el video, siempre visible (sin rotar a otras
 ## Notas de progreso
 
 - 2026-09-09: Implementado en la misma sesión — primer intento con el video dentro del carrusel existente, corregido de inmediato tras la aclaración del usuario ("quiero que se quede el video como imagen principal, solo el video, quita las fotos anteriores" + "centra el video para que se vean todas las caras").
+- 2026-09-09: El usuario reportó que con `object-center` sí se cortaban las caras (ya subido a producción) — se midió el recorte real contra el tamaño del video (vertical, 1080×1920) y se corrigió a `object-[center_30%]`, verificado en escritorio y mobile antes de volver a subir.

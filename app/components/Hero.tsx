@@ -18,7 +18,11 @@ export function Hero() {
           playsInline
           preload="auto"
           aria-label={HERO_COLLAGE.main.alt}
-          className="h-full w-full object-cover object-center"
+          // El video es vertical (1080×1920, formato celular) dentro de una franja
+          // horizontal ancha — "center" recorta a la altura del torso y "top"
+          // deja ver techo por arriba de las cabezas; 30% desde arriba es lo
+          // que mantiene las caras dentro del recorte en desktop.
+          className="h-full w-full object-cover object-[center_30%]"
         />
 
         {/* Warm scrim for legibility + brand tone — siempre por encima del
