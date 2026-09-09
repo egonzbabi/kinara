@@ -24,8 +24,9 @@ El hero muestra el nuevo mensaje de marca, sin el párrafo anterior, en una posi
 
 ### Copy
 
-- Título: "El mundo de las mujeres." (antes "El mundo de la mujer en movimiento.") — con salto de línea explícito en 3 renglones cortos ("El mundo" / "de las" / "mujeres.") en vez de dejar que el navegador decida dónde envolver el texto: a 92px (tamaño máximo del `clamp` en escritorio) la frase completa no cabe en una sola línea dentro del ancho disponible (columna izquierda, compitiendo con la tarjeta de video anclada a la derecha desde la tarea 091/092) — en vez de un ajuste automático potencialmente feo, se controla la composición a propósito, con "mujeres" en el tono clay/durazno de acento (mismo tratamiento que tenía "movimiento" antes).
-- Párrafo debajo del título: se reemplaza por completo — el texto anterior ("Tejidos técnicos con tacto de segunda piel...") se borra, ya no queda rastro de él. Nuevo texto: "Tu fuerza no tiene edad. Tu mejor versión está por comenzar."
+- Frase corta (arriba, con menos peso visual): "Tu fuerza no tiene edad. Tu mejor versión está por comenzar..." — reemplaza por completo el párrafo anterior ("Tejidos técnicos con tacto de segunda piel...", que ya no queda en el código); termina en puntos suspensivos a pedido explícito del usuario, como si dejara la frase "en suspenso" antes de revelar el titular grande debajo.
+- Título (abajo, con la letra llamativa): "El mundo de las mujeres." (antes "El mundo de la mujer en movimiento.") — con salto de línea explícito en 3 renglones cortos ("El mundo" / "de las" / "mujeres.") en vez de dejar que el navegador decida dónde envolver el texto: a 92px (tamaño máximo del `clamp` en escritorio) la frase completa no cabe en una sola línea dentro del ancho disponible (columna izquierda, compitiendo con la tarjeta de video anclada a la derecha desde la tarea 091/092) — en vez de un ajuste automático potencialmente feo, se controla la composición a propósito, con "mujeres" en el tono clay/durazno de acento (mismo tratamiento que tenía "movimiento" antes).
+- El usuario pidió después invertir el orden: la frase corta pasa arriba y el titular grande abajo (antes era al revés). El `<h1>` semántico sigue siendo "El mundo de las mujeres" (es el mensaje principal de marca), solo cambió su posición visual respecto al párrafo — el orden en el DOM ahora es párrafo primero, `<h1>` después.
 
 ### Tipografía del título
 
@@ -48,9 +49,9 @@ Solución final: el texto ya no se posiciona con flexbox ni con `transform: tran
 
 ## Criterios de aceptación
 
-- [x] El título dice "El mundo de las mujeres." con "mujeres" en el tono de acento.
+- [x] El título dice "El mundo de las mujeres." con "mujeres" en el tono de acento, y vive debajo del párrafo (letra llamativa, abajo).
 - [x] El párrafo "Tejidos técnicos..." ya no existe en ningún lado del código.
-- [x] Nuevo párrafo: "Tu fuerza no tiene edad. Tu mejor versión está por comenzar."
+- [x] Nuevo párrafo, arriba del título: "Tu fuerza no tiene edad. Tu mejor versión está por comenzar..." (termina en puntos suspensivos).
 - [x] El bloque de texto está visiblemente más arriba que antes, tanto en mobile como en escritorio.
 - [x] En mobile, el texto no se encima con la tarjeta de video.
 - [x] Los botones siguen siendo visibles sin necesidad de hacer scroll en una ventana de escritorio típica (1440×900).
