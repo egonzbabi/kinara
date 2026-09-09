@@ -32,11 +32,10 @@ export function Hero() {
       <div className="relative h-[clamp(560px,90vh,960px)] w-full overflow-hidden rounded-[28px] bg-espresso">
         {/* Fondo ambiental: el mismo video, agrandado y desenfocado, para llenar
             la franja horizontal con color y movimiento reales en vez de una
-            barra sólida — el video es vertical (1080×1920, formato celular) y
-            nunca va a llenar un hero horizontal sin recortarse o dejar huecos,
-            así que el hueco se resuelve con el propio video, no con relleno
-            plano (tarea 089, mismo recurso que usan apps como Spotify/Apple
-            para video vertical dentro de un marco horizontal). */}
+            barra sólida — el video es cuadrado (1080×1080, tarea 092) y no
+            llena por sí solo un hero horizontal ancho, así que el hueco se
+            resuelve con el propio video, no con relleno plano (tarea 089,
+            mismo recurso que usan apps como Spotify/Apple). */}
         <video
           src={HERO_COLLAGE.main.url}
           poster={HERO_COLLAGE.main.poster}
@@ -68,16 +67,19 @@ export function Hero() {
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute right-[clamp(4px,3.5vw,48px)] top-1/2 z-0 hidden h-[70%] w-[38%] -translate-y-1/2 rounded-full bg-clay/40 blur-[90px] md:block",
+            "pointer-events-none absolute right-[clamp(4px,3.5vw,40px)] top-1/2 z-0 hidden aspect-square h-[96%] -translate-y-1/2 rounded-full bg-clay/40 blur-[90px] md:block",
             revealBase,
             "duration-1000",
             mounted || reducedMotion ? "opacity-100" : "opacity-0",
           )}
         />
 
-        {/* Video nítido: en mobile llena el marco (como antes); desde `md` se
-            ancla como una tarjeta a la derecha (alto, con su propia sombra),
-            dejando el texto respirar a la izquierda sobre el fondo desenfocado. */}
+        {/* Video nítido: ahora que el archivo mismo es cuadrado (recortado a
+            propósito arriba/abajo para quitar el exceso de fondo blanco del
+            estudio, sin perder cabeza ni pies — tarea 092), la tarjeta ya no
+            necesita `object-contain` ni una proporción artificial: es un
+            cuadrado real, centrado en mobile y anclado a la derecha desde
+            `md`, y el video la llena exacto. */}
         <video
           src={HERO_COLLAGE.main.url}
           poster={HERO_COLLAGE.main.poster}
@@ -88,10 +90,16 @@ export function Hero() {
           preload="auto"
           aria-label={HERO_COLLAGE.main.alt}
           className={cn(
-            "absolute inset-0 z-[1] h-full w-full object-contain",
-            "md:inset-auto md:right-[clamp(16px,4vw,56px)] md:top-1/2 md:h-[92%] md:w-[58%]",
-            "md:-translate-y-1/2 md:rounded-2xl md:object-contain",
-            "md:shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6)] md:ring-1 md:ring-bone/10",
+            // En mobile se ancla cerca del borde superior (no centrada) para
+            // no encimarse con el texto, que siempre vive abajo (tarea 092) —
+            // el centrado es solo horizontal (translate-x), a propósito: si
+            // también centráramos verticalmente con translate-y chocaría con
+            // el translate-y de la animación de entrada de más abajo (misma
+            // propiedad CSS, no se pueden combinar dos clases de Tailwind que
+            // la usen sin prefijo de breakpoint).
+            "absolute left-1/2 top-[5%] z-[1] aspect-square h-[36%] -translate-x-1/2 rounded-2xl object-cover",
+            "shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6)] ring-1 ring-bone/10",
+            "md:left-auto md:right-[clamp(16px,4vw,56px)] md:top-1/2 md:h-[92%] md:-translate-y-1/2 md:translate-x-0",
             "md:transition-transform md:duration-500 md:ease-out md:hover:scale-[1.015]",
             revealBase,
             "duration-[900ms]",
