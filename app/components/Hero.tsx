@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { LinkButton } from "./Button";
 import { HERO_COLLAGE } from "~/data/images";
+import { cn } from "~/lib/cn";
 
 // Ya no se usa para el hero (era el ancho de srcSet de las fotos del
 // carrusel, tarea 087/088) — se deja exportado porque _index.tsx todavía lo
@@ -7,6 +9,24 @@ import { HERO_COLLAGE } from "~/data/images";
 export const HERO_WIDTHS = [640, 1000, 1500, 2000];
 
 export function Hero() {
+  // Entrada suave del texto/tarjeta al cargar (no al hacer scroll — el hero ya
+  // está a la vista desde el primer momento) y respeto a "menos movimiento":
+  // sin esto, el video autoplay ignoraba por completo la preferencia de
+  // accesibilidad del sistema (tarea 090).
+  const [mounted, setMounted] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const playsVideo = !reducedMotion;
+  const revealBase = "transition-all duration-700 ease-out";
+  const revealHidden = "opacity-0 translate-y-4";
+  const revealShown = "opacity-100 translate-y-0";
+
   return (
     <section className="pad pt-4">
       <div className="relative h-[clamp(520px,82vh,860px)] w-full overflow-hidden rounded-[28px] bg-espresso">
@@ -19,7 +39,8 @@ export function Hero() {
             para video vertical dentro de un marco horizontal). */}
         <video
           src={HERO_COLLAGE.main.url}
-          autoPlay
+          poster={HERO_COLLAGE.main.poster}
+          autoPlay={playsVideo}
           muted
           loop
           playsInline
@@ -27,7 +48,32 @@ export function Hero() {
           tabIndex={-1}
           className="absolute inset-0 h-full w-full scale-125 object-cover object-[center_30%] opacity-70 blur-2xl saturate-125"
         />
+        {/* Sombreado + tinte cálido de marca sobre el fondo (mix-blend-overlay
+            deja pasar el detalle del video, no lo tapa) — sin esto el fondo
+            toma el gris del estudio de foto, no el tono cálido de la marca. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-espresso/35" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 mix-blend-overlay"
+          style={{
+            background:
+              "radial-gradient(120% 100% at 100% 50%, rgba(200,138,98,0.55), transparent 60%), linear-gradient(135deg, rgba(58,38,28,0.6), transparent 55%)",
+          }}
+        />
+
+        {/* Resplandor cálido detrás de la tarjeta — solo desde `md` (donde la
+            tarjeta existe como objeto flotante); le da profundidad e insinúa
+            que ahí "vive" la luz de la composición, en vez de un video
+            flotando sin razón. */}
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute right-[clamp(4px,3.5vw,48px)] top-1/2 z-0 hidden h-[70%] w-[38%] -translate-y-1/2 rounded-full bg-clay/40 blur-[90px] md:block",
+            revealBase,
+            "duration-1000",
+            mounted || reducedMotion ? "opacity-100" : "opacity-0",
+          )}
+        />
 
         {/* Video nítido: en mobile llena el marco (como antes); desde `md` se
             ancla como una tarjeta a la derecha (alto, con su propia sombra),
@@ -35,15 +81,24 @@ export function Hero() {
         <video
           src={HERO_COLLAGE.main.url}
           poster={HERO_COLLAGE.main.poster}
-          autoPlay
+          autoPlay={playsVideo}
           muted
           loop
           playsInline
           preload="auto"
           aria-label={HERO_COLLAGE.main.alt}
-          className="absolute inset-0 z-[1] h-full w-full object-contain
-            md:inset-auto md:right-[clamp(20px,5vw,64px)] md:top-1/2 md:h-[86%] md:w-auto
-            md:-translate-y-1/2 md:rounded-2xl md:object-cover md:shadow-[0_30px_70px_-20px_rgba(0,0,0,0.55)]"
+          className={cn(
+            "absolute inset-0 z-[1] h-full w-full object-contain",
+            "md:inset-auto md:right-[clamp(20px,5vw,64px)] md:top-1/2 md:h-[86%] md:w-auto",
+            "md:-translate-y-1/2 md:rounded-2xl md:object-cover",
+            "md:shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6)] md:ring-1 md:ring-bone/10",
+            "md:transition-transform md:duration-500 md:ease-out md:hover:scale-[1.015]",
+            revealBase,
+            "duration-[900ms]",
+            mounted || reducedMotion
+              ? "opacity-100 translate-y-0 md:scale-100"
+              : "opacity-0 translate-y-6 md:scale-[0.97]",
+          )}
         />
 
         {/* Warm scrim for legibility + brand tone — siempre por encima del
@@ -58,7 +113,13 @@ export function Hero() {
         />
 
         <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-end p-[clamp(24px,5vw,72px)]">
-          <div className="pointer-events-auto max-w-2xl text-bone md:max-w-lg">
+          <div
+            className={cn(
+              "pointer-events-auto max-w-2xl text-bone md:max-w-lg",
+              revealBase,
+              mounted || reducedMotion ? revealShown : revealHidden,
+            )}
+          >
             <h1 className="mt-3 font-display text-[clamp(40px,7vw,92px)] font-medium leading-[0.98] tracking-[-0.01em]">
               El mundo de la
               <br />
@@ -69,8 +130,22 @@ export function Hero() {
               cálidos para entrenar, respirar y seguir con tu día.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <LinkButton to="/tienda" variant="clay" size="lg">
+              <LinkButton to="/tienda" variant="clay" size="lg" className="group">
                 Comprar la colección
+                <svg
+                  aria-hidden
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  className="ml-2 inline-block h-4 w-4 -translate-y-px transition-transform duration-200 ease-out group-hover:translate-x-1"
+                >
+                  <path
+                    d="M4 10h12m0 0-5-5m5 5-5 5"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </LinkButton>
               <LinkButton
                 to="/tienda?cat=mujer"
