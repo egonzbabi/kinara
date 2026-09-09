@@ -128,5 +128,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 085 | [085-permitir-stock-inicial-color-nuevo.md](085-permitir-stock-inicial-color-nuevo.md) | done | Permite cargar stock real al agregar un color/talla nueva a un producto existente |
 | 086 | [086-galeria-elegir-foto-de-color.md](086-galeria-elegir-foto-de-color.md) | done | Galería genérica: elegir una foto ya subida a un color, sin volver a subirla |
 | 087 | [087-video-hero-principal.md](087-video-hero-principal.md) | done | El hero de home es un solo video, centrado, sin carrusel de fotos |
+| 088 | [088-hero-video-completo-y-optimizado.md](088-hero-video-completo-y-optimizado.md) | done | Hero: video completo (sin recortar ropa) + optimizado para carga rápida |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

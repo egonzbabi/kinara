@@ -73,6 +73,9 @@ const HERO_BASE =
 export const HERO_COLLAGE = {
   main: {
     url: `${HERO_BASE}/hero-video.mp4`,
+    // Cuadro real del video (no una foto aparte) — se ve de inmediato mientras
+    // el video todavía está bajando, en vez de una caja vacía (tarea 088).
+    poster: `${HERO_BASE}/hero-poster.jpg`,
     alt: "Video de KINARA: ropa deportiva en movimiento",
   },
 } as const;

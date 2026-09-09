@@ -9,20 +9,26 @@ export const HERO_WIDTHS = [640, 1000, 1500, 2000];
 export function Hero() {
   return (
     <section className="pad pt-4">
-      <div className="relative h-[clamp(520px,82vh,860px)] w-full overflow-hidden rounded-[28px]">
+      <div className="relative h-[clamp(520px,82vh,860px)] w-full overflow-hidden rounded-[28px] bg-espresso">
         <video
           src={HERO_COLLAGE.main.url}
+          poster={HERO_COLLAGE.main.poster}
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
+          // @ts-expect-error -- fetchPriority es un atributo válido de <video>
+          // (Chrome/Edge lo soportan para priorizar la descarga), pero el tipo
+          // de React todavía no lo declara para elementos de video.
+          fetchpriority="high"
           aria-label={HERO_COLLAGE.main.alt}
           // El video es vertical (1080×1920, formato celular) dentro de una franja
-          // horizontal ancha — "center" recorta a la altura del torso y "top"
-          // deja ver techo por arriba de las cabezas; 30% desde arriba es lo
-          // que mantiene las caras dentro del recorte en desktop.
-          className="h-full w-full object-cover object-[center_30%]"
+          // horizontal ancha — con "cover" siempre se recorta mucho verticalmente
+          // (torso o cabeza, nunca los dos). "contain" muestra el cuadro completo
+          // (caras y ropa) sin recortar nada; el espacio sobrante a los lados lo
+          // rellena el fondo espresso, que ya se usaba en el overlay de abajo.
+          className="h-full w-full object-contain"
         />
 
         {/* Warm scrim for legibility + brand tone — siempre por encima del
