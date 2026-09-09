@@ -33,6 +33,86 @@ function sizeTemplate(singleSize: boolean): readonly SizeStock["size"][] {
   return singleSize ? [ACCESSORY_SIZE] : SIZE_ORDER;
 }
 
+/**
+ * Controles de una foto ya subida: subir/bajar de orden y quitar. Antes eran
+ * texto plano ("↑ ↓ ✕", ~10px) — casi invisibles y muy difíciles de tocar; se
+ * detectó que el usuario no los encontraba aunque el reordenamiento ya
+ * funcionaba y se guardaba bien (tarea 097). Ahora son botones circulares con
+ * ícono, borde y fondo, más grandes y con `aria-label` (antes solo llevaban
+ * el glifo como contenido, sin texto accesible real para lectores de
+ * pantalla). Se comparte entre "Fotos" por color y "Galería genérica" para no
+ * duplicar el marcado en dos lugares.
+ */
+function PhotoOrderControls({
+  label,
+  upDisabled,
+  downDisabled,
+  onUp,
+  onDown,
+  onRemove,
+}: {
+  label: string;
+  upDisabled: boolean;
+  downDisabled: boolean;
+  onUp: () => void;
+  onDown: () => void;
+  onRemove: () => void;
+}) {
+  const btnClass =
+    "flex h-7 w-7 items-center justify-center rounded-full border border-line bg-bone text-espresso transition-colors hover:border-clay hover:text-clay disabled:opacity-30 disabled:hover:border-line disabled:hover:text-espresso";
+  return (
+    <div className="mt-1.5 flex justify-center gap-1.5">
+      <button
+        type="button"
+        disabled={upDisabled}
+        onClick={onUp}
+        aria-label={`Mover ${label} hacia arriba`}
+        title="Mover arriba"
+        className={btnClass}
+      >
+        <svg aria-hidden viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+          <path
+            d="M10 15V5m0 0-4 4m4-4 4 4"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        type="button"
+        disabled={downDisabled}
+        onClick={onDown}
+        aria-label={`Mover ${label} hacia abajo`}
+        title="Mover abajo"
+        className={btnClass}
+      >
+        <svg aria-hidden viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+          <path
+            d="M10 5v10m0 0 4-4m-4 4-4-4"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Quitar ${label}`}
+        title="Quitar"
+        className="flex h-7 w-7 items-center justify-center rounded-full border border-line bg-bone text-clay transition-colors hover:border-clay hover:bg-clay hover:text-bone"
+      >
+        <svg aria-hidden viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+          <path d="M5 5l10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 function emptyColor(singleSize: boolean): AdminColorInput {
   return {
     name: "",
@@ -651,7 +731,10 @@ export function ProductForm({ product, productId, error }: Props) {
                   <label className={labelClass}>
                     Fotos {color.imageUrls.length > 0 && `(${color.imageUrls.length})`}
                   </label>
-                  <p className="text-xs text-muted">La primera es la foto principal.</p>
+                  <p className="text-xs text-muted">
+                    La primera es la foto principal — usa las flechas debajo de cada foto para
+                    cambiar el orden.
+                  </p>
                   {color.imageUrls.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {color.imageUrls.map((url, pi) => (
@@ -664,31 +747,14 @@ export function ProductForm({ product, productId, error }: Props) {
                               pi === 0 && "ring-2 ring-clay ring-offset-1",
                             )}
                           />
-                          <div className="mt-1 flex justify-center gap-1">
-                            <button
-                              type="button"
-                              disabled={pi === 0}
-                              onClick={() => moveColorImage(i, pi, -1)}
-                              className="text-xs text-muted hover:text-espresso disabled:opacity-30"
-                            >
-                              ↑
-                            </button>
-                            <button
-                              type="button"
-                              disabled={pi === color.imageUrls.length - 1}
-                              onClick={() => moveColorImage(i, pi, 1)}
-                              className="text-xs text-muted hover:text-espresso disabled:opacity-30"
-                            >
-                              ↓
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeColorImage(i, pi)}
-                              className="text-xs text-clay hover:underline"
-                            >
-                              ✕
-                            </button>
-                          </div>
+                          <PhotoOrderControls
+                            label={`la foto ${pi + 1} de ${color.name || "este color"}`}
+                            upDisabled={pi === 0}
+                            downDisabled={pi === color.imageUrls.length - 1}
+                            onUp={() => moveColorImage(i, pi, -1)}
+                            onDown={() => moveColorImage(i, pi, 1)}
+                            onRemove={() => removeColorImage(i, pi)}
+                          />
                         </div>
                       ))}
                     </div>
@@ -724,37 +790,21 @@ export function ProductForm({ product, productId, error }: Props) {
       <section className="rounded-xl bg-bone p-5">
         <h2 className="font-display text-lg text-espresso">Galería (fotos genéricas)</h2>
         <p className="mt-1 text-[13px] text-muted">
-          Se muestran cuando no hay un color seleccionado o el color no tiene foto propia.
+          Se muestran cuando no hay un color seleccionado o el color no tiene foto propia. Usa las
+          flechas debajo de cada foto para cambiar el orden.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           {gallery.map((url, i) => (
             <div key={url} className="relative">
               <img src={url} alt="" className="h-24 w-20 rounded-lg object-cover" />
-              <div className="mt-1 flex justify-center gap-1">
-                <button
-                  type="button"
-                  disabled={i === 0}
-                  onClick={() => moveGalleryImage(i, -1)}
-                  className="text-xs text-muted hover:text-espresso disabled:opacity-30"
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  disabled={i === gallery.length - 1}
-                  onClick={() => moveGalleryImage(i, 1)}
-                  className="text-xs text-muted hover:text-espresso disabled:opacity-30"
-                >
-                  ↓
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setGallery((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="text-xs text-clay hover:underline"
-                >
-                  ✕
-                </button>
-              </div>
+              <PhotoOrderControls
+                label={`la foto ${i + 1} de la galería`}
+                upDisabled={i === 0}
+                downDisabled={i === gallery.length - 1}
+                onUp={() => moveGalleryImage(i, -1)}
+                onDown={() => moveGalleryImage(i, 1)}
+                onRemove={() => setGallery((prev) => prev.filter((_, idx) => idx !== i))}
+              />
             </div>
           ))}
         </div>

@@ -17,6 +17,7 @@ Formato de cada entrada: `- [ ] Requisito — (origen: tarea NNN)`
 ## Accesibilidad / UI-UX
 
 - [x] Nunca publicar una foto de producto con texto/badges de marketing de un proveedor superpuestos (inglés/chino, watermarks, capturas de UI) — recortar/limpiar antes de subir a Storage. — (origen: tarea 009)
+- [x] Todo botón de solo ícono (sin texto visible) lleva `aria-label` descriptivo real — el glifo/ícono en sí (ej. "↑", una `<svg>`) no cuenta como texto accesible para lectores de pantalla. — (origen: tarea 097)
 - [x] Ningún elemento con `position: fixed` (ej. un panel de menú mobile a pantalla completa) puede vivir dentro de un ancestro con `backdrop-filter`, `filter` o `transform` (ej. el `<header>` con `backdrop-blur-md`) — esas propiedades crean un nuevo containing block para descendientes `fixed`, y el elemento queda mal posicionado/recortado en vez de cubrir el viewport. Renderizar ese tipo de overlay como hermano del elemento con esas propiedades, no como hijo. — (origen: tarea 021)
 - [x] Todo elemento con autoplay de video/animación continua debe respetar `prefers-reduced-motion` (leído client-side vía `window.matchMedia`, con fallback SSR-safe a "sin preferencia") — si el usuario tiene esa preferencia activada, el autoplay se desactiva (cae a una imagen estática/`poster`) y cualquier animación de entrada se salta directo a su estado final, no queda a medias. — (origen: tarea 090)
 
