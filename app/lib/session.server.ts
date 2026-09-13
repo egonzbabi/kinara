@@ -59,7 +59,21 @@ export async function requireAdmin(request: Request) {
     .eq("id", adminId)
     .maybeSingle();
 
-  if (error || !admin) {
+  // Un error de la consulta (hiccup de red, función serverless recién
+  // despertada, timeout puntual de Supabase) NO significa que el acceso fue
+  // revocado — antes se trataba igual que "admin no encontrado" y se cerraba
+  // la sesión, lo que sacaba al admin al login en medio de una edición larga
+  // (tarea 108: cuanto más tiempo pasa entre requests, más probable que la
+  // siguiente encuentre la función fría y esta consulta falle). La cookie
+  // firmada ya es prueba suficiente para dejarlo continuar esta vez; si el
+  // acceso sí fue revocado de verdad, la próxima consulta que sí funcione lo
+  // va a atrapar.
+  if (error) {
+    console.error("requireAdmin: no se pudo verificar el admin, se permite continuar:", error);
+    return { adminId, adminName: adminName || "Admin" };
+  }
+
+  if (!admin) {
     const session = await getSessionStorage().getSession(request.headers.get("Cookie"));
     throw redirect("/admin", {
       headers: { "Set-Cookie": await getSessionStorage().destroySession(session) },

@@ -147,5 +147,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 104 | [104-hero-poster-webp-y-preload.md](104-hero-poster-webp-y-preload.md) | done | Performance: el poster del hero seguía sin pasar por `productImage()` — LCP seguía fallando tras la tarea 100 |
 | 106 | [106-editorial-copy-diversidad-comunidad.md](106-editorial-copy-diversidad-comunidad.md) | done | Home: nuevo copy de "Nuestra filosofía" (diversidad, mujeres, urbano, comunidad KINARA) |
 | 107 | [107-tienda-orden-ropa-antes-accesorios.md](107-tienda-orden-ropa-antes-accesorios.md) | done | Tienda: orden por defecto — toda la ropa agrupada por tipo, accesorios al final |
+| 108 | [108-fix-logout-falso-editar-producto.md](108-fix-logout-falso-editar-producto.md) | done | Fix: cerraba la sesión de admin ante un error transitorio de red/DB, no solo cuando el acceso era revocado de verdad |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
