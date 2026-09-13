@@ -30,6 +30,13 @@ const SORTS: { value: Sort; label: string }[] = [
 
 const ALL_SIZES = ["XS", "S", "M", "L", "XL", "Única"];
 
+// Orden por defecto ("Destacados"): toda la ropa primero, agrupada por tipo
+// (mismo orden que el menú principal, SiteNav.tsx → LINKS), y los accesorios
+// siempre al final — a pedido explícito del usuario. Un tipo que no aparece
+// aquí (ej. un accesorio dado de alta con su propio `kind`, como "Guantes")
+// cae al final de su grupo, no rompe el orden de los que sí están listados.
+const KIND_ORDER = ["Top", "Bottom", "Legging", "Chaqueta", "Enterizo", "Set"];
+
 export async function loader() {
   const products = await getAllProducts();
   return { products };
@@ -121,9 +128,21 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
         list.sort((a, b) => Number(!!b.isNew) - Number(!!a.isNew));
         break;
       default:
-        list.sort(
-          (a, b) => Number(!!b.isBestseller) - Number(!!a.isBestseller),
-        );
+        list.sort((a, b) => {
+          // 1) Ropa antes que accesorios.
+          const aAcc = a.category === "accesorios" ? 1 : 0;
+          const bAcc = b.category === "accesorios" ? 1 : 0;
+          if (aAcc !== bAcc) return aAcc - bAcc;
+          // 2) Dentro de la ropa, agrupada por tipo (KIND_ORDER de arriba).
+          const aRank = KIND_ORDER.indexOf(a.kind);
+          const bRank = KIND_ORDER.indexOf(b.kind);
+          const aKind = aRank === -1 ? KIND_ORDER.length : aRank;
+          const bKind = bRank === -1 ? KIND_ORDER.length : bRank;
+          if (aKind !== bKind) return aKind - bKind;
+          // 3) Dentro del mismo tipo, best-sellers primero (el criterio
+          // original de "Destacados").
+          return Number(!!b.isBestseller) - Number(!!a.isBestseller);
+        });
     }
     return list;
   }, [products, cat, sizes, colors, types, onlyOnSale, sort]);
