@@ -5,7 +5,7 @@ import { productImage, productSrcSet } from "~/lib/productImage";
 // stock de Unsplash que tenía esta sección (tarea 103, auditoría de
 // performance: "reemplazar fotos hotlinked por fotos reales del shooting").
 // Pose de movimiento genuina, en la paleta cálida de la marca — encaja con
-// la frase "el cuerpo que se mueve y la mente que necesita calma".
+// el tono del copy de abajo (diversidad, fuerza, comunidad, tarea 106).
 const EDITORIAL_PHOTO =
   "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/t5a8m19y/ivorycocoa-1788997367076-1.jpg";
 const EDITORIAL_WIDTHS = [480, 700, 1100];
@@ -17,13 +17,12 @@ export function EditorialSplit() {
         <div className="reveal order-2 md:order-1">
           <span className="label">Nuestra filosofía</span>
           <blockquote className="mt-4 font-display text-[clamp(26px,3.6vw,44px)] font-medium leading-[1.08]">
-            “Hecho para el cuerpo que se mueve y la mente que necesita
-            calma.”
+            “Ropa urbana y deportiva que realza tu fuerza.”
           </blockquote>
           <p className="mt-5 max-w-[48ch] text-muted">
-            Diseñamos cada pieza con tejidos cómodos y un patronaje que
-            favorece a cuerpos reales. Menos colecciones, más duraderas. Color
-            cálido que combina con todo lo que ya tienes.
+            Hecha para mujeres diversas, de cuerpos reales y toda edad.
+            Tejidos cómodos, colores cálidos que combinan con todo — súmate
+            a la comunidad KINARA.
           </p>
           <div className="mt-7">
             <LinkButton to="/tienda" variant="ink">
