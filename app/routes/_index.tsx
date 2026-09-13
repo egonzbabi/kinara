@@ -7,7 +7,6 @@ import { ProductGrid } from "~/components/ProductGrid";
 import { EditorialSplit } from "~/components/EditorialSplit";
 import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
 import { BestsellerRail } from "~/components/BestsellerRail";
-import { LookbookBand } from "~/components/LookbookBand";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { img, imgSrcSet, PHOTO } from "~/data/images";
@@ -99,7 +98,12 @@ export default function Index({ loaderData }: Route.ComponentProps) {
 
       <EditorialSplit />
       <BestsellerRail products={products} />
-      <LookbookBand />
+
+      {/* Lookbook desactivado a pedido del usuario (tarea 101): solo tiene 6
+          fotos y 4 ya estaban rotas (apuntaban a archivos renombrados en la
+          tarea 098). Se reactivará cuando haya más fotos para la sección —
+          el componente (`LookbookBand`) y los datos (`app/data/looks.ts`,
+          ya corregidos) se dejan intactos para ese momento. */}
     </>
   );
 }

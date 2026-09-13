@@ -27,24 +27,29 @@ export const LOOKS: Look[] = [
     num: "Look 02",
     name: "Bottee Set · Verde Fresco",
     slug: "bottee-set",
+    // Ruta corregida (tarea 101): el archivo "verde-fresco.jpg" ya no existe
+    // en Storage — se reemplazó por el nombrado nuevo durante el shooting
+    // masivo (tarea 098), esta es la foto real correspondiente (position 0).
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/b6qq5u7o/verde-fresco.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/b6qq5u7o/verde-fresco-1788997469897-0.jpg",
   },
   {
     id: "l3",
     num: "Look 03",
     name: "Leggin Flare · Vino",
     slug: "leggin-flare",
+    // Ruta corregida (tarea 101), mismo motivo que el look anterior.
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/b0qfoka7/vino.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/b0qfoka7/vino-1788997457019-0.jpg",
   },
   {
     id: "l4",
     num: "Look 04",
     name: "Conjunto Camuflaje · Rosa",
     slug: "conjunto-camuflaje",
+    // Ruta corregida (tarea 101), mismo motivo que los looks anteriores.
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/rva62zma/rosa.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/rva62zma/rosa-1788997434516-0.jpg",
   },
   {
     id: "l5",
@@ -59,7 +64,8 @@ export const LOOKS: Look[] = [
     num: "Look 06",
     name: "Wrinkle Short · Lila",
     slug: "wrinkle-short",
+    // Ruta corregida (tarea 101), mismo motivo que los looks anteriores.
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/z2gep2ik/lila.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/z2gep2ik/lila-1788997357068-0.jpg",
   },
 ];
