@@ -22,7 +22,10 @@ export function CartDrawer() {
 
   return (
     <div
-      aria-hidden={!isOpen}
+      // Ver mismo fix en SiteNav.tsx (MobileMenu): `inert` en vez de
+      // `aria-hidden` cuando está cerrado, para que sus botones/links dejen
+      // de ser alcanzables con Tab (tarea 102).
+      inert={!isOpen}
       className={cn("fixed inset-0 z-[100]", !isOpen && "pointer-events-none")}
     >
       {/* Backdrop */}

@@ -99,7 +99,7 @@ export function SiteNav() {
             <button
               onClick={open}
               className="group flex items-center gap-2 text-sm font-medium"
-              aria-label={`Abrir carrito de compras, ${count} artículos`}
+              aria-label={`Abrir carrito de compras, ${count} ${count === 1 ? "artículo" : "artículos"}`}
             >
               <span className="transition-colors group-hover:text-clay">
                 Carrito
@@ -149,7 +149,12 @@ export function SiteNav() {
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   return (
     <div
-      aria-hidden={!open}
+      // `inert` (no `aria-hidden`) cuando está cerrado: aria-hidden por sí solo
+      // dejaba los links/botones de adentro todavía enfocables con Tab —
+      // contradicción de accesibilidad (un elemento aria-hidden no puede tener
+      // descendientes enfocables). `inert` además los saca del orden de
+      // tabulación, que es lo que realmente hacía falta (tarea 102).
+      inert={!open}
       className={cn(
         "fixed inset-0 z-[60] md:hidden",
         !open && "pointer-events-none",

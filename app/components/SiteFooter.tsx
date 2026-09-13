@@ -47,7 +47,12 @@ export function SiteFooter() {
           </div>
           {COLS.map((col) => (
             <div key={col.title}>
-              <h4 className="label mb-4">{col.title}</h4>
+              {/* h3, no h4: no hay ningún h3 antes en la página (las
+                  secciones usan h2) — un h4 directo saltaba un nivel del
+                  esquema de encabezados (tarea 102). El estilo viene 100% de
+                  `.label`, así que el cambio de etiqueta no cambia nada
+                  visualmente. */}
+              <h3 className="label mb-4">{col.title}</h3>
               <ul className="flex flex-col gap-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}>
