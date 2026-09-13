@@ -142,6 +142,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 099 | [099-hero-video-collage-10-fotos.md](099-hero-video-collage-10-fotos.md) | done | Hero: video actualizado a un collage de 10 fotos con Ken Burns y transiciones cruzadas |
 | 100 | [100-hero-performance-lcp.md](100-hero-performance-lcp.md) | done | Performance: auditoría Lighthouse y corrección del LCP del hero (video de fondo → imagen estática + recompresión) |
 | 101 | [101-fotos-reales-home-y-limpieza.md](101-fotos-reales-home-y-limpieza.md) | done | Home: fotos reales del shooting en tiles de categoría, fix de fotos rotas del lookbook (desactivado por ahora) y limpieza de preload muerto |
-| 102 | [102-accesibilidad-auditoria.md](102-accesibilidad-auditoria.md) | in-progress | Accesibilidad: hallazgos de la auditoría de performance (aria-hidden con foco, salto de heading, aria-label del carrito, contraste pendiente) |
+| 102 | [102-accesibilidad-auditoria.md](102-accesibilidad-auditoria.md) | done | Accesibilidad: hallazgos de la auditoría de performance (aria-hidden con foco, salto de heading, aria-label del carrito, contraste) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

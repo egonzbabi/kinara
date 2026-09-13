@@ -23,10 +23,20 @@
   --color-espresso: #2b2118; /* primary ink */
   --color-sand: #e9e1d4; /* page background */
   --color-bone: #f4f0e8; /* raised surfaces / cards */
-  --color-clay: #c2603d; /* primary accent / CTA */
+  /* Oscurecido lo mínimo necesario (tarea 102, conflicto de accesibilidad
+     autorizado por el usuario): el clay original (#c2603d) con texto bone
+     encima (.btn-clay y demás bg-clay+text-bone) daba ~3.67:1 de contraste,
+     bajo el 4.5:1 de WCAG AA para texto normal. Este tono llega a ~4.56:1
+     — el resto de usos de clay (texto de acento sobre sand/bone, bordes,
+     glow decorativo) solo ganan contraste o quedan visualmente igual. */
+  --color-clay: #ab5436; /* primary accent / CTA */
   --color-clay-deep: #a44e30; /* hover */
   --color-sage: #7c8466; /* secondary accent */
-  --color-muted: #6f6457; /* secondary text */
+  /* Oscurecido lo mínimo necesario (tarea 102): el muted original (#6f6457)
+     daba ~4.45:1 sobre el fondo sand (el más exigente de los dos fondos
+     donde se usa) — apenas debajo del 4.5:1 de AA. Este tono llega a
+     ~4.53:1 sobre sand (y ~5.17:1 sobre bone), cambio casi imperceptible. */
+  --color-muted: #6d6356; /* secondary text */
   --color-line: rgb(43 33 24 / 0.14);
   --color-line-strong: rgb(43 33 24 / 0.24);
 
