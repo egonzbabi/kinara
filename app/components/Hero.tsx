@@ -30,21 +30,22 @@ export function Hero() {
   return (
     <section className="pad pt-4">
       <div className="relative h-[clamp(560px,90vh,960px)] w-full overflow-hidden rounded-[28px] bg-espresso">
-        {/* Fondo ambiental: el mismo video, agrandado y desenfocado, para llenar
-            la franja horizontal con color y movimiento reales en vez de una
-            barra sólida — el video es cuadrado (1080×1080, tarea 092) y no
-            llena por sí solo un hero horizontal ancho, así que el hueco se
-            resuelve con el propio video, no con relleno plano (tarea 089,
-            mismo recurso que usan apps como Spotify/Apple). */}
-        <video
-          src={HERO_COLLAGE.main.url}
-          poster={HERO_COLLAGE.main.poster}
-          autoPlay={playsVideo}
-          muted
-          loop
-          playsInline
+        {/* Fondo ambiental: antes era una segunda copia del video (mismo
+            archivo, agrandada y desenfocada) para llenar la franja horizontal
+            con color real en vez de una barra sólida (tarea 089). Se cambió a
+            una <img> fija con el poster (tarea 099, auditoría de performance)
+            porque Lighthouse marcaba esta capa como el elemento de LCP del
+            home — al ser `inset-0` (la más grande del hero por área) y un
+            <video>, el LCP esperaba a que bajara suficiente del archivo de
+            video completo bajo red móvil simulada (~4.7s de "Render Delay").
+            Con una imagen fija (el mismo poster ya usado por los dos <video>,
+            ~80KB) el LCP de esa región se resuelve casi de inmediato; el
+            desenfoque (`blur-2xl`) ya disolvía el detalle de movimiento, así
+            que la diferencia visual es mínima. */}
+        <img
+          src={HERO_COLLAGE.main.poster}
+          alt=""
           aria-hidden
-          tabIndex={-1}
           className="absolute inset-0 h-full w-full scale-125 object-cover object-[center_30%] opacity-70 blur-2xl saturate-125"
         />
         {/* Sombreado + tinte cálido de marca sobre el fondo (mix-blend-overlay
