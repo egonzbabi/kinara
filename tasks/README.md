@@ -138,5 +138,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 095 | [095-hero-corazon-y-comparativo-fuente.md](095-hero-corazon-y-comparativo-fuente.md) | done | Hero: corazón rojo al final de "El mundo de las mujeres" + comparativo de fuentes itálicas (se mantiene Fraunces) |
 | 096 | [096-hero-corazon-grande-y-bodoni-moda.md](096-hero-corazon-grande-y-bodoni-moda.md) | done | Hero: corazón más grande + fuente sofisticada (Bodoni Moda) para la frase grande, reemplaza a Syne |
 | 097 | [097-admin-reordenar-fotos-visible.md](097-admin-reordenar-fotos-visible.md) | done | Admin/Productos: controles de reordenar fotos ya subidas, visibles y con mejor tamaño de clic |
+| 098 | [098-shooting-fotos-producto-masivo.md](098-shooting-fotos-producto-masivo.md) | done | Catálogo: subida masiva de fotos del shooting profesional (reemplazo por color, ~30 productos) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
