@@ -145,5 +145,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 102 | [102-accesibilidad-auditoria.md](102-accesibilidad-auditoria.md) | done | Accesibilidad: hallazgos de la auditoría de performance (aria-hidden con foco, salto de heading, aria-label del carrito, contraste) |
 | 103 | [103-editorial-foto-real-sin-unsplash.md](103-editorial-foto-real-sin-unsplash.md) | done | Home: última foto de stock de Unsplash reemplazada por foto real del shooting (EditorialSplit), `PHOTO`/`img()` eliminados |
 | 104 | [104-hero-poster-webp-y-preload.md](104-hero-poster-webp-y-preload.md) | done | Performance: el poster del hero seguía sin pasar por `productImage()` — LCP seguía fallando tras la tarea 100 |
+| 105 | [105-home-loader-streaming-lcp.md](105-home-loader-streaming-lcp.md) | done | Performance: streaming del loader de home (Suspense/Await) — el catálogo completo ya no bloquea el envío del HTML |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
