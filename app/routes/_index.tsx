@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/_index";
-import { Hero } from "~/components/Hero";
+import { Hero, HERO_BG_IMAGE } from "~/components/Hero";
 import { TrustStrip } from "~/components/TrustStrip";
 import { CategoryTiles } from "~/components/CategoryTiles";
 import { ProductGrid } from "~/components/ProductGrid";
@@ -9,6 +9,13 @@ import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
+
+// Precarga la imagen de LCP real de esta ruta (tarea 104) — el fondo
+// ambiental del hero, no una foto suelta: sin esto el navegador la descubre
+// recién al parsear el <img> en el body, perdiendo tiempo de LCP.
+export const links: Route.LinksFunction = () => [
+  { rel: "preload", as: "image", href: HERO_BG_IMAGE, fetchPriority: "high" },
+];
 
 export function meta(_: Route.MetaArgs) {
   return [

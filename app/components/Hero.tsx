@@ -1,7 +1,27 @@
 import { useEffect, useState } from "react";
 import { LinkButton } from "./Button";
 import { HERO_COLLAGE } from "~/data/images";
+import { productImage } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
+
+// Fondo ambiental (ver comentario más abajo): al ir tan desenfocado
+// (`blur-2xl`, ~40px de radio), ningún detalle sobrevive por debajo de este
+// tamaño — pedir el poster ya reducido y en WebP (en vez del JPEG completo)
+// no cambia nada visualmente y es la diferencia entre bajar ~78KB o unos
+// pocos KB (tarea 104, auditoría de performance).
+// Exportado para que _index.tsx pueda precargarla (`links()`) con la
+// URL exacta que este componente realmente pide — nunca duplicar el cálculo.
+export const HERO_BG_IMAGE = productImage(HERO_COLLAGE.main.poster, {
+  width: 240,
+  height: 240,
+  quality: 50,
+});
+// Poster del video nítido (se ve sharp, no desenfocado) — mismo archivo
+// fuente, pero pedido a un tamaño/formato razonable en vez del JPEG crudo.
+const HERO_VIDEO_POSTER = productImage(HERO_COLLAGE.main.poster, {
+  width: 900,
+  height: 900,
+});
 
 export function Hero() {
   // Entrada suave del texto/tarjeta al cargar (no al hacer scroll — el hero ya
@@ -33,14 +53,24 @@ export function Hero() {
             home — al ser `inset-0` (la más grande del hero por área) y un
             <video>, el LCP esperaba a que bajara suficiente del archivo de
             video completo bajo red móvil simulada (~4.7s de "Render Delay").
-            Con una imagen fija (el mismo poster ya usado por los dos <video>,
-            ~80KB) el LCP de esa región se resuelve casi de inmediato; el
-            desenfoque (`blur-2xl`) ya disolvía el detalle de movimiento, así
-            que la diferencia visual es mínima. */}
+            Con una imagen fija (el mismo poster ya usado por los dos <video>)
+            el LCP de esa región se resuelve casi de inmediato; el desenfoque
+            (`blur-2xl`) ya disolvía el detalle de movimiento, así que la
+            diferencia visual es mínima.
+
+            Un Lighthouse real después de ese cambio (tarea 104) mostró que
+            esta imagen seguía siendo el elemento de LCP y seguía sin cumplir
+            el objetivo (4.6s) — no por Render Delay esta vez, sino porque se
+            pedía el JPEG crudo de Storage (`HERO_COLLAGE.main.poster` directo,
+            sin pasar por `productImage()`): ni WebP ni redimensionado al
+            tamaño real de render. Con tanto blur ningún detalle por debajo
+            de ~240px sobrevive, así que pedirla ya reducida (`HERO_BG_IMAGE`)
+            no cambia nada visualmente y sí el peso (78KB → unos pocos KB). */}
         <img
-          src={HERO_COLLAGE.main.poster}
+          src={HERO_BG_IMAGE}
           alt=""
           aria-hidden
+          fetchPriority="high"
           className="absolute inset-0 h-full w-full scale-125 object-cover object-[center_30%] opacity-70 blur-2xl saturate-125"
         />
         {/* Sombreado + tinte cálido de marca sobre el fondo (mix-blend-overlay
@@ -78,7 +108,7 @@ export function Hero() {
             `md`, y el video la llena exacto. */}
         <video
           src={HERO_COLLAGE.main.url}
-          poster={HERO_COLLAGE.main.poster}
+          poster={HERO_VIDEO_POSTER}
           autoPlay={playsVideo}
           muted
           loop
