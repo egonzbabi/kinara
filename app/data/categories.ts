@@ -17,22 +17,28 @@ export const CATEGORY_TILES: CategoryTile[] = [
     tipo: "Top",
     title: "Top",
     copy: "Bases suaves que se llevan solas o en capas.",
+    // NOVA TOP, color Negro — foto real del shooting profesional (tarea 098),
+    // reemplaza la foto genérica de proveedor que se rompió (404) cuando esa
+    // foto vieja se sustituyó en la 098 (tarea 101).
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/06hfejx4.png",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/06hfejx4/negro-1788997383660-0.jpg",
   },
   {
     tipo: "Bottom",
     title: "Bottom",
     copy: "Shorts y pantalones que se mueven contigo.",
+    // MOVE SHORT, color Cocoa — foto real del shooting (tarea 101).
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/8akg4rmo.png",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/z2gep2ik/cocoa-1788997348894-0.jpg",
   },
   {
     tipo: "Legging",
     title: "Legging",
     copy: "Segunda piel para entrenar o para el día a día.",
+    // Barbie Glow Leggins, color Café — foto real del shooting, con el logo
+    // de marca visible en la pretina (tarea 101).
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/nih06ld7/generic-1785027562494.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/g8owd848/cafe-1789255540470-0.jpg",
   },
   {
     tipo: "Chaqueta",
@@ -45,14 +51,17 @@ export const CATEGORY_TILES: CategoryTile[] = [
     tipo: "Enterizo",
     title: "Enterizo",
     copy: "Una sola pieza, ajuste total.",
+    // ONE MOTION JUMPSUIT, color Oxford — foto real del shooting (tarea 101);
+    // la foto genérica anterior ya estaba rota (404, borrada en la 098).
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/dfp1c34z/generic-0.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/dfp1c34z/oxford-1788997401028-0.jpg",
   },
   {
     tipo: "Set",
     title: "Set",
     copy: "Conjuntos pensados para combinar sin pensar.",
+    // SCULPT SET, color Rosa — foto real del shooting (tarea 101).
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/wk8gx3lz/generic-0.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/b6qq5u7o/rosa-1788997459885-0.jpg",
   },
 ];
