@@ -210,6 +210,20 @@ export function ProductForm({ product, productId, error }: Props) {
   }, [singleSize]);
 
   const [gallery, setGallery] = useState<string[]>(product?.gallery ?? []);
+  // Arrastrar y soltar para reordenar fotos (tarea 109) — además de las
+  // flechas de PhotoOrderControls, no en su lugar: el drag-and-drop nativo
+  // (HTML5) no funciona en touch/mobile, así que las flechas siguen siendo
+  // la única forma de reordenar ahí y también la accesible por teclado.
+  const [draggedColorPhoto, setDraggedColorPhoto] = useState<{
+    colorIndex: number;
+    photoIndex: number;
+  } | null>(null);
+  const [dragOverColorPhoto, setDragOverColorPhoto] = useState<{
+    colorIndex: number;
+    photoIndex: number;
+  } | null>(null);
+  const [draggedGalleryIndex, setDraggedGalleryIndex] = useState<number | null>(null);
+  const [dragOverGalleryIndex, setDragOverGalleryIndex] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   // Cuenta subidas de foto en curso — sin esto, "Guardar" podía enviar el
   // formulario antes de que terminara una subida y la foto se perdía en silencio.
@@ -373,6 +387,22 @@ export function ProductForm({ product, productId, error }: Props) {
     );
   };
 
+  // Arrastrar a una posición cualquiera (no solo intercambiar con la
+  // adyacente, como moveColorImage/moveGalleryImage de arriba) — quita la
+  // foto de `from` y la inserta en `to`, corriendo el resto.
+  const moveColorImageTo = (colorIndex: number, from: number, to: number) => {
+    if (from === to) return;
+    setColors((prev) =>
+      prev.map((c, i) => {
+        if (i !== colorIndex) return c;
+        const imageUrls = [...c.imageUrls];
+        const [moved] = imageUrls.splice(from, 1);
+        imageUrls.splice(to, 0, moved);
+        return { ...c, imageUrls };
+      }),
+    );
+  };
+
   const handleGalleryImage = async (file: File) => {
     setPendingUploads((n) => n + 1);
     try {
@@ -397,6 +427,16 @@ export function ProductForm({ product, productId, error }: Props) {
       const target = index + dir;
       if (target < 0 || target >= next.length) return prev;
       [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const moveGalleryImageTo = (from: number, to: number) => {
+    if (from === to) return;
+    setGallery((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
       return next;
     });
   };
@@ -732,19 +772,51 @@ export function ProductForm({ product, productId, error }: Props) {
                     Fotos {color.imageUrls.length > 0 && `(${color.imageUrls.length})`}
                   </label>
                   <p className="text-xs text-muted">
-                    La primera es la foto principal — usa las flechas debajo de cada foto para
-                    cambiar el orden.
+                    La primera es la foto principal — arrastra una foto a otra posición para
+                    reordenarla, o usa las flechas debajo de cada foto.
                   </p>
                   {color.imageUrls.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {color.imageUrls.map((url, pi) => (
-                        <div key={url} className="relative">
+                        <div
+                          key={url}
+                          draggable
+                          onDragStart={() => setDraggedColorPhoto({ colorIndex: i, photoIndex: pi })}
+                          onDragEnd={() => {
+                            setDraggedColorPhoto(null);
+                            setDragOverColorPhoto(null);
+                          }}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            if (draggedColorPhoto?.colorIndex === i) {
+                              setDragOverColorPhoto({ colorIndex: i, photoIndex: pi });
+                            }
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            if (draggedColorPhoto && draggedColorPhoto.colorIndex === i) {
+                              moveColorImageTo(i, draggedColorPhoto.photoIndex, pi);
+                            }
+                            setDraggedColorPhoto(null);
+                            setDragOverColorPhoto(null);
+                          }}
+                          className={cn(
+                            "relative cursor-grab active:cursor-grabbing",
+                            draggedColorPhoto?.colorIndex === i &&
+                              draggedColorPhoto.photoIndex === pi &&
+                              "opacity-40",
+                          )}
+                        >
                           <img
                             src={url}
                             alt={`${color.name} ${pi + 1}`}
+                            draggable={false}
                             className={cn(
                               "h-16 w-16 rounded-lg object-cover",
                               pi === 0 && "ring-2 ring-clay ring-offset-1",
+                              dragOverColorPhoto?.colorIndex === i &&
+                                dragOverColorPhoto.photoIndex === pi &&
+                                "ring-2 ring-clay/60 ring-offset-2",
                             )}
                           />
                           <PhotoOrderControls
@@ -790,13 +862,44 @@ export function ProductForm({ product, productId, error }: Props) {
       <section className="rounded-xl bg-bone p-5">
         <h2 className="font-display text-lg text-espresso">Galería (fotos genéricas)</h2>
         <p className="mt-1 text-[13px] text-muted">
-          Se muestran cuando no hay un color seleccionado o el color no tiene foto propia. Usa las
-          flechas debajo de cada foto para cambiar el orden.
+          Se muestran cuando no hay un color seleccionado o el color no tiene foto propia.
+          Arrastra una foto a otra posición para reordenarla, o usa las flechas debajo de cada
+          foto.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           {gallery.map((url, i) => (
-            <div key={url} className="relative">
-              <img src={url} alt="" className="h-24 w-20 rounded-lg object-cover" />
+            <div
+              key={url}
+              draggable
+              onDragStart={() => setDraggedGalleryIndex(i)}
+              onDragEnd={() => {
+                setDraggedGalleryIndex(null);
+                setDragOverGalleryIndex(null);
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (draggedGalleryIndex !== null) setDragOverGalleryIndex(i);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedGalleryIndex !== null) moveGalleryImageTo(draggedGalleryIndex, i);
+                setDraggedGalleryIndex(null);
+                setDragOverGalleryIndex(null);
+              }}
+              className={cn(
+                "relative cursor-grab active:cursor-grabbing",
+                draggedGalleryIndex === i && "opacity-40",
+              )}
+            >
+              <img
+                src={url}
+                alt=""
+                draggable={false}
+                className={cn(
+                  "h-24 w-20 rounded-lg object-cover",
+                  dragOverGalleryIndex === i && "ring-2 ring-clay/60 ring-offset-2",
+                )}
+              />
               <PhotoOrderControls
                 label={`la foto ${i + 1} de la galería`}
                 upDisabled={i === 0}
