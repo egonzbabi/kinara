@@ -27,9 +27,11 @@ export const CATEGORY_TILES: CategoryTile[] = [
     tipo: "Bottom",
     title: "Bottom",
     copy: "Shorts y pantalones que se mueven contigo.",
-    // MOVE SHORT, color Cocoa — foto real del shooting (tarea 101).
+    // MOVE SHORT, color Cocoa — foto real del shooting (tarea 101), recorte
+    // cerrado solo en el short (no de cuerpo completo) para diferenciarse
+    // visualmente del tile de Top, que usa la misma pose de cuerpo completo.
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/z2gep2ik/cocoa-1788997348894-0.jpg",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/z2gep2ik/cocoa-1788997348894-2.jpg",
   },
   {
     tipo: "Legging",
