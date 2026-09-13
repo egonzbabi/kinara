@@ -18,7 +18,7 @@ export const HERO_BG_IMAGE = productImage(HERO_COLLAGE.main.poster, {
 });
 // Poster del video nítido (se ve sharp, no desenfocado) — mismo archivo
 // fuente, pero pedido a un tamaño/formato razonable en vez del JPEG crudo.
-const HERO_VIDEO_POSTER = productImage(HERO_COLLAGE.main.poster, {
+export const HERO_VIDEO_POSTER = productImage(HERO_COLLAGE.main.poster, {
   width: 900,
   height: 900,
 });
@@ -109,6 +109,12 @@ export function Hero() {
         <video
           src={HERO_COLLAGE.main.url}
           poster={HERO_VIDEO_POSTER}
+          // Tras arreglar el fondo ambiental (arriba), Lighthouse pasó a
+          // marcar este <video> (su poster) como el nuevo elemento de LCP —
+          // se descubría tarde (~1.5s de "Load Delay"). `fetchPriority` no
+          // es un atributo válido de <video> (los tipos de React no lo
+          // permiten aquí, a diferencia de <img>/<link>) — el preload real
+          // vive en `links()` de _index.tsx (tarea 104).
           autoPlay={playsVideo}
           muted
           loop

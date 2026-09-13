@@ -38,7 +38,7 @@ El poster del hero se sirve en WebP y al tamaño real que necesita cada uso (fon
 
 - [x] El fondo ambiental del hero pide `hero-poster.jpg` vía `productImage()` (240×240, calidad 50) — 78,279 bytes → **4,710 bytes** (WebP), confirmado por `fetch()` en el navegador.
 - [x] El poster del `<video>` nítido también pasa por `productImage()` (900×900) — 78,279 → 28,416 bytes (WebP).
-- [x] `_index.tsx` precarga (`links()`, `fetchPriority: "high"`) exactamente la misma URL que el componente usa para el fondo ambiental.
+- [x] `_index.tsx` precarga (`links()`, `fetchPriority: "high"`) las dos imágenes candidatas a LCP del hero (fondo ambiental y poster del video nítido) — un primer deploy solo con la primera bajó LCP de 4.6s a 3.4s, pero el elemento de LCP se corrió al poster del video (antes más rápido en términos relativos, quedó como el nuevo cuello de botella); se agregó también su preload.
 - [x] Sin diferencia visual perceptible (comparado antes/después en desktop y mobile).
 - [x] `npm run typecheck` limpio.
 - [x] Lighthouse real contra producción (después del deploy): LCP pasa de 4.6s a **dentro del objetivo** — ver "Notas de progreso" para el número exacto post-deploy.

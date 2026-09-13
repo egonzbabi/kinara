@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/_index";
-import { Hero, HERO_BG_IMAGE } from "~/components/Hero";
+import { Hero, HERO_BG_IMAGE, HERO_VIDEO_POSTER } from "~/components/Hero";
 import { TrustStrip } from "~/components/TrustStrip";
 import { CategoryTiles } from "~/components/CategoryTiles";
 import { ProductGrid } from "~/components/ProductGrid";
@@ -10,11 +10,14 @@ import { BestsellerRail } from "~/components/BestsellerRail";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 
-// Precarga la imagen de LCP real de esta ruta (tarea 104) — el fondo
-// ambiental del hero, no una foto suelta: sin esto el navegador la descubre
-// recién al parsear el <img> en el body, perdiendo tiempo de LCP.
+// Precarga las dos imágenes candidatas a LCP del hero (tarea 104): el fondo
+// ambiental (ganaba antes) y el poster del video nítido (ganó después de
+// arreglar el fondo — Lighthouse va turnándose el elemento de LCP entre
+// ambas capas del hero según cuál sea más lenta en cada momento). Sin esto
+// el navegador las descubre recién al parsear el body, perdiendo tiempo.
 export const links: Route.LinksFunction = () => [
   { rel: "preload", as: "image", href: HERO_BG_IMAGE, fetchPriority: "high" },
+  { rel: "preload", as: "image", href: HERO_VIDEO_POSTER, fetchPriority: "high" },
 ];
 
 export function meta(_: Route.MetaArgs) {
