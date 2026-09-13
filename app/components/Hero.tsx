@@ -3,11 +3,6 @@ import { LinkButton } from "./Button";
 import { HERO_COLLAGE } from "~/data/images";
 import { cn } from "~/lib/cn";
 
-// Ya no se usa para el hero (era el ancho de srcSet de las fotos del
-// carrusel, tarea 087/088) — se deja exportado porque _index.tsx todavía lo
-// usa para el preload de una foto distinta (PHOTO.heroPrimary).
-export const HERO_WIDTHS = [640, 1000, 1500, 2000];
-
 export function Hero() {
   // Entrada suave del texto/tarjeta al cargar (no al hacer scroll — el hero ya
   // está a la vista desde el primer momento) y respeto a "menos movimiento":
