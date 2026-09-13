@@ -1,66 +1,11 @@
 /**
- * Central image map. Every product/editorial photo is referenced from here so a
- * real photo shoot can replace these by editing a single file.
- *
- * Sources are curated Unsplash athletic/athleisure photos (verified live).
- * `img()` builds an optimized delivery URL with crop + format params.
+ * Central image map para fotos de sitio (no de catálogo — esas viven en
+ * Supabase, ver `app/lib/catalog.ts`). Antes tenía fotos de stock de Unsplash
+ * hotlinkeadas (`img()`/`PHOTO`, tarea 002-ish); se quitaron en la tarea 103
+ * al reemplazar la última que se renderizaba (`PHOTO.editorial`, en
+ * `EditorialSplit.tsx`) por una foto real del shooting — ya no queda ninguna
+ * imagen del sitio dependiendo de un dominio externo.
  */
-
-const BASE = "https://images.unsplash.com/";
-
-type ImgOpts = {
-  w?: number;
-  h?: number;
-  q?: number;
-};
-
-export function img(id: string, { w = 1200, h, q = 80 }: ImgOpts = {}): string {
-  const params = new URLSearchParams({
-    auto: "format",
-    fit: "crop",
-    crop: "entropy",
-    w: String(w),
-    q: String(q),
-  });
-  if (h) params.set("h", String(h));
-  return `${BASE}${id}?${params.toString()}`;
-}
-
-/**
- * `srcSet` para una serie de anchos, manteniendo el aspect ratio de `w`/`h`
- * pasados — evita que un móvil descargue la misma imagen de escritorio.
- */
-export function imgSrcSet(id: string, widths: number[], { h: baseH, w: baseW, q = 80 }: ImgOpts = {}): string {
-  const ratio = baseH && baseW ? baseH / baseW : undefined;
-  return widths
-    .map((w) => `${img(id, { w, h: ratio ? Math.round(w * ratio) : undefined, q })} ${w}w`)
-    .join(", ");
-}
-
-/** Named raw photo ids (Unsplash), grouped by intended use. */
-export const PHOTO = {
-  heroPrimary: "photo-1517836357463-d25dfeac3438",
-
-  editorial: "photo-1549576490-b0b4831ef60a",
-
-  // Product galleries
-  pBruma1: "photo-1556817411-31ae72fa3ea0",
-  pBruma2: "photo-1518310383802-640c2de311b2",
-  pCalma1: "photo-1535556116002-6281ff3e9f36",
-  pCalma2: "photo-1552674605-db6ffd4facb5",
-  pCorteza1: "photo-1594381898411-846e7d193883",
-  pCorteza2: "photo-1434596922112-19c563067271",
-  pSendero1: "photo-1538805060514-97d9cc17730c",
-  pSendero2: "photo-1540206395-68808572332f",
-  pAurora1: "photo-1506629082955-511b1aa562c8",
-  pAurora2: "photo-1517836357463-d25dfeac3438",
-  pDuna1: "photo-1571019613454-1cb2f99b2d8b",
-  pDuna2: "photo-1581009146145-b5ef050c2e1e",
-  pRaiz1: "photo-1549576490-b0b4831ef60a",
-  pRaiz2: "photo-1532009324734-20a7a5813719",
-  pBrisa1: "photo-1571945153237-4929e783af4a",
-  pBrisa2: "photo-1483721310020-03333e577078",
-} as const;
 
 /**
  * Hero de home: antes era un collage rotativo de fotos propias, ahora es un

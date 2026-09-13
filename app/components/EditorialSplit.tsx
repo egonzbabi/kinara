@@ -1,5 +1,14 @@
 import { LinkButton } from "./Button";
-import { img, PHOTO } from "~/data/images";
+import { productImage, productSrcSet } from "~/lib/productImage";
+
+// Foto real del shooting (NEWYORK SET, Ivory/Cocoa) — reemplaza la foto de
+// stock de Unsplash que tenía esta sección (tarea 103, auditoría de
+// performance: "reemplazar fotos hotlinked por fotos reales del shooting").
+// Pose de movimiento genuina, en la paleta cálida de la marca — encaja con
+// la frase "el cuerpo que se mueve y la mente que necesita calma".
+const EDITORIAL_PHOTO =
+  "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/t5a8m19y/ivorycocoa-1788997367076-1.jpg";
+const EDITORIAL_WIDTHS = [480, 700, 1100];
 
 export function EditorialSplit() {
   return (
@@ -25,8 +34,10 @@ export function EditorialSplit() {
 
         <div className="reveal order-1 overflow-hidden rounded-2xl md:order-2">
           <img
-            src={img(PHOTO.editorial, { w: 1100, h: 1200, q: 82 })}
-            alt="Detalle de tejido y movimiento en ropa KINARA"
+            src={productImage(EDITORIAL_PHOTO, { width: 1100, height: 1200 })}
+            srcSet={productSrcSet(EDITORIAL_PHOTO, EDITORIAL_WIDTHS, { heightRatio: 1200 / 1100 })}
+            sizes="(min-width: 768px) 46vw, 92vw"
+            alt="Modelo de KINARA en movimiento, brazo en alto"
             loading="lazy"
             className="h-full w-full object-cover"
           />
