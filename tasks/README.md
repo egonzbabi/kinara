@@ -149,5 +149,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 107 | [107-tienda-orden-ropa-antes-accesorios.md](107-tienda-orden-ropa-antes-accesorios.md) | done | Tienda: orden por defecto — toda la ropa agrupada por tipo, accesorios al final |
 | 108 | [108-fix-logout-falso-editar-producto.md](108-fix-logout-falso-editar-producto.md) | done | Fix: cerraba la sesión de admin ante un error transitorio de red/DB, no solo cuando el acceso era revocado de verdad |
 | 109 | [109-admin-drag-and-drop-fotos.md](109-admin-drag-and-drop-fotos.md) | done | Admin/Productos: arrastrar y soltar para reordenar fotos (sin borrar y volver a subir) |
+| 110 | [110-home-banner-descuento-arriba.md](110-home-banner-descuento-arriba.md) | done | Home: banner de 10% de descuento (registro) justo debajo del hero |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

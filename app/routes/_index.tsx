@@ -48,6 +48,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <Hero />
+      <WelcomeDiscountBanner />
       <TrustStrip />
       <CategoryTiles />
 
@@ -90,8 +91,6 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </div>
         <ProductGrid products={novedades} priorityCount={2} />
       </section>
-
-      <WelcomeDiscountBanner />
 
       <EditorialSplit />
       <BestsellerRail products={products} />
