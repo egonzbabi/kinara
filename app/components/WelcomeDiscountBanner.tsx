@@ -33,7 +33,7 @@ export function WelcomeDiscountBanner() {
 
   return (
     <section id="bienvenida" className="pad py-[clamp(40px,6vw,72px)]">
-      <div className="reveal rounded-2xl bg-espresso px-6 py-10 text-center text-bone sm:px-12 sm:py-14">
+      <div className="reveal reveal-bounce rounded-2xl bg-espresso px-6 py-10 text-center text-bone sm:px-12 sm:py-14">
         <span className="label text-clay">Bienvenida</span>
         <h2 className="mt-3 font-display text-[clamp(24px,3.4vw,38px)] leading-tight">
           Llévate {DISCOUNT_PERCENT}% en tu primera compra
@@ -42,6 +42,26 @@ export function WelcomeDiscountBanner() {
           Regístrate con tu correo y te mandamos tu código — válido desde{" "}
           {formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos, sin contar el envío.
         </p>
+
+        {/* Flechita que rebota apuntando al formulario — sigue llamando la
+            atención después del rebote de entrada de arriba (tarea 111). Se
+            oculta cuando ya se registró (no hay nada a lo que apuntar). */}
+        {!success && (
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            fill="none"
+            className="motion-safe:animate-bounce mx-auto mt-4 h-5 w-5 text-clay"
+          >
+            <path
+              d="M12 4v14m0 0-6-6m6 6 6-6"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        )}
 
         {success ? (
           <p className="mx-auto mt-7 max-w-[40ch] text-sm font-medium text-bone">
