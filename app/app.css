@@ -164,11 +164,13 @@
   }
 
   /* Entrada "con rebote" para el banner de descuento (tarea 111, a pedido
-     del usuario: "que llame la atención, que brinque") — mismo mecanismo de
-     `useScrollReveal`/`.reveal` (se le agrega `.in` al entrar en viewport),
-     pero en vez del fade+translate liso de `.reveal`, hace un rebote tipo
-     resorte una sola vez. `prefers-reduced-motion` ya lo neutraliza solo
-     (regla global de abajo, `animation-duration: 0.001ms !important`). */
+     del usuario: "que llame la atención, que brinque... que se quede
+     moviéndose") — mismo mecanismo de `useScrollReveal`/`.reveal` (se le
+     agrega `.in` al entrar en viewport), pero en vez del fade+translate liso
+     de `.reveal`, entra con un rebote tipo resorte y se queda flotando en un
+     rebote suave continuo (no se detiene, a diferencia del resto del sitio
+     que solo anima su entrada). `prefers-reduced-motion` ya lo neutraliza
+     solo (regla global de abajo, `animation-duration: 0.001ms !important`). */
   @keyframes bounce-in {
     0% {
       opacity: 0;
@@ -189,8 +191,23 @@
       transform: translateY(0);
     }
   }
+  @keyframes bounce-loop {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
   .reveal-bounce.in {
-    animation: bounce-in 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    /* La entrada (bounce-in) corre una sola vez; bounce-loop arranca justo
+       cuando esa termina (delay = misma duración que bounce-in) y sigue para
+       siempre — las dos comparten `transform` pero nunca se solapan en el
+       tiempo, así que no compiten entre sí. */
+    animation:
+      bounce-in 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+      bounce-loop 1.8s ease-in-out 0.9s infinite;
   }
 
   @keyframes marquee {
