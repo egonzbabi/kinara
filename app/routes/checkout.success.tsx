@@ -7,9 +7,16 @@ import { ensureOrderFromCheckoutSession, type OrderItem } from "~/lib/orders.ser
 import { supabaseAdmin } from "~/lib/supabase.server";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
+import { seoMeta } from "~/lib/seo";
 
+// noindex: confirmación específica de un pedido, no contenido a posicionar.
 export function meta(_: Route.MetaArgs) {
-  return [{ title: "Pedido confirmado · KINARA" }];
+  return seoMeta({
+    title: "Pedido confirmado · KINARA",
+    description: "Confirmación de tu pedido en KINARA.",
+    path: "/checkout/success",
+    noindex: true,
+  });
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

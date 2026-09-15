@@ -1,13 +1,12 @@
 import type { Route } from "./+types/aviso-de-privacidad";
+import { seoMeta } from "~/lib/seo";
 
 export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Aviso de Privacidad · KINARA" },
-    {
-      name: "description",
-      content: "Cómo KINARA recaba, usa y protege tus datos personales.",
-    },
-  ];
+  return seoMeta({
+    title: "Aviso de Privacidad · KINARA",
+    description: "Cómo KINARA recaba, usa y protege tus datos personales.",
+    path: "/aviso-de-privacidad",
+  });
 }
 
 const sectionClass = "flex flex-col gap-3";

@@ -9,6 +9,7 @@ import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
+import { seoMeta, SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "~/lib/seo";
 
 // Precarga las dos imágenes candidatas a LCP del hero (tarea 104): el fondo
 // ambiental (ganaba antes) y el poster del video nítido (ganó después de
@@ -22,11 +23,27 @@ export const links: Route.LinksFunction = () => [
 
 export function meta(_: Route.MetaArgs) {
   return [
-    { title: "KINARA · Ropa deportiva con alma" },
-    {
-      name: "description",
-      content:
+    ...seoMeta({
+      title: "KINARA · Ropa deportiva con alma",
+      description:
         "Athleisure técnico en tonos cálidos. Leggings, tops, sudaderas y capas hechas para moverse y para vivir. Nueva colección SS26.",
+      path: "/",
+    }),
+    // Organization (tarea 003, SEO técnico) — se pone solo aquí, no en
+    // root.tsx: cada ruta reemplaza por completo el `meta()` de sus
+    // ancestros en React Router 7 (no se concatenan), así que ponerlo en
+    // root.tsx nunca llegaría a renderizarse en ninguna ruta que defina su
+    // propio meta() — y todas las rutas públicas de este sitio lo hacen.
+    {
+      "script:ld+json": {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: SITE_NAME,
+        url: SITE_URL,
+        image: DEFAULT_OG_IMAGE,
+        description:
+          "Athleisure técnico mexicano en tonos cálidos, hecho para moverse y para vivir.",
+      },
     },
   ];
 }

@@ -19,6 +19,7 @@ import { productImage, productSrcSet } from "~/lib/productImage";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { useDragScroll } from "~/hooks/useDragScroll";
 import { cn } from "~/lib/cn";
+import { seoMeta, absoluteUrl } from "~/lib/seo";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const product = await getProductBySlug(params.slug);
@@ -32,9 +33,44 @@ export async function loader({ params }: Route.LoaderArgs) {
 
 export function meta({ data }: Route.MetaArgs) {
   if (!data) return [{ title: "Producto · KINARA" }];
+  const { product } = data;
+  const path = `/producto/${product.slug}`;
+  const mainImage = productImage(product.gallery[0], { width: 1200, height: 1500 });
+
   return [
-    { title: `${data.product.name} · KINARA` },
-    { name: "description", content: data.product.description },
+    ...seoMeta({
+      title: `${product.name} · KINARA`,
+      description: product.description,
+      path,
+      image: mainImage,
+      type: "product",
+    }),
+    // Product/Offer (tarea 003, SEO técnico) — Google Rich Results / Merchant
+    // listings. `availability` se deriva de `product.sizes` (tallas con
+    // stock > 0, ya filtradas en app/lib/catalog.ts) — sin tallas
+    // disponibles, se reporta agotado en vez de "en stock" a ciegas.
+    {
+      "script:ld+json": {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description: product.description,
+        image: product.gallery.slice(0, 4).map((url) => productImage(url, { width: 1200, height: 1500 })),
+        sku: product.id,
+        brand: { "@type": "Brand", name: "KINARA" },
+        offers: {
+          "@type": "Offer",
+          url: absoluteUrl(path),
+          priceCurrency: "MXN",
+          price: product.price.toFixed(2),
+          availability:
+            product.sizes.length > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          itemCondition: "https://schema.org/NewCondition",
+        },
+      },
+    },
   ];
 }
 

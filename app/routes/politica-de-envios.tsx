@@ -1,13 +1,12 @@
 import type { Route } from "./+types/politica-de-envios";
+import { seoMeta } from "~/lib/seo";
 
 export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Política de Envíos · KINARA" },
-    {
-      name: "description",
-      content: "Tiempos de preparación y entrega, rastreo y costos de envío en KINARA.",
-    },
-  ];
+  return seoMeta({
+    title: "Política de Envíos · KINARA",
+    description: "Tiempos de preparación y entrega, rastreo y costos de envío en KINARA.",
+    path: "/politica-de-envios",
+  });
 }
 
 const sectionClass = "flex flex-col gap-3";

@@ -12,7 +12,9 @@ Formato de cada entrada: `- [ ] Requisito — (origen: tarea NNN)`
 
 ## SEO
 
--
+- [x] Toda ruta pública nueva arma sus metadatos con `seoMeta()` (`app/lib/seo.ts`) — nunca `title`/`description` sueltos a mano — para no perder canonical/Open Graph/Twitter Card por accidente. Una página transitoria o específica de un usuario (checkout, una futura cuenta) debe pasar `noindex: true`. El dominio de SEO (canonical, Open Graph, JSON-LD, sitemap, robots.txt) es la constante `SITE_URL` en `app/lib/seo.ts` (`https://www.kinarafit.com.mx`, confirmado con el usuario aunque el sitio hoy viva en `kinara-ecommerce.vercel.app`) — se actualiza ahí, nunca hardcodeado en cada ruta. — (origen: tarea 003)
+- [x] `sitemap.xml` (`app/routes/sitemap.xml.tsx`) se genera desde el catálogo real de Supabase (`getAllProducts()`), nunca desde `app/data/products.ts`. Una ruta pública de contenido nueva (no transitoria, no `/admin`/`/api`) debe agregarse a `STATIC_PATHS` en ese archivo. `/tienda` con cualquier filtro (`?tipo=`, `?cat=`, etc.) canonicaliza a `/tienda` sin query string — nunca listar esas variantes en el sitemap. — (origen: tarea 003)
+- [x] React Router 7 no concatena el `meta()` de rutas anidadas — la ruta más profunda que define `meta()` reemplaza por completo el de sus ancestros (`root.tsx` incluido), sin merge. Un tag que deba aparecer en todas las páginas públicas (ej. el JSON-LD de `Organization`) debe agregarse dentro de `seoMeta()`/cada ruta, no en `root.tsx` esperando que se herede — ahí nunca se renderiza en una ruta que ya tiene su propio `meta()` (todas las públicas lo tienen). — (origen: tarea 003)
 
 ## Accesibilidad / UI-UX
 

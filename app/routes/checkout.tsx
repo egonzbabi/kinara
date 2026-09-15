@@ -4,9 +4,17 @@ import type { Route } from "./+types/checkout";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { cn } from "~/lib/cn";
+import { seoMeta } from "~/lib/seo";
 
+// noindex: página transitoria y específica del carrito de cada visitante,
+// no contenido a posicionar (tarea 003, SEO técnico).
 export function meta(_: Route.MetaArgs) {
-  return [{ title: "Finalizar compra · KINARA" }];
+  return seoMeta({
+    title: "Finalizar compra · KINARA",
+    description: "Finaliza tu compra en KINARA.",
+    path: "/checkout",
+    noindex: true,
+  });
 }
 
 type Address = {

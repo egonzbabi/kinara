@@ -3,15 +3,14 @@ import type { Route } from "./+types/contacto";
 import { supabaseAdmin } from "~/lib/supabase.server";
 import { sendContactEmail } from "~/lib/resend.server";
 import { cn } from "~/lib/cn";
+import { seoMeta } from "~/lib/seo";
 
 export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Contacto · KINARA" },
-    {
-      name: "description",
-      content: "¿Tienes preguntas sobre un pedido, una prenda o un cambio? Escríbenos.",
-    },
-  ];
+  return seoMeta({
+    title: "Contacto · KINARA",
+    description: "¿Tienes preguntas sobre un pedido, una prenda o un cambio? Escríbenos.",
+    path: "/contacto",
+  });
 }
 
 type ActionData = { ok: true } | { ok: false; error: string };

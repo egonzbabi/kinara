@@ -7,16 +7,19 @@ import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
 import { FAMILY_ORDER, FAMILY_SWATCH, getColorFamily } from "~/lib/colorFamilies";
+import { seoMeta } from "~/lib/seo";
 
+// El canonical siempre apunta a /tienda sin query string, sin importar qué
+// filtros (?tipo=, ?cat=, ?talla=, ?color=, ?sort=) traiga la URL actual —
+// son la misma página/contenido reordenado, no páginas nuevas; indexarlas
+// por separado sería contenido duplicado/delgado ante Google.
 export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Tienda · KINARA" },
-    {
-      name: "description",
-      content:
-        "Explora toda la colección KINARA: leggings, tops, sudaderas, capas y accesorios técnicos en tonos cálidos.",
-    },
-  ];
+  return seoMeta({
+    title: "Tienda · KINARA",
+    description:
+      "Explora toda la colección KINARA: leggings, tops, sudaderas, capas y accesorios técnicos en tonos cálidos.",
+    path: "/tienda",
+  });
 }
 
 type Sort = "destacados" | "precio-asc" | "precio-desc" | "nuevo";

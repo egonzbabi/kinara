@@ -1,13 +1,12 @@
 import type { Route } from "./+types/politica-de-cambios-y-devoluciones";
+import { seoMeta } from "~/lib/seo";
 
 export function meta(_: Route.MetaArgs) {
-  return [
-    { title: "Política de Cambios y Devoluciones · KINARA" },
-    {
-      name: "description",
-      content: "Cuándo procede un cambio por defecto de fábrica en KINARA y cómo reportarlo.",
-    },
-  ];
+  return seoMeta({
+    title: "Política de Cambios y Devoluciones · KINARA",
+    description: "Cuándo procede un cambio por defecto de fábrica en KINARA y cómo reportarlo.",
+    path: "/politica-de-cambios-y-devoluciones",
+  });
 }
 
 const sectionClass = "flex flex-col gap-3";

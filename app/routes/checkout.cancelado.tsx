@@ -1,8 +1,15 @@
 import { Link } from "react-router";
 import type { Route } from "./+types/checkout.cancelado";
+import { seoMeta } from "~/lib/seo";
 
+// noindex: página de resultado transitoria, no contenido a posicionar.
 export function meta(_: Route.MetaArgs) {
-  return [{ title: "Pago cancelado · KINARA" }];
+  return seoMeta({
+    title: "Pago cancelado · KINARA",
+    description: "Tu pago fue cancelado.",
+    path: "/checkout/cancelado",
+    noindex: true,
+  });
 }
 
 export default function CheckoutCancelado() {
