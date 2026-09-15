@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { trackAddToCart } from "~/lib/analytics";
 
 export type CartItem = {
   /** Stable line key: product + color + size */
@@ -99,6 +100,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return next;
     });
     setIsOpen(true);
+    // GA4 add_to_cart (tarea 004) — un solo punto de entrada al carrito
+    // (ProductCard, detalle de producto, etc. llaman todos a este `add`),
+    // así que dispararlo aquí cubre todo el sitio sin duplicar la llamada
+    // en cada lugar que agrega al carrito.
+    trackAddToCart({
+      id: payload.productId,
+      name: payload.name,
+      price: payload.price,
+      quantity: qty,
+    });
   }, []);
 
   const remove = useCallback((key: string) => {

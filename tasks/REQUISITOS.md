@@ -28,7 +28,7 @@ Formato de cada entrada: `- [ ] Requisito — (origen: tarea NNN)`
 
 ## Analytics
 
--
+- [x] GA4 con Consent Mode (`app/lib/analytics.ts`, `app/components/CookieConsentBanner.tsx`) — `analytics_storage` arranca "denied" (script inline en `root.tsx`, corre antes que `gtag.js`) y solo pasa a "granted" cuando el visitante acepta el banner de cookies. Todo evento de e-commerce nuevo (producto/compra) debe dispararse con los helpers tipados de `analytics.ts` (`trackViewItem`/`trackAddToCart`/`trackBeginCheckout`/`trackPurchase`), nunca con `gtag()` suelto a mano en un componente. El Measurement ID es siempre `VITE_GA_MEASUREMENT_ID` — nunca hardcodeado. — (origen: tarea 004)
 
 ## Datos (Supabase)
 

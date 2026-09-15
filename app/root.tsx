@@ -15,6 +15,8 @@ import { AnnouncementBar } from "~/components/AnnouncementBar";
 import { SiteNav } from "~/components/SiteNav";
 import { SiteFooter } from "~/components/SiteFooter";
 import { CartDrawer } from "~/components/CartDrawer";
+import { CookieConsentBanner } from "~/components/CookieConsentBanner";
+import { GA_MEASUREMENT_ID } from "~/lib/analytics";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://images.unsplash.com" },
@@ -43,6 +45,38 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="theme-color" content="#e9e1d4" />
         <Meta />
         <Links />
+        {/* Google Analytics 4 (tarea 004) con Consent Mode — solo se carga si
+            hay Measurement ID configurado (VITE_GA_MEASUREMENT_ID), nunca
+            hardcodeado. El script inline corre ANTES que gtag.js y fija
+            `analytics_storage` en "denied" por defecto (o "granted" si el
+            visitante ya había aceptado antes, leyendo el mismo localStorage
+            que usa CookieConsentBanner/analytics.ts) — sin esto, gtag.js
+            mandaría hits con el consentimiento todavía sin definir. `async`
+            en el script real: no bloquea el render inicial (regla de
+            CLAUDE.md sobre scripts de terceros). */}
+        {GA_MEASUREMENT_ID && (
+          <>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  var kinaraConsent = null;
+                  try { kinaraConsent = localStorage.getItem("kinara-cookie-consent"); } catch (e) {}
+                  gtag("consent", "default", {
+                    analytics_storage: kinaraConsent === "granted" ? "granted" : "denied"
+                  });
+                  gtag("js", new Date());
+                  gtag("config", "${GA_MEASUREMENT_ID}");
+                `,
+              }}
+            />
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+            />
+          </>
+        )}
       </head>
       <body>
         {children}
@@ -74,6 +108,7 @@ export default function App() {
       </main>
       <SiteFooter />
       <CartDrawer />
+      <CookieConsentBanner />
     </CartProvider>
   );
 }

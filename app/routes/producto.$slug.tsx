@@ -20,6 +20,7 @@ import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { useDragScroll } from "~/hooks/useDragScroll";
 import { cn } from "~/lib/cn";
 import { seoMeta, absoluteUrl } from "~/lib/seo";
+import { trackViewItem } from "~/lib/analytics";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const product = await getProductBySlug(params.slug);
@@ -78,6 +79,18 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   const { product, related } = loaderData;
   const { add } = useCart();
   useScrollReveal();
+
+  // GA4 view_item (tarea 004) — una vez por producto visto, no por cada
+  // cambio de color/talla (por eso depende solo de product.id, no de
+  // `color`/`size` de abajo).
+  useEffect(() => {
+    trackViewItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.kind,
+    });
+  }, [product.id, product.name, product.price, product.kind]);
 
   const [color, setColor] = useState<string | null>(
     product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null,

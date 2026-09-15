@@ -8,6 +8,7 @@ import { supabaseAdmin } from "~/lib/supabase.server";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { seoMeta } from "~/lib/seo";
+import { trackPurchase } from "~/lib/analytics";
 
 // noindex: confirmación específica de un pedido, no contenido a posicionar.
 export function meta(_: Route.MetaArgs) {
@@ -62,7 +63,23 @@ export default function CheckoutSuccess({ loaderData }: Route.ComponentProps) {
   const { clear } = useCart();
 
   useEffect(() => {
-    if (loaderData.status === "paid") clear();
+    if (loaderData.status !== "paid") return;
+    clear();
+    // GA4 purchase (tarea 004) — el único lugar del sitio donde se confirma
+    // un pago real, ya verificado server-side contra Stripe (loader de
+    // arriba) antes de llegar aquí.
+    if (loaderData.orderId) {
+      trackPurchase({
+        transactionId: loaderData.orderId,
+        value: loaderData.total,
+        items: loaderData.items.map((item) => ({
+          id: item.productId,
+          name: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaderData.status]);
 

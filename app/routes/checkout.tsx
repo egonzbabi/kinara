@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import type { Route } from "./+types/checkout";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { cn } from "~/lib/cn";
 import { seoMeta } from "~/lib/seo";
+import { trackBeginCheckout } from "~/lib/analytics";
 
 // noindex: página transitoria y específica del carrito de cada visitante,
 // no contenido a posicionar (tarea 003, SEO técnico).
@@ -79,6 +80,20 @@ export default function Checkout() {
   useEffect(() => {
     if (hydrated && items.length === 0) navigate("/tienda");
   }, [hydrated, items.length, navigate]);
+
+  // GA4 begin_checkout (tarea 004) — una sola vez por visita a esta página
+  // (no en cada re-render al cambiar cantidades/dirección), y solo cuando ya
+  // se sabe que el carrito real no está vacío (mismo gate que el redirect de
+  // arriba, para no dispararlo con el estado vacío previo a hidratar).
+  const beginCheckoutFired = useRef(false);
+  useEffect(() => {
+    if (!hydrated || items.length === 0 || beginCheckoutFired.current) return;
+    beginCheckoutFired.current = true;
+    trackBeginCheckout(
+      items.map((i) => ({ id: i.productId, name: i.name, price: i.price, quantity: i.qty })),
+      subtotal,
+    );
+  }, [hydrated, items, subtotal]);
 
   // Autocompleta Estado/Municipio y convierte Colonia en lista desplegable en
   // cuanto el CP resuelve contra el catálogo de SEPOMEX (tarea 029) — evita

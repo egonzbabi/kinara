@@ -44,7 +44,7 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 001 | [001-ejemplo.md](001-ejemplo.md) | ejemplo | Tarea de muestra — bórrala cuando ya no la necesites de referencia |
 | 002 | [002-performance-core-web-vitals.md](002-performance-core-web-vitals.md) | done | Performance y Core Web Vitals |
 | 003 | [003-seo-tecnico.md](003-seo-tecnico.md) | done | SEO técnico (metadatos, canonical, Open Graph, JSON-LD Organization/Product, sitemap.xml, robots.txt) |
-| 004 | [004-google-analytics.md](004-google-analytics.md) | pending | Google Analytics 4 con eventos de e-commerce (requiere Measurement ID del usuario) |
+| 004 | [004-google-analytics.md](004-google-analytics.md) | done | Google Analytics 4 con Consent Mode + eventos de e-commerce (view_item, add_to_cart, begin_checkout, purchase) |
 | 005 | [005-ui-ux-accesibilidad.md](005-ui-ux-accesibilidad.md) | pending | Auditoría de UI/UX y accesibilidad (WCAG AA) |
 | 006 | [006-supabase-productos.md](006-supabase-productos.md) | done | Migrar catálogo e imágenes a Supabase |
 | 007 | [007-stripe-checkout.md](007-stripe-checkout.md) | done | Cobros con Stripe Checkout Sessions hospedado, modo test |
