@@ -128,13 +128,6 @@ export function Hero() {
                   />
                 </svg>
               </LinkButton>
-              <LinkButton
-                to="/tienda?cat=mujer"
-                size="lg"
-                className="border border-bone/40 bg-transparent text-bone hover:bg-bone hover:text-espresso"
-              >
-                Ver Mujer
-              </LinkButton>
             </div>
           </div>
         </div>
