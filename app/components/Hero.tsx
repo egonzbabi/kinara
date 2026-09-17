@@ -55,7 +55,14 @@ export function Hero() {
           // banner ancho full-bleed `object-cover` recorta arriba/abajo para
           // llenar el ancho — centrar un poco arriba del centro conserva la
           // cara en cuadro a costa de parte de las piernas.
-          className="absolute inset-0 h-full w-full object-cover object-[center_20%]"
+          // Zoom Ken Burns continuo (tarea 116, a pedido del usuario): arranca
+          // en el encuadre normal de `object-cover` y acerca lento sin parar
+          // — desactivado si el usuario prefiere menos movimiento (mismo
+          // criterio que `autoPlay`, tarea 090).
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover object-[center_20%]",
+            playsVideo && "animate-kenburns-loop",
+          )}
         />
 
         {/* Tinte cálido de marca sobre el video (mix-blend-overlay deja pasar

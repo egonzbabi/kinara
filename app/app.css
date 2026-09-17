@@ -239,6 +239,14 @@
   .animate-kenburns {
     animation: kenburns 6.5s var(--ease-out-soft) forwards;
   }
+  /* Variante continua para un solo video full-bleed que ya hace loop por su
+     cuenta (Hero.tsx, tarea 116): en vez de "una vez y detente" (forwards),
+     va y viene sin parar (infinite alternate) — no se sincroniza con el loop
+     del video a propósito, para que nunca se sienta un salto/corte al mismo
+     tiempo que el video reinicia. */
+  .animate-kenburns-loop {
+    animation: kenburns 22s ease-in-out infinite alternate;
+  }
 }
 
 /* ---------------------------------------------------------------
