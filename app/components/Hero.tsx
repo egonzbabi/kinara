@@ -129,9 +129,9 @@ export function Hero() {
             // el translate-y de la animación de entrada de más abajo (misma
             // propiedad CSS, no se pueden combinar dos clases de Tailwind que
             // la usen sin prefijo de breakpoint).
-            "absolute left-1/2 top-[5%] z-[1] aspect-square h-[32%] -translate-x-1/2 rounded-2xl object-cover",
+            "absolute left-1/2 top-[5%] z-[1] aspect-square h-[28%] -translate-x-1/2 rounded-2xl object-cover",
             "shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6)] ring-1 ring-bone/10",
-            "md:left-auto md:right-[clamp(16px,4vw,56px)] md:top-1/2 md:h-[84%] md:-translate-y-1/2 md:translate-x-0",
+            "md:left-auto md:right-[clamp(16px,4vw,56px)] md:top-1/2 md:h-[76%] md:-translate-y-1/2 md:translate-x-0",
             "md:transition-transform md:duration-500 md:ease-out md:hover:scale-[1.015]",
             revealBase,
             "duration-[900ms]",
@@ -162,7 +162,7 @@ export function Hero() {
         <div className="pointer-events-none absolute inset-0 z-10">
           <div
             className={cn(
-              "pointer-events-auto absolute left-0 right-0 top-[47%] max-w-2xl px-[clamp(24px,5vw,72px)] text-bone md:top-[30%] md:max-w-xl",
+              "pointer-events-auto absolute left-0 right-0 top-[36%] max-w-2xl px-[clamp(24px,5vw,72px)] text-bone md:top-[20%] md:max-w-md",
               revealBase,
               mounted || reducedMotion ? revealShown : revealHidden,
             )}
@@ -178,7 +178,9 @@ export function Hero() {
               <span className="block">Tu fuerza no tiene edad.</span>
               <span className="block">Tu mejor versión está por comenzar...</span>
             </p>
-            <p className="label mt-4 text-bone/70">KINARA</p>
+            <p className="mt-4 font-display text-[clamp(26px,4vw,44px)] font-semibold tracking-[0.1em] text-bone/90">
+              KINARA
+            </p>
             <h1 className="mt-2 font-display text-[clamp(20px,2.4vw,30px)] italic leading-snug tracking-[-0.005em] text-bone/85">
               El mundo de las <span className="text-[#f0c9b5]">mujeres</span>.
               <svg
