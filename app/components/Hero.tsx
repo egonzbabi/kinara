@@ -174,7 +174,7 @@ export function Hero() {
                 aquí (no reemplaza la tipografía de marca en el resto del
                 sitio). El h1 semántico (abajo) es el mensaje de marca de
                 siempre, ahora en un tamaño secundario más discreto. */}
-            <p className="max-w-[20ch] font-accent text-[clamp(28px,4.6vw,52px)] font-bold leading-[1.05] tracking-[-0.01em]">
+            <p className="max-w-[24ch] font-accent text-[clamp(22px,3.4vw,38px)] font-bold leading-[1.15] tracking-[-0.01em]">
               <span className="block">Tu fuerza no tiene edad.</span>
               <span className="block">Tu mejor versión está por comenzar...</span>
             </p>
