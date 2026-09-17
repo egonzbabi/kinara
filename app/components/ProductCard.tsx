@@ -148,8 +148,12 @@ export function ProductCard({
             </span>
           )}
 
-          {/* Quick add */}
-          <div className="absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0 group-hover:opacity-100">
+          {/* Quick add. Se revela con `group-hover` (mouse) y también con
+              `group-focus-within` (teclado): sin esto, el botón "Añadir
+              rápido" seguía siendo alcanzable con Tab pero invisible
+              (opacity-0) para quien no usa mouse — quedaba un control
+              enfocado sin foco visible en pantalla (tarea 005). */}
+          <div className="absolute inset-x-3 bottom-3 translate-y-3 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
             {quickAddOpen ? (
               <div className="rounded-xl bg-sand/95 p-3 backdrop-blur">
                 <div className="flex items-center justify-between gap-2">
@@ -262,12 +266,18 @@ export function ProductCard({
           </div>
         </div>
 
-        {/* Color dots */}
+        {/* Color dots — decorativos para vista, con equivalente de texto para
+            lector de pantalla (no tenían ninguno: ni aria-label individual
+            ni alternativa agrupada, tarea 005). */}
         <div className="mt-2 flex items-center gap-1.5">
+          <span className="sr-only">
+            Colores disponibles: {product.colors.map((c) => c.name).join(", ")}
+          </span>
           {product.colors.map((c) => (
             <span
               key={c.name}
               title={c.name}
+              aria-hidden="true"
               className="h-3.5 w-3.5 rounded-full border border-line"
               style={{ background: c.hex }}
             />

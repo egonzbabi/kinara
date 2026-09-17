@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { useCart } from "~/context/CartContext";
+import { useFocusTrap } from "~/hooks/useFocusTrap";
 import { cn } from "~/lib/cn";
 
 export const LINKS = [
@@ -99,13 +100,22 @@ export function SiteNav() {
             <button
               onClick={open}
               className="group flex items-center gap-2 text-sm font-medium"
-              aria-label={`Abrir carrito de compras, ${count} ${count === 1 ? "artículo" : "artículos"}`}
             >
               <span className="transition-colors group-hover:text-clay">
                 Carrito
               </span>
               <span className="grid h-6 min-w-6 place-items-center rounded-full bg-espresso px-1.5 text-[12px] font-semibold tabular-nums text-bone">
                 {count}
+              </span>
+              {/* Sin aria-label: uno que reemplaza todo el nombre accesible
+                  ("Abrir carrito de compras...") no contenía el texto visible
+                  ("Carrito"), lo que Lighthouse marca como
+                  label-content-name-mismatch (WCAG 2.5.3, rompe el control
+                  por voz). En vez de eso, se deja que el nombre accesible se
+                  arme del contenido visible + este texto oculto que agrega
+                  el plural correcto. */}
+              <span className="sr-only">
+                , {count === 1 ? "1 artículo" : `${count} artículos`}
               </span>
             </button>
           </div>
@@ -147,6 +157,9 @@ export function SiteNav() {
 }
 
 function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, panelRef, onClose);
+
   return (
     <div
       // `inert` (no `aria-hidden`) cuando está cerrado: aria-hidden por sí solo
@@ -169,6 +182,10 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
         )}
       />
       <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menú de navegación"
         className={cn(
           "absolute left-0 top-0 flex h-full w-[80%] max-w-[320px] flex-col bg-sand p-6 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           open ? "translate-x-0" : "-translate-x-full",

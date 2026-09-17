@@ -257,6 +257,12 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
 
       {/* Grid */}
       <div className="mt-6">
+        {/* h2 oculto visualmente: el nombre de cada producto es un <h3>
+            (ProductCard.tsx) — sin este h2 intermedio, esta página saltaba
+            de h1 a h3 directo (Lighthouse: heading-order). En el home no
+            hace falta porque ahí cada sección ya tiene su propio <h2>
+            visible antes de la grilla de productos. */}
+        <h2 className="sr-only">Resultados</h2>
         {filtered.length > 0 ? (
           <ProductGrid
             products={filtered}

@@ -19,11 +19,13 @@ export function Accordion({
     <div className="divide-y divide-line border-y border-line">
       {items.map((item, i) => {
         const isOpen = open === i;
+        const panelId = `accordion-panel-${i}-${item.title.replace(/\s+/g, "-")}`;
         return (
           <div key={item.title}>
             <button
               onClick={() => setOpen(isOpen ? null : i)}
               aria-expanded={isOpen}
+              aria-controls={panelId}
               className="flex w-full items-center justify-between gap-4 py-4 text-left"
             >
               <span className="font-medium">{item.title}</span>
@@ -45,6 +47,14 @@ export function Accordion({
               </span>
             </button>
             <div
+              id={panelId}
+              role="region"
+              // `inert` (no solo aria-hidden): el contenido de un panel
+              // cerrado puede traer un <Link> real (ej. "Envíos y
+              // devoluciones" en producto.$slug.tsx) que con solo
+              // aria-hidden seguía siendo alcanzable con Tab estando oculto
+              // — mismo patrón ya corregido en SiteNav/CartDrawer (tarea 102).
+              inert={!isOpen}
               className={cn(
                 "grid transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
                 isOpen

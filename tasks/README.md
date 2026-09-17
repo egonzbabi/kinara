@@ -45,7 +45,7 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 002 | [002-performance-core-web-vitals.md](002-performance-core-web-vitals.md) | done | Performance y Core Web Vitals |
 | 003 | [003-seo-tecnico.md](003-seo-tecnico.md) | done | SEO técnico (metadatos, canonical, Open Graph, JSON-LD Organization/Product, sitemap.xml, robots.txt) |
 | 004 | [004-google-analytics.md](004-google-analytics.md) | done | Google Analytics 4 con Consent Mode + eventos de e-commerce (view_item, add_to_cart, begin_checkout, purchase) |
-| 005 | [005-ui-ux-accesibilidad.md](005-ui-ux-accesibilidad.md) | pending | Auditoría de UI/UX y accesibilidad (WCAG AA) |
+| 005 | [005-ui-ux-accesibilidad.md](005-ui-ux-accesibilidad.md) | done | Auditoría de UI/UX y accesibilidad (WCAG AA) — Lighthouse 100/100 |
 | 006 | [006-supabase-productos.md](006-supabase-productos.md) | done | Migrar catálogo e imágenes a Supabase |
 | 007 | [007-stripe-checkout.md](007-stripe-checkout.md) | done | Cobros con Stripe Checkout Sessions hospedado, modo test |
 | 008 | [008-copy-envios-pesos.md](008-copy-envios-pesos.md) | done | Actualizar copy de envíos/devoluciones a pesos mexicanos |

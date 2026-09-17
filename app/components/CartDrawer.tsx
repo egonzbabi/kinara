@@ -1,24 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { useCart, type CartItem } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage } from "~/lib/productImage";
 import { Button, LinkButton } from "./Button";
 import { cn } from "~/lib/cn";
+import { useFocusTrap } from "~/hooks/useFocusTrap";
 
 export function CartDrawer() {
   const { items, subtotal, count, isOpen, close, remove, setQty } = useCart();
+  const panelRef = useRef<HTMLElement>(null);
+
+  useFocusTrap(isOpen, panelRef, close);
 
   useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
-    document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [isOpen, close]);
+  }, [isOpen]);
 
   return (
     <div
@@ -40,6 +41,7 @@ export function CartDrawer() {
 
       {/* Panel */}
       <aside
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Tu carrito de compras"
