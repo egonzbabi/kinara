@@ -33,6 +33,15 @@ const SORTS: { value: Sort; label: string }[] = [
 
 const ALL_SIZES = ["XS", "S", "M", "L", "XL", "Única"];
 
+// Normaliza acentos (NFD + strip diacríticos) para que "pantalon" encuentre
+// "Pantalón" — sin esto, cualquier búsqueda sin tilde exacta no encontraba
+// nada, un error común al escribir rápido en un buscador.
+const normalize = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase();
+
 // Orden por defecto ("Destacados"): toda la ropa primero, agrupada por tipo
 // (mismo orden que el menú principal, SiteNav.tsx → LINKS), y los accesorios
 // siempre al final — a pedido explícito del usuario. Un tipo que no aparece
@@ -64,6 +73,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
     [params],
   );
   const onlyOnSale = params.get("oferta") === "1";
+  const q = params.get("q") ?? "";
 
   // Filtro por familia de color (ej. "Rosa" agrupa Rosa/Fresa/Melon/Palo De
   // Rosa/Lila), no por cada nombre exacto de color del catálogo — ver
@@ -94,6 +104,17 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
   const setSort = (next: Sort) =>
     setParam("sort", next === "destacados" ? null : next);
 
+  // `replace: true` (no `preventScrollReset`, que solo evita el salto de
+  // scroll): sin esto, cada letra tecleada empujaría una entrada nueva al
+  // historial y "Atrás" del navegador tendría que deshacer letra por letra
+  // en vez de salir de /tienda de una vez.
+  const setSearch = (next: string) => {
+    const p = new URLSearchParams(params);
+    if (next.trim()) p.set("q", next);
+    else p.delete("q");
+    setParams(p, { preventScrollReset: true, replace: true });
+  };
+
   const toggle = (key: string, value: string, list: string[]) => {
     const next = list.includes(value)
       ? list.filter((v) => v !== value)
@@ -119,6 +140,15 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
       );
     if (types.length) list = list.filter((p) => types.includes(p.kind));
     if (onlyOnSale) list = list.filter((p) => p.isOnSale);
+    if (q.trim()) {
+      const needle = normalize(q);
+      list = list.filter(
+        (p) =>
+          normalize(p.name).includes(needle) ||
+          normalize(p.description).includes(needle) ||
+          normalize(p.kind).includes(needle),
+      );
+    }
 
     switch (sort) {
       case "precio-asc":
@@ -148,10 +178,11 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
         });
     }
     return list;
-  }, [products, cat, sizes, colors, types, onlyOnSale, sort]);
+  }, [products, cat, sizes, colors, types, onlyOnSale, sort, q]);
 
-  const heading =
-    types.length === 1
+  const heading = q.trim()
+    ? `Resultados para "${q}"`
+    : types.length === 1
       ? types[0]
       : cat !== "todo"
         ? CATEGORY_LABELS[cat as Category]
@@ -160,7 +191,7 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
   const clearAll = () => setParams(new URLSearchParams(), { preventScrollReset: true });
 
   const hasFilters =
-    sizes.length > 0 || colors.length > 0 || types.length > 0 || cat !== "todo";
+    sizes.length > 0 || colors.length > 0 || types.length > 0 || cat !== "todo" || q.trim() !== "";
 
   return (
     <div className="pad py-[clamp(28px,4vw,56px)]">
@@ -174,6 +205,22 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
       {/* Filter bar */}
       <div className="sticky top-16 z-30 -mx-[clamp(20px,5vw,80px)] border-y border-line bg-sand/90 px-[clamp(20px,5vw,80px)] py-3 backdrop-blur">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          {/* Search */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="tienda-search" className="label">
+              Buscar
+            </label>
+            <input
+              id="tienda-search"
+              type="search"
+              defaultValue={q}
+              key={q}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Nombre del producto…"
+              className="w-40 rounded-md border border-line bg-bone px-3 py-1.5 text-[13px] outline-none focus:border-espresso sm:w-52"
+            />
+          </div>
+
           {/* Sizes */}
           <div className="flex items-center gap-2">
             <span className="label">Talla</span>

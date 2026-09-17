@@ -20,6 +20,7 @@ export function SiteNav() {
   const { count, open } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isProductDetail = location.pathname.startsWith("/producto/");
@@ -32,11 +33,11 @@ export function SiteNav() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? "hidden" : "";
+    document.body.style.overflow = menuOpen || searchOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [menuOpen]);
+  }, [menuOpen, searchOpen]);
 
   return (
     <>
@@ -92,8 +93,8 @@ export function SiteNav() {
               Contacto
             </Link>
             <button
+              onClick={() => setSearchOpen(true)}
               className="hidden text-sm font-medium text-espresso/80 transition-colors hover:text-clay sm:block"
-              aria-label="Buscar"
             >
               Buscar
             </button>
@@ -151,12 +152,114 @@ export function SiteNav() {
           crea un containing block nuevo para descendientes position:fixed (regla
           CSS de backdrop-filter/transform/filter), y el panel quedaba mal
           posicionado/recortado en vez de cubrir el viewport completo. */}
-      <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onSearch={() => {
+          setMenuOpen(false);
+          setSearchOpen(true);
+        }}
+      />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }
 
-function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  useFocusTrap(open, panelRef, onClose);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = inputRef.current?.value.trim() ?? "";
+    navigate(q ? `/tienda?q=${encodeURIComponent(q)}` : "/tienda");
+    onClose();
+  };
+
+  return (
+    <div
+      inert={!open}
+      className={cn(
+        "fixed inset-0 z-[70]",
+        !open && "pointer-events-none",
+      )}
+    >
+      <button
+        aria-label="Cerrar búsqueda"
+        onClick={onClose}
+        className={cn(
+          "absolute inset-0 bg-espresso/40 backdrop-blur-[2px] transition-opacity duration-300",
+          open ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Buscar productos"
+        className={cn(
+          "pad absolute left-0 right-0 top-0 pt-24 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          open ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0",
+        )}
+      >
+        <form
+          onSubmit={onSubmit}
+          className="mx-auto flex w-full max-w-xl items-center gap-3 rounded-2xl bg-sand p-3 shadow-2xl"
+        >
+          <SearchIcon />
+          <input
+            ref={inputRef}
+            type="search"
+            placeholder="Buscar productos…"
+            aria-label="Buscar productos"
+            className="flex-1 bg-transparent py-1.5 text-base outline-none placeholder:text-muted"
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors hover:bg-bone"
+          >
+            <CloseIcon />
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      className="shrink-0 text-muted"
+    >
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
+      <path
+        d="M21 21l-4.35-4.35"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MobileMenu({
+  open,
+  onClose,
+  onSearch,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSearch: () => void;
+}) {
   const panelRef = useRef<HTMLDivElement>(null);
   useFocusTrap(open, panelRef, onClose);
 
@@ -218,7 +321,12 @@ function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
           >
             Contacto
           </Link>
-          <button className="text-left text-sm font-medium text-muted">Buscar</button>
+          <button
+            onClick={onSearch}
+            className="text-left text-sm font-medium text-muted"
+          >
+            Buscar
+          </button>
         </div>
       </div>
     </div>
