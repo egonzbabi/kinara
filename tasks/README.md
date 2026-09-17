@@ -153,5 +153,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 111 | [111-banner-descuento-rebote.md](111-banner-descuento-rebote.md) | done | Home: el banner de descuento llama la atención (rebote de entrada + flecha animada) |
 | 112 | [112-buscador-header.md](112-buscador-header.md) | done | Buscador funcional en el menú (antes era un botón muerto) |
 | 113 | [113-footer-quitar-links-falsos.md](113-footer-quitar-links-falsos.md) | done | Footer: quitar links que no llevan a nada real (Marca, Guía de tallas, Términos, Cookies) |
+| 114 | [114-hero-video-mas-chico-copy-kinara.md](114-hero-video-mas-chico-copy-kinara.md) | done | Home: video del hero un poco más chico + KINARA antes de la última frase |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

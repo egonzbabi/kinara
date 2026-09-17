@@ -129,9 +129,9 @@ export function Hero() {
             // el translate-y de la animación de entrada de más abajo (misma
             // propiedad CSS, no se pueden combinar dos clases de Tailwind que
             // la usen sin prefijo de breakpoint).
-            "absolute left-1/2 top-[5%] z-[1] aspect-square h-[36%] -translate-x-1/2 rounded-2xl object-cover",
+            "absolute left-1/2 top-[5%] z-[1] aspect-square h-[32%] -translate-x-1/2 rounded-2xl object-cover",
             "shadow-[0_30px_70px_-20px_rgba(0,0,0,0.6)] ring-1 ring-bone/10",
-            "md:left-auto md:right-[clamp(16px,4vw,56px)] md:top-1/2 md:h-[92%] md:-translate-y-1/2 md:translate-x-0",
+            "md:left-auto md:right-[clamp(16px,4vw,56px)] md:top-1/2 md:h-[84%] md:-translate-y-1/2 md:translate-x-0",
             "md:transition-transform md:duration-500 md:ease-out md:hover:scale-[1.015]",
             revealBase,
             "duration-[900ms]",
@@ -175,9 +175,11 @@ export function Hero() {
                 sitio). El h1 semántico (abajo) es el mensaje de marca de
                 siempre, ahora en un tamaño secundario más discreto. */}
             <p className="max-w-[20ch] font-accent text-[clamp(28px,4.6vw,52px)] font-bold leading-[1.05] tracking-[-0.01em]">
-              Tu fuerza no tiene edad. Tu mejor versión está por comenzar...
+              <span className="block">Tu fuerza no tiene edad.</span>
+              <span className="block">Tu mejor versión está por comenzar...</span>
             </p>
-            <h1 className="mt-5 font-display text-[clamp(20px,2.4vw,30px)] italic leading-snug tracking-[-0.005em] text-bone/85">
+            <p className="label mt-4 text-bone/70">KINARA</p>
+            <h1 className="mt-2 font-display text-[clamp(20px,2.4vw,30px)] italic leading-snug tracking-[-0.005em] text-bone/85">
               El mundo de las <span className="text-[#f0c9b5]">mujeres</span>.
               <svg
                 aria-hidden
