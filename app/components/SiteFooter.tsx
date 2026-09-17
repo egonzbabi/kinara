@@ -13,17 +13,7 @@ const COLS = [
     links: [
       { label: "Envíos y entregas", to: "/politica-de-envios" },
       { label: "Cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
-      { label: "Guía de tallas", to: "/tienda" },
       { label: "Contacto", to: "/contacto" },
-    ],
-  },
-  {
-    title: "Marca",
-    links: [
-      { label: "Nuestra historia", to: "/tienda" },
-      { label: "Sostenibilidad", to: "/tienda" },
-      { label: "Instagram", to: "/tienda" },
-      { label: "TikTok", to: "/tienda" },
     ],
   },
 ];
@@ -32,7 +22,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-bone">
       <div className="pad py-[clamp(48px,6vw,88px)]">
-        <div className="grid gap-10 border-b border-line pb-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="grid gap-10 border-b border-line pb-12 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <Link
               to="/"
@@ -75,12 +65,6 @@ export function SiteFooter() {
             <Link to="/aviso-de-privacidad" className="hover:text-clay">
               Privacidad
             </Link>
-            <a href="#" className="hover:text-clay">
-              Términos
-            </a>
-            <a href="#" className="hover:text-clay">
-              Cookies
-            </a>
           </div>
         </div>
       </div>
