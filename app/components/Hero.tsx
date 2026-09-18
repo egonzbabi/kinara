@@ -67,7 +67,7 @@ export function Hero() {
           tagline + 2 botones). */}
       <div
         ref={containerRef}
-        className="relative h-[clamp(480px,78vh,820px)] w-full overflow-hidden rounded-[28px] bg-espresso"
+        className="relative h-[clamp(440px,68vh,720px)] w-full overflow-hidden rounded-[28px] bg-espresso"
       >
         <video
           src={HERO_COLLAGE.main.url}

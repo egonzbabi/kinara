@@ -53,3 +53,4 @@ En reposo, el video se ve completo (sin recortar ningún borde) — con franjas 
 ## Notas de progreso
 
 - 2026-09-17: Implementado en la misma sesión que las tareas 115/116, tras la aclaración del usuario de que el zoom debía arrancar desde el cuadro completo, no desde un recorte.
+- 2026-09-17 (ajuste): El usuario pidió achicar un poco más el banner ya con el cuadro completo visible. Alto: `clamp(480px,78vh,820px)` → `clamp(440px,68vh,720px)`. El cálculo de `--kb-scale-end` sigue correcto tras el cambio (se recalcula solo vía `ResizeObserver`), verificado en desktop y mobile.
