@@ -156,5 +156,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 114 | [114-hero-video-mas-chico-copy-kinara.md](114-hero-video-mas-chico-copy-kinara.md) | done | Home: video del hero un poco más chico + KINARA antes de la última frase |
 | 115 | [115-hero-rediseno-full-bleed.md](115-hero-rediseno-full-bleed.md) | done | Home: rediseño del hero a full-bleed con un solo titular (inspirado en Lululemon/Vuori/Gymshark/Alo) |
 | 116 | [116-hero-zoom-kenburns-y-calidad-video.md](116-hero-zoom-kenburns-y-calidad-video.md) | done | Home: zoom Ken Burns continuo en el video del hero + mejora de calidad del video |
+| 117 | [117-hero-zoom-desde-foto-completa.md](117-hero-zoom-desde-foto-completa.md) | done | Home: el zoom del hero arranca desde la foto completa (sin recortar), no desde el recorte de cover |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

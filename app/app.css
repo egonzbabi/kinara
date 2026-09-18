@@ -239,13 +239,27 @@
   .animate-kenburns {
     animation: kenburns 6.5s var(--ease-out-soft) forwards;
   }
-  /* Variante continua para un solo video full-bleed que ya hace loop por su
-     cuenta (Hero.tsx, tarea 116): en vez de "una vez y detente" (forwards),
-     va y viene sin parar (infinite alternate) — no se sincroniza con el loop
-     del video a propósito, para que nunca se sienta un salto/corte al mismo
+  /* Variante "de cuadro completo a recorte" (Hero.tsx, tarea 117): el video
+     fuente es cuadrado y el usuario pidió que se vea completo en reposo
+     (`object-contain`, sin recortar nada) y que el zoom lo lleve hasta el
+     mismo encuadre que `object-cover` habría mostrado siempre — nunca más
+     allá, o se saldría del cuadro real del video. `--kb-scale-end` lo calcula
+     Hero.tsx en vivo (`Math.max(w,h)/Math.min(w,h)` del contenedor) porque
+     ese factor cambia con la proporción del viewport; el `1.5` de respaldo
+     es solo por si el JS no llegó a correr (ej. JS deshabilitado). Va y
+     viene sin parar (infinite alternate), sin sincronizarse a propósito con
+     el loop del video, para que nunca se sienta un salto/corte al mismo
      tiempo que el video reinicia. */
-  .animate-kenburns-loop {
-    animation: kenburns 22s ease-in-out infinite alternate;
+  @keyframes kenburns-fill {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(var(--kb-scale-end, 1.5));
+    }
+  }
+  .animate-kenburns-fill {
+    animation: kenburns-fill 22s ease-in-out infinite alternate;
   }
 }
 

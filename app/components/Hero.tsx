@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LinkButton } from "./Button";
 import { HERO_COLLAGE } from "~/data/images";
 import { productImage } from "~/lib/productImage";
@@ -20,11 +20,36 @@ export function Hero() {
   // accesibilidad del sistema (tarea 090).
   const [mounted, setMounted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     const id = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(id);
+  }, []);
+
+  // El video fuente es cuadrado; para que "aparezca la foto completa y luego
+  // haga zoom" (tarea 117) el estado de reposo es `object-contain` (se ve
+  // TODO el cuadro, con franjas del fondo a los lados o arriba/abajo según el
+  // ancho del banner) y la animación lo acerca hasta el mismo recorte que
+  // `object-cover` habría mostrado siempre. Ese factor de escala depende de
+  // la proporción real del contenedor (cambia con el viewport), así que se
+  // calcula en vivo en vez de un valor fijo — de lo contrario en algunos
+  // anchos se quedaría corto (sigue viéndose franja) o se pasaría (recorta
+  // de más) del punto exacto donde `contain` se vuelve `cover`.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const { width, height } = el.getBoundingClientRect();
+      if (!width || !height) return;
+      const scale = Math.max(width, height) / Math.min(width, height);
+      el.style.setProperty("--kb-scale-end", scale.toFixed(3));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   const playsVideo = !reducedMotion;
@@ -40,7 +65,10 @@ export function Hero() {
           revisar. Un solo titular corto abajo-izquierda en vez de los 5
           bloques de texto apilados que había antes (frase grande + "KINARA" +
           tagline + 2 botones). */}
-      <div className="relative h-[clamp(480px,78vh,820px)] w-full overflow-hidden rounded-[28px] bg-espresso">
+      <div
+        ref={containerRef}
+        className="relative h-[clamp(480px,78vh,820px)] w-full overflow-hidden rounded-[28px] bg-espresso"
+      >
         <video
           src={HERO_COLLAGE.main.url}
           poster={HERO_VIDEO_POSTER}
@@ -50,18 +78,15 @@ export function Hero() {
           playsInline
           preload="auto"
           aria-label={HERO_COLLAGE.main.alt}
-          // object-[center_20%]: el archivo fuente es cuadrado (recortado
-          // cabeza-a-pies para la tarjeta flotante de antes, tarea 092); en un
-          // banner ancho full-bleed `object-cover` recorta arriba/abajo para
-          // llenar el ancho — centrar un poco arriba del centro conserva la
-          // cara en cuadro a costa de parte de las piernas.
-          // Zoom Ken Burns continuo (tarea 116, a pedido del usuario): arranca
-          // en el encuadre normal de `object-cover` y acerca lento sin parar
-          // — desactivado si el usuario prefiere menos movimiento (mismo
-          // criterio que `autoPlay`, tarea 090).
+          // `object-contain` (no `cover`): el usuario pidió ver el cuadro
+          // completo del video en reposo, no recortado — el zoom (abajo) es
+          // el que después lo acerca hasta el recorte equivalente a `cover`.
+          // Desactivado si el usuario prefiere menos movimiento (mismo
+          // criterio que `autoPlay`, tarea 090); en ese caso queda fijo
+          // mostrando el cuadro completo, sin animar.
           className={cn(
-            "absolute inset-0 h-full w-full object-cover object-[center_20%]",
-            playsVideo && "animate-kenburns-loop",
+            "absolute inset-0 h-full w-full object-contain",
+            playsVideo && "animate-kenburns-fill",
           )}
         />
 
