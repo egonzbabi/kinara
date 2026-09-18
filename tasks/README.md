@@ -158,5 +158,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 116 | [116-hero-zoom-kenburns-y-calidad-video.md](116-hero-zoom-kenburns-y-calidad-video.md) | done | Home: zoom Ken Burns continuo en el video del hero + mejora de calidad del video |
 | 117 | [117-hero-zoom-desde-foto-completa.md](117-hero-zoom-desde-foto-completa.md) | done | Home: el zoom del hero arranca desde la foto completa (sin recortar), no desde el recorte de cover |
 | 118 | [118-hero-video-nuevo-14-fotos.md](118-hero-video-nuevo-14-fotos.md) | done | Home: nuevo video del hero armado con 14 fotos reales del shooting |
+| 119 | [119-fix-subida-fotos-limite-vercel.md](119-fix-subida-fotos-limite-vercel.md) | done | Fix: subir foto de producto tronaba por el límite de 4.5MB de Vercel |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

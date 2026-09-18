@@ -128,19 +128,76 @@ function sizesFor(sizes: SizeStock[], singleSize: boolean): SizeStock[] {
   );
 }
 
+// Vercel rechaza (a nivel de plataforma, antes de que corra nuestro código)
+// cualquier subida de más de 4.5MB con una respuesta de texto plano ("Request
+// Entity Too Large"), no JSON — el fetch de uploadImage() truena al intentar
+// leerla como JSON con un error confuso. Nuestro propio límite del lado del
+// servidor (`admin.upload.tsx`, 8MB) nunca llega a aplicarse en esos casos: la
+// foto ni siquiera llega a la función. Una foto de celular moderno fácilmente
+// pesa más de 4.5MB, así que se re-comprime aquí antes de subir.
+const CLIENT_MAX_DIMENSION = 2400;
+const CLIENT_TARGET_BYTES = 3.5 * 1024 * 1024;
+
+async function compressImageIfNeeded(file: File): Promise<File> {
+  // Los GIF animados pierden su animación al pasar por <canvas> — se dejan
+  // tal cual; si resultan demasiado grandes, el servidor los rechaza con un
+  // mensaje claro en vez de fallar sin explicación en Vercel.
+  if (file.type === "image/gif" || file.size <= CLIENT_TARGET_BYTES) return file;
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, CLIENT_MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+
+  // Baja la calidad JPEG hasta quedar cómodamente debajo del límite de
+  // Vercel, sin importar qué tan grande/alta resolución venga la original.
+  let quality = 0.9;
+  let blob: Blob | null = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality),
+    );
+    if (!blob || blob.size <= CLIENT_TARGET_BYTES) break;
+    quality -= 0.15;
+  }
+  if (!blob) return file;
+
+  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", {
+    type: "image/jpeg",
+  });
+}
+
 async function uploadImage(
   file: File,
   productId: string,
   kind: "generic" | "color",
   colorName?: string,
 ): Promise<string> {
+  const compressed = await compressImageIfNeeded(file);
   const form = new FormData();
-  form.set("file", file);
+  form.set("file", compressed);
   form.set("productId", productId);
   form.set("kind", kind);
   if (colorName) form.set("colorName", colorName);
   const res = await fetch("/admin/upload", { method: "POST", body: form });
-  const data = (await res.json()) as { url?: string; error?: string };
+  let data: { url?: string; error?: string };
+  try {
+    data = (await res.json()) as { url?: string; error?: string };
+  } catch {
+    // Vercel puede rechazar la subida con texto plano (no JSON) antes de que
+    // corra nuestro código — sin este try/catch, esto tronaba con un mensaje
+    // críptico ("Unexpected token 'R'..."). La compresión de arriba ya evita
+    // el caso más común (foto de celular > 4.5MB), esto es un mensaje claro
+    // por si de todos modos ocurre.
+    throw new Error(`Error del servidor (${res.status}) al subir la foto — intenta con otra imagen.`);
+  }
   if (!res.ok || !data.url) throw new Error(data.error || "Falló la subida");
   return data.url;
 }
