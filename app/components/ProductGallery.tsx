@@ -3,7 +3,11 @@ import { cn } from "~/lib/cn";
 import { productImage, productSrcSet } from "~/lib/productImage";
 
 export const MAIN_WIDTHS = [500, 800, 1100];
-export const MAIN_SIZES = "(min-width: 768px) 55vw, 100vw";
+// La miniatura ahora vive siempre al lado de la foto principal (columna de
+// ~64px + gap), incluso en mobile — ya no ocupa el 100vw completo como
+// cuando las miniaturas quedaban abajo. `calc()` resta esa columna + el
+// padding lateral de `.pad` (~20px de cada lado en mobile).
+export const MAIN_SIZES = "(min-width: 768px) 55vw, calc(100vw - 116px)";
 
 export type GalleryItem = { src: string; color?: string };
 
@@ -32,10 +36,16 @@ export function ProductGallery({
   };
 
   return (
-    <div className="flex flex-col-reverse gap-3 md:flex-row">
+    // Miniaturas siempre a la izquierda (antes quedaban abajo de la foto en
+    // mobile — `flex-col-reverse` + `md:flex-row` — y solo pasaban a la
+    // izquierda desde `md`; a pedido del usuario ahora es igual en todos los
+    // anchos). La columna de miniaturas se estira a la altura de la foto
+    // principal (comportamiento por defecto de flex `align-items: stretch`)
+    // y hace scroll vertical propio si un producto tiene muchos colores.
+    <div className="flex flex-row gap-3">
       {/* Thumbnails */}
       {items.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto md:flex-col md:overflow-visible">
+        <div className="flex w-16 shrink-0 flex-col gap-2 overflow-y-auto md:w-20">
           {items.map((item, i) => (
             <button
               key={item.src}
@@ -62,7 +72,7 @@ export function ProductGallery({
       )}
 
       {/* Main */}
-      <div className="flex-1 overflow-hidden rounded-2xl bg-bone">
+      <div className="min-w-0 flex-1 overflow-hidden rounded-2xl bg-bone">
         <img
           src={productImage(current ?? "", { width: 800, height: 1000 })}
           srcSet={productSrcSet(current ?? "", MAIN_WIDTHS, { heightRatio: 1.25 })}

@@ -160,5 +160,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 118 | [118-hero-video-nuevo-14-fotos.md](118-hero-video-nuevo-14-fotos.md) | done | Home: nuevo video del hero armado con 14 fotos reales del shooting |
 | 119 | [119-fix-subida-fotos-limite-vercel.md](119-fix-subida-fotos-limite-vercel.md) | done | Fix: subir foto de producto tronaba por el límite de 4.5MB de Vercel |
 | 120 | [120-quitar-cara-jacket-fit.md](120-quitar-cara-jacket-fit.md) | done | JACKET FIT: quitar la cara de las fotos (modelo de stock, no es de la marca) |
+| 121 | [121-galeria-carrusel-izquierda-fotos-color.md](121-galeria-carrusel-izquierda-fotos-color.md) | done | Detalle de producto: el carrusel de fotos extra del color pasa a la izquierda, en vez de debajo de la foto |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

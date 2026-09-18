@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { preload } from "react-dom";
 import { Link } from "react-router";
 import type { Route } from "./+types/producto.$slug";
@@ -17,7 +17,6 @@ import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
-import { useDragScroll } from "~/hooks/useDragScroll";
 import { cn } from "~/lib/cn";
 import { seoMeta, absoluteUrl } from "~/lib/seo";
 import { trackViewItem } from "~/lib/analytics";
@@ -104,37 +103,30 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
 
   const colorImage = color ? product.colorImages?.[color] : undefined;
 
-  // Cuando el color elegido tiene varias fotos, la primera es la principal (mostrada
-  // arriba) y el resto aparece en el carrusel de abajo — elegir una foto del
-  // carrusel la pasa a ser la principal, sin cambiar de color.
+  // La galería de fotos (a la izquierda) ya no cambia de color al hacer clic
+  // — eso ahora es trabajo exclusivo de las bolitas de color de la derecha
+  // (más abajo). Esta galería solo recorre las fotos del color que ya está
+  // a la vista: todas las del color elegido si tiene varias (antes vivían en
+  // un carrusel aparte debajo de la foto principal), o si no, las genéricas
+  // del producto.
   //
   // Antes de que el cliente elija color a propósito, la galería ya muestra la
-  // foto del primer color como principal (ver `activeGalleryIndex` más abajo)
-  // — para que el carrusel de fotos extra coincida con lo que ya se ve, usa
-  // ese mismo color "de vista" (displayColor) en vez de solo el color ya
-  // confirmado (`color`, que sigue siendo `null` hasta que el cliente hace
-  // clic, y es lo que sigue exigiendo el botón de agregar al carrito).
+  // foto del primer color como principal — para que coincida con lo que ya
+  // se ve, usa ese mismo color "de vista" (displayColor) en vez de solo el
+  // color ya confirmado (`color`, que sigue siendo `null` hasta que el
+  // cliente hace clic, y es lo que sigue exigiendo el botón de agregar al
+  // carrito).
   const displayColor = color ?? product.colors[0]?.name;
   const colorPhotos = (displayColor && product.colorGallery?.[displayColor]) || [];
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   useEffect(() => {
     setActivePhotoIndex(0);
   }, [color]);
-  const otherPhotos = colorPhotos
-    .map((src, i) => ({ src, i }))
-    .filter(({ i }) => i !== activePhotoIndex);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  useDragScroll(carouselRef);
 
-  // Si el producto tiene foto real por color, la galería muestra una miniatura por
-  // cada color disponible (en vez de solo la del color seleccionado + fotos genéricas),
-  // y seleccionar una miniatura cambia también el color activo.
-  const galleryItems: GalleryItem[] = product.colorImages
-    ? product.colors.map((c) => ({
-        src: product.colorImages![c.name] ?? product.gallery[0],
-        color: c.name,
-      }))
-    : product.gallery.map((src) => ({ src }));
+  const galleryItems: GalleryItem[] =
+    colorPhotos.length > 0
+      ? colorPhotos.map((src) => ({ src }))
+      : product.gallery.map((src) => ({ src }));
 
   // Precarga la imagen inicial de la galería (LCP de esta ruta) — sin esto el
   // navegador la descubre recién al parsear el <img> en el body.
@@ -146,13 +138,6 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
       fetchPriority: "high",
     });
   }
-
-  const activeGalleryIndex = product.colorImages
-    ? Math.max(
-        0,
-        galleryItems.findIndex((item) => item.color === color),
-      )
-    : 0;
 
   const onAdd = () => {
     if (!color || !size) {
@@ -193,41 +178,10 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
         <div>
           <ProductGallery
             items={galleryItems}
-            active={activeGalleryIndex}
-            onSelect={(i) => {
-              const item = galleryItems[i];
-              if (item.color) setColor(item.color);
-            }}
+            active={activePhotoIndex}
+            onSelect={setActivePhotoIndex}
             alt={product.name}
-            mainSrcOverride={colorPhotos[activePhotoIndex]}
           />
-
-          {/* Carrusel de más fotos del color elegido */}
-          {otherPhotos.length > 0 && (
-            <div className="mt-3 rounded-2xl bg-white p-3">
-              <div
-                ref={carouselRef}
-                className="no-scrollbar flex cursor-grab gap-2.5 overflow-x-auto"
-              >
-                {otherPhotos.map(({ src, i }) => (
-                  <button
-                    key={src}
-                    onClick={() => setActivePhotoIndex(i)}
-                    aria-label={`Ver foto ${i + 1} de ${displayColor}`}
-                    className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border border-line opacity-80 transition-opacity hover:opacity-100"
-                  >
-                    <img
-                      src={productImage(src, { width: 160, height: 200 })}
-                      alt=""
-                      aria-hidden
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Info */}
