@@ -46,8 +46,11 @@ export const CATEGORY_TILES: CategoryTile[] = [
     tipo: "Chaqueta",
     title: "Chaqueta",
     copy: "Capas técnicas para el after y el afuera.",
+    // JACKET FIT, color Negro — la URL anterior (x17aegeg.png) ya no
+    // corresponde a ningún archivo real en Storage (quedó de cuando se
+    // reemplazaron las fotos de este producto, tarea 120) y devolvía 400.
     image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/x17aegeg.png",
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/x17aegeg/negro-1790009099878.jpg",
   },
   {
     tipo: "Enterizo",

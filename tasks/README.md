@@ -164,5 +164,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 122 | [122-seccion-proximamente.md](122-seccion-proximamente.md) | done | Nueva sección "Próximamente" en el home con 10 prendas nuevas |
 | 123 | [123-admin-reordenar-colores.md](123-admin-reordenar-colores.md) | in-progress | Admin/Productos: reordenar los colores de un producto |
 | 124 | [124-buscar-movimientos-por-sku-o-nombre.md](124-buscar-movimientos-por-sku-o-nombre.md) | in-progress | Movimientos de inventario: buscar por SKU o nombre en el historial |
+| 125 | [125-fix-foto-rota-chaqueta-encuentra-lo-tuyo.md](125-fix-foto-rota-chaqueta-encuentra-lo-tuyo.md) | done | Fix: foto rota de Chaqueta en "Encuentra lo tuyo" |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
