@@ -39,13 +39,20 @@ export function ProductGallery({
     // Miniaturas siempre a la izquierda (antes quedaban abajo de la foto en
     // mobile — `flex-col-reverse` + `md:flex-row` — y solo pasaban a la
     // izquierda desde `md`; a pedido del usuario ahora es igual en todos los
-    // anchos). La columna de miniaturas se estira a la altura de la foto
-    // principal (comportamiento por defecto de flex `align-items: stretch`)
-    // y hace scroll vertical propio si un producto tiene muchos colores.
-    <div className="flex flex-row gap-3">
-      {/* Thumbnails */}
+    // anchos). La columna de miniaturas va `absolute` (no como hermano flex
+    // normal): en un flex row sin alto explícito, el alto del contenedor sale
+    // del hijo MÁS ALTO de los dos — con muchas fotos, la columna de
+    // miniaturas terminaba siendo ese hijo más alto, así que en vez de
+    // scrollear dentro de la altura de la foto principal, crecía sin límite Y
+    // ESTIRABA también la foto principal a esa misma altura (dejando un
+    // espacio en blanco enorme debajo de ella). Al sacarla del flujo normal
+    // con `absolute`, el alto del contenedor lo decide solo la foto principal
+    // (el único hijo que ya queda en flujo normal), y la columna de
+    // miniaturas (`inset-y-0`) se ajusta a esa altura ya fija y scrollea
+    // dentro de ella si hace falta.
+    <div className="relative">
       {items.length > 1 && (
-        <div className="flex w-16 shrink-0 flex-col gap-2 overflow-y-auto md:w-20">
+        <div className="absolute inset-y-0 left-0 flex w-16 flex-col gap-2 overflow-y-auto md:w-20">
           {items.map((item, i) => (
             <button
               key={item.src}
@@ -71,8 +78,14 @@ export function ProductGallery({
         </div>
       )}
 
-      {/* Main */}
-      <div className="min-w-0 flex-1 overflow-hidden rounded-2xl bg-bone">
+      {/* Main — el margen izquierdo (ancho de la columna de miniaturas + el
+          gap que antes daba `gap-3`) le hace lugar a la columna `absolute`. */}
+      <div
+        className={cn(
+          "overflow-hidden rounded-2xl bg-bone",
+          items.length > 1 && "ml-[76px] md:ml-[92px]",
+        )}
+      >
         <img
           src={productImage(current ?? "", { width: 800, height: 1000 })}
           srcSet={productSrcSet(current ?? "", MAIN_WIDTHS, { heightRatio: 1.25 })}
