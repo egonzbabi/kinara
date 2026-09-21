@@ -110,8 +110,8 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         <ProductGrid products={novedades} priorityCount={2} />
       </section>
 
-      <EditorialSplit />
       <BestsellerRail products={products} />
+      <EditorialSplit />
 
       {/* Lookbook desactivado a pedido del usuario (tarea 101): solo tiene 6
           fotos y 4 ya estaban rotas (apuntaban a archivos renombrados en la
