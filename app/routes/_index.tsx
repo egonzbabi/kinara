@@ -7,6 +7,7 @@ import { ProductGrid } from "~/components/ProductGrid";
 import { EditorialSplit } from "~/components/EditorialSplit";
 import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
 import { BestsellerRail } from "~/components/BestsellerRail";
+import { ComingSoonRail } from "~/components/ComingSoonRail";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { seoMeta, SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "~/lib/seo";
@@ -106,6 +107,8 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </div>
         <ProductGrid products={novedades} priorityCount={2} />
       </section>
+
+      <ComingSoonRail />
 
       <EditorialSplit />
       <BestsellerRail products={products} />
