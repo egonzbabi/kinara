@@ -89,6 +89,8 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </section>
       )}
 
+      <ComingSoonRail />
+
       {/* Lo nuevo */}
       <section className="pad py-[clamp(48px,7vw,96px)]">
         <div className="reveal mb-8 flex items-end justify-between gap-6">
@@ -107,8 +109,6 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </div>
         <ProductGrid products={novedades} priorityCount={2} />
       </section>
-
-      <ComingSoonRail />
 
       <EditorialSplit />
       <BestsellerRail products={products} />
