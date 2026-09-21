@@ -113,6 +113,33 @@ function PhotoOrderControls({
   );
 }
 
+/**
+ * `includedZeroStock`/`touchedModelos` (más abajo) guardan sus claves como
+ * `${colorIndex}:${talla}` — a diferencia de `originalTrackedKeys`, que es por
+ * nombre. Al reordenar los bloques de color hay que mover esas claves junto
+ * con su color, o quedan apuntando al color que ahora ocupa ese índice (ej. la
+ * casilla "Existe sin stock" de Negro terminaría marcada en Azul).
+ */
+function remapIndexedSet(set: Set<string>, mapIndex: (oldIndex: number) => number): Set<string> {
+  const next = new Set<string>();
+  for (const key of set) {
+    const sep = key.indexOf(":");
+    const rest = key.slice(sep);
+    next.add(`${mapIndex(Number(key.slice(0, sep)))}${rest}`);
+  }
+  return next;
+}
+
+/** Índice resultante de mover un elemento de `from` a `to` en un arreglo
+ * (mismo efecto que `splice(from,1)` + `splice(to,0,moved)`), para remapear
+ * cualquier otro índice que dependía de la posición original. */
+function indexAfterMove(old: number, from: number, to: number): number {
+  if (old === from) return to;
+  if (from < to) return old > from && old <= to ? old - 1 : old;
+  if (from > to) return old >= to && old < from ? old + 1 : old;
+  return old;
+}
+
 function emptyColor(singleSize: boolean): AdminColorInput {
   return {
     name: "",
@@ -281,6 +308,10 @@ export function ProductForm({ product, productId, error }: Props) {
   } | null>(null);
   const [draggedGalleryIndex, setDraggedGalleryIndex] = useState<number | null>(null);
   const [dragOverGalleryIndex, setDragOverGalleryIndex] = useState<number | null>(null);
+  // Reordenar los bloques de color (tarea 123): el primero de la lista es el
+  // que se muestra por default en el detalle de producto antes de elegir uno.
+  const [draggedColorIndex, setDraggedColorIndex] = useState<number | null>(null);
+  const [dragOverColorIndex, setDragOverColorIndex] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   // Cuenta subidas de foto en curso — sin esto, "Guardar" podía enviar el
   // formulario antes de que terminara una subida y la foto se perdía en silencio.
@@ -344,6 +375,37 @@ export function ProductForm({ product, productId, error }: Props) {
 
   const updateColor = (index: number, patch: Partial<AdminColorInput>) => {
     setColors((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
+  };
+
+  // Flechas subir/bajar (intercambia con el adyacente). El bounds check va
+  // antes de disparar cualquier setState porque las tres actualizaciones
+  // (colors + los dos Set indexados) tienen que quedar de acuerdo sobre si el
+  // movimiento aplica o no.
+  const moveColor = (index: number, dir: -1 | 1) => {
+    const target = index + dir;
+    if (target < 0 || target >= colors.length) return;
+    setColors((prev) => {
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+    const remap = (idx: number) => (idx === index ? target : idx === target ? index : idx);
+    setIncludedZeroStock((prev) => remapIndexedSet(prev, remap));
+    setTouchedModelos((prev) => remapIndexedSet(prev, remap));
+  };
+
+  // Arrastrar un color a cualquier posición (no solo con el adyacente).
+  const moveColorTo = (from: number, to: number) => {
+    if (from === to) return;
+    setColors((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+    const remap = (idx: number) => indexAfterMove(idx, from, to);
+    setIncludedZeroStock((prev) => remapIndexedSet(prev, remap));
+    setTouchedModelos((prev) => remapIndexedSet(prev, remap));
   };
 
   const updateStock = (colorIndex: number, size: SizeStock["size"], stock: number) => {
@@ -728,7 +790,86 @@ export function ProductForm({ product, productId, error }: Props) {
 
         <div className="mt-4 flex flex-col gap-4">
           {colors.map((color, i) => (
-            <div key={i} className="rounded-lg border border-line p-4">
+            <div
+              key={i}
+              onDragOver={(e) => {
+                e.preventDefault();
+                if (draggedColorIndex !== null) setDragOverColorIndex(i);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (draggedColorIndex !== null) moveColorTo(draggedColorIndex, i);
+                setDraggedColorIndex(null);
+                setDragOverColorIndex(null);
+              }}
+              className={cn(
+                "rounded-lg border border-line p-4",
+                draggedColorIndex === i && "opacity-40",
+                dragOverColorIndex === i &&
+                  draggedColorIndex !== i &&
+                  "ring-2 ring-clay/60 ring-offset-2",
+              )}
+            >
+              <div className="mb-3 flex items-center justify-between gap-2 border-b border-line pb-2">
+                <div
+                  draggable
+                  onDragStart={() => setDraggedColorIndex(i)}
+                  onDragEnd={() => {
+                    setDraggedColorIndex(null);
+                    setDragOverColorIndex(null);
+                  }}
+                  title="Arrastra para reordenar"
+                  className="flex cursor-grab items-center gap-1.5 text-xs font-medium text-muted active:cursor-grabbing"
+                >
+                  <svg aria-hidden viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0">
+                    <circle cx="7" cy="5" r="1.3" />
+                    <circle cx="13" cy="5" r="1.3" />
+                    <circle cx="7" cy="10" r="1.3" />
+                    <circle cx="13" cy="10" r="1.3" />
+                    <circle cx="7" cy="15" r="1.3" />
+                    <circle cx="13" cy="15" r="1.3" />
+                  </svg>
+                  {color.name || `Color ${i + 1}`}
+                </div>
+                <div className="flex gap-1.5">
+                  <button
+                    type="button"
+                    disabled={i === 0}
+                    onClick={() => moveColor(i, -1)}
+                    aria-label={`Mover ${color.name || `color ${i + 1}`} hacia arriba`}
+                    title="Mover arriba"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-line bg-bone text-espresso transition-colors hover:border-clay hover:text-clay disabled:opacity-30 disabled:hover:border-line disabled:hover:text-espresso"
+                  >
+                    <svg aria-hidden viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+                      <path
+                        d="M10 15V5m0 0-4 4m4-4 4 4"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={i === colors.length - 1}
+                    onClick={() => moveColor(i, 1)}
+                    aria-label={`Mover ${color.name || `color ${i + 1}`} hacia abajo`}
+                    title="Mover abajo"
+                    className="flex h-7 w-7 items-center justify-center rounded-full border border-line bg-bone text-espresso transition-colors hover:border-clay hover:text-clay disabled:opacity-30 disabled:hover:border-line disabled:hover:text-espresso"
+                  >
+                    <svg aria-hidden viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+                      <path
+                        d="M10 5v10m0 0 4-4m-4 4-4-4"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
               <div className="flex flex-wrap items-end gap-4">
                 <div>
                   <label className={labelClass}>Nombre del color</label>
