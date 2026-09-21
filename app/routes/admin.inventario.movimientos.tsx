@@ -144,6 +144,32 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
   const skuTyped = skuInput.trim().length > 0;
   const skuNotFound = skuTyped && !selected;
 
+  // El movimiento en sí no guarda el SKU (solo product_id/color/talla) — se
+  // resuelve con el mismo `rows` de listInventory() que ya trae el SKU de
+  // cada variante, sin necesidad de otra consulta.
+  const skuByVariant = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const r of rows) map.set(`${r.productId}|${r.colorName}|${r.size}`, r.sku);
+    return map;
+  }, [rows]);
+  const movementsWithSku = useMemo(
+    () =>
+      movements.map((m) => ({
+        ...m,
+        sku: skuByVariant.get(`${m.productId}|${m.colorName}|${m.size}`) ?? null,
+      })),
+    [movements, skuByVariant],
+  );
+
+  const [movementSearch, setMovementSearch] = useState("");
+  const filteredMovements = useMemo(() => {
+    const q = movementSearch.trim().toLowerCase();
+    if (!q) return movementsWithSku;
+    return movementsWithSku.filter(
+      (m) => m.productName.toLowerCase().includes(q) || (m.sku ?? "").toLowerCase().includes(q),
+    );
+  }, [movementsWithSku, movementSearch]);
+
   // Al llegar una respuesta exitosa: limpia cantidad/concepto para el siguiente
   // registro (se deja SKU/tipo/fecha, lo normal es seguir cargando movimientos
   // del mismo pedido o del mismo día).
@@ -336,88 +362,115 @@ export default function AdminInventarioMovimientos({ loaderData }: Route.Compone
           Todavía no hay movimientos registrados.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl bg-bone">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-line">
-                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Ref.
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Fecha del movimiento
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Tipo
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Producto
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Color / Talla
-                  </th>
-                  <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted">
-                    Cantidad
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Concepto
-                  </th>
-                  <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted">
-                    Stock resultante
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
-                    Registrado
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {movements.map((m) => (
-                  <tr key={m.id} className="border-b border-line last:border-0 hover:bg-sand/60">
-                    <td className="whitespace-nowrap px-5 py-3 font-mono text-sm text-muted">
-                      #{m.folio}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 text-sm text-muted">
-                      {formatMovementDate(m.movementDate)}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold",
-                          m.type === "entrada"
-                            ? "bg-sage/10 text-espresso"
-                            : "bg-clay/10 text-clay",
-                        )}
-                      >
-                        {m.type === "entrada" ? "+ Entrada" : "− Salida"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-sm text-espresso">{m.productName}</td>
-                    <td className="px-5 py-3 text-sm text-muted">
-                      {m.colorName} · {m.size}
-                    </td>
-                    <td
-                      className={cn(
-                        "px-5 py-3 text-right text-sm font-semibold tabular-nums",
-                        m.type === "entrada" ? "text-espresso" : "text-clay",
-                      )}
-                    >
-                      {m.type === "entrada" ? "+" : "−"}
-                      {m.quantity}
-                    </td>
-                    <td className="px-5 py-3 text-sm text-espresso">{m.concept}</td>
-                    <td className="px-5 py-3 text-right text-sm tabular-nums text-muted">
-                      {m.resultingStock}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 text-[13px] text-muted">
-                      {formatRegisteredAt(m.createdAt)}
-                      <br />
-                      <span className="text-espresso">{m.adminName}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <input
+              type="text"
+              placeholder="Buscar por SKU o nombre…"
+              value={movementSearch}
+              onChange={(e) => setMovementSearch(e.target.value)}
+              className={cn(inputClass, "sm:max-w-xs")}
+            />
+            {movementSearch.trim() && (
+              <p className="text-xs text-muted">
+                {filteredMovements.length} de {movements.length} movimientos
+              </p>
+            )}
           </div>
+
+          {filteredMovements.length === 0 ? (
+            <p className="rounded-xl bg-bone p-8 text-center text-sm text-muted">
+              No se encontraron movimientos con "{movementSearch}".
+            </p>
+          ) : (
+            <div className="overflow-hidden rounded-xl bg-bone">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-line">
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        Ref.
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        Fecha del movimiento
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        Tipo
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        Producto
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        SKU
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        Color / Talla
+                      </th>
+                      <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted">
+                        Cantidad
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        Concepto
+                      </th>
+                      <th className="px-5 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted">
+                        Stock resultante
+                      </th>
+                      <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-muted">
+                        Registrado
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredMovements.map((m) => (
+                      <tr key={m.id} className="border-b border-line last:border-0 hover:bg-sand/60">
+                        <td className="whitespace-nowrap px-5 py-3 font-mono text-sm text-muted">
+                          #{m.folio}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 text-sm text-muted">
+                          {formatMovementDate(m.movementDate)}
+                        </td>
+                        <td className="px-5 py-3">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold",
+                              m.type === "entrada"
+                                ? "bg-sage/10 text-espresso"
+                                : "bg-clay/10 text-clay",
+                            )}
+                          >
+                            {m.type === "entrada" ? "+ Entrada" : "− Salida"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-sm text-espresso">{m.productName}</td>
+                        <td className="px-5 py-3 font-mono text-sm text-muted">{m.sku ?? "—"}</td>
+                        <td className="px-5 py-3 text-sm text-muted">
+                          {m.colorName} · {m.size}
+                        </td>
+                        <td
+                          className={cn(
+                            "px-5 py-3 text-right text-sm font-semibold tabular-nums",
+                            m.type === "entrada" ? "text-espresso" : "text-clay",
+                          )}
+                        >
+                          {m.type === "entrada" ? "+" : "−"}
+                          {m.quantity}
+                        </td>
+                        <td className="px-5 py-3 text-sm text-espresso">{m.concept}</td>
+                        <td className="px-5 py-3 text-right text-sm tabular-nums text-muted">
+                          {m.resultingStock}
+                        </td>
+                        <td className="whitespace-nowrap px-5 py-3 text-[13px] text-muted">
+                          {formatRegisteredAt(m.createdAt)}
+                          <br />
+                          <span className="text-espresso">{m.adminName}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
