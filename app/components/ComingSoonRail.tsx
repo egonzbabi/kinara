@@ -32,7 +32,7 @@ export function ComingSoonRail() {
             key={item.slug}
             className="w-[68vw] shrink-0 snap-start sm:w-[42vw] md:w-[30vw] lg:w-[23vw]"
           >
-            <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-bone">
+            <div className="aspect-[4/5] overflow-hidden rounded-xl bg-bone">
               <img
                 src={`/proximamente/${item.imageBase}-800.webp`}
                 srcSet={WIDTHS.map((w) => `/proximamente/${item.imageBase}-${w}.webp ${w}w`).join(
@@ -41,13 +41,17 @@ export function ComingSoonRail() {
                 sizes={SIZES}
                 alt={item.name}
                 loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover object-top"
+                className="h-full w-full object-cover object-top"
               />
-              <span className="absolute left-3 top-3 rounded-full bg-espresso px-2.5 py-1 text-[11px] font-semibold tracking-wide text-bone">
-                Próximamente
-              </span>
             </div>
-            <h3 className="mt-3 font-medium leading-tight">{item.name}</h3>
+            {/* La etiqueta va debajo de la foto, no encima (tarea 122): con
+                fotos de proveedor de composición variable, un badge superpuesto
+                a veces tapaba la cara de la modelo (ej. Aura Skirt Set, con dos
+                modelos lado a lado). */}
+            <span className="mt-3 inline-block rounded-full bg-espresso px-2.5 py-1 text-[11px] font-semibold tracking-wide text-bone">
+              Próximamente
+            </span>
+            <h3 className="mt-1.5 font-medium leading-tight">{item.name}</h3>
           </article>
         ))}
       </div>
