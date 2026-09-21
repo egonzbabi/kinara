@@ -34,7 +34,9 @@ export function WelcomeDiscountBanner() {
   return (
     <section id="bienvenida" className="pad py-[clamp(40px,6vw,72px)]">
       <div className="reveal reveal-bounce rounded-2xl bg-espresso px-6 py-10 text-center text-bone sm:px-12 sm:py-14">
-        <span className="label text-clay">Únete a la comunidad de mujeres Kinara</span>
+        <span className="text-[15px] font-semibold uppercase tracking-[0.16em] text-bone sm:text-lg">
+          Únete a la comunidad de mujeres Kinara
+        </span>
         <h2 className="mt-3 font-display text-[clamp(24px,3.4vw,38px)] leading-tight">
           Llévate {DISCOUNT_PERCENT}% en tu primera compra
         </h2>
