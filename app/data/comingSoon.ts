@@ -17,7 +17,7 @@ export const COMING_SOON_ITEMS: ComingSoonItem[] = [
   { slug: "move-enterizo", name: "Move Enterizo", imageBase: "move-enterizo" },
   { slug: "enterizo-sculpt-one", name: "Enterizo Sculpt One", imageBase: "enterizo-sculpt-one" },
   { slug: "enterizo-sprint-one", name: "Enterizo Sprint One", imageBase: "enterizo-sprint-one" },
-  { slug: "aura-legging", name: "Aura Legging", imageBase: "aura-legging" },
+  { slug: "aura-legging", name: "Eclipse Legging", imageBase: "aura-legging" },
   { slug: "aura-skirt-set", name: "Aura Skirt Set", imageBase: "aura-skirt-set" },
   { slug: "pulse-jacket", name: "Pulse Jacket", imageBase: "pulse-jacket" },
   { slug: "aura-flow-pants", name: "Aura Flow Pants", imageBase: "aura-flow-pants" },
