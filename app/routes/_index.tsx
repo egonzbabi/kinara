@@ -90,6 +90,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
       )}
 
       <ComingSoonRail />
+      <BestsellerRail products={products} />
 
       {/* Lo nuevo */}
       <section className="pad py-[clamp(48px,7vw,96px)]">
@@ -111,7 +112,6 @@ export default function Index({ loaderData }: Route.ComponentProps) {
       </section>
 
       <EditorialSplit />
-      <BestsellerRail products={products} />
 
       {/* Lookbook desactivado a pedido del usuario (tarea 101): solo tiene 6
           fotos y 4 ya estaban rotas (apuntaban a archivos renombrados en la
