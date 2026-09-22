@@ -17,12 +17,12 @@ export function EditorialSplit() {
         <div className="reveal order-2 md:order-1">
           <span className="label">Nuestra filosofía</span>
           <blockquote className="mt-4 font-display text-[clamp(26px,3.6vw,44px)] font-medium leading-[1.08]">
-            “Ropa urbana y deportiva que realza tu fuerza.”
+            “Tu fuerza no tiene edad. Tu mejor versión está por comenzar...”
           </blockquote>
           <p className="mt-5 max-w-[48ch] text-muted">
-            Hecha para mujeres diversas, de cuerpos reales y toda edad.
-            Tejidos cómodos, colores cálidos que combinan con todo — súmate
-            a la comunidad KINARA.
+            Hecha para moverte y para brillar, celebrando la diversidad de
+            cuerpos y edades que somos. Tejidos técnicos en tonos cálidos,
+            pensados para acompañarte — bienvenida a la comunidad KINARA.
           </p>
           <div className="mt-7">
             <LinkButton to="/tienda" variant="ink">
