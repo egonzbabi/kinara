@@ -1,4 +1,5 @@
-import { Link } from "react-router";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router";
 import type { Route } from "./+types/_index";
 import { Hero, HERO_VIDEO_POSTER } from "~/components/Hero";
 import { TrustStrip } from "~/components/TrustStrip";
@@ -56,6 +57,16 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   useScrollReveal();
   const { products } = loaderData;
 
+  // Enlaces del footer/menú a secciones del home por #hash (ej. "Lo nuevo",
+  // "Próximamente") — igual que "/#bienvenida" (ver WelcomeDiscountBanner),
+  // el #hash solo no alcanza: ScrollRestoration de React Router no lo mira en
+  // una carga fresca (tarea 068), así que el scroll se hace a mano.
+  const location = useLocation();
+  useEffect(() => {
+    if (!location.hash) return;
+    document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: "start" });
+  }, [location.hash]);
+
   const novedades = products.filter((p) => p.isNew).slice(0, 4);
   // Sin límite: a diferencia de "Lo nuevo" (una vitrina acotada), esta sección
   // debe mostrar todos los productos en oferta, no solo los primeros 4.
@@ -92,7 +103,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
       <ComingSoonRail />
 
       {/* Lo nuevo */}
-      <section className="pad py-[clamp(48px,7vw,96px)]">
+      <section id="lo-nuevo" className="pad py-[clamp(48px,7vw,96px)]">
         <div className="reveal mb-8 flex items-end justify-between gap-6">
           <div>
             <span className="label">Recién llegado</span>

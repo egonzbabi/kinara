@@ -4,9 +4,15 @@ import { LINKS as NAV_LINKS } from "./SiteNav";
 const COLS = [
   {
     title: "Tienda",
-    // Mismas opciones que el menú principal (SiteNav) — se reutiliza la
-    // lista para que nunca se desincronicen.
-    links: NAV_LINKS,
+    // Empieza con las mismas opciones que el menú principal (SiteNav) — se
+    // reutiliza la lista para que nunca se desincronicen — y agrega dos
+    // enlaces propios del footer a secciones del home (no son categorías de
+    // /tienda, así que no tiene sentido meterlos en el menú principal).
+    links: [
+      ...NAV_LINKS,
+      { label: "Lo nuevo", to: "/#lo-nuevo" },
+      { label: "Próximamente", to: "/#proximamente" },
+    ],
   },
   {
     title: "Ayuda",

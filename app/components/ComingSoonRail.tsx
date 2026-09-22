@@ -10,7 +10,7 @@ export function ComingSoonRail() {
   useDragScroll(railRef);
 
   return (
-    <section className="py-[clamp(48px,7vw,96px)]">
+    <section id="proximamente" className="py-[clamp(48px,7vw,96px)]">
       <div className="pad reveal mb-8 flex items-end justify-between gap-6">
         <div>
           <span className="label">Nueva colección</span>
