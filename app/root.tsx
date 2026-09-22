@@ -17,6 +17,22 @@ import { SiteFooter } from "~/components/SiteFooter";
 import { CartDrawer } from "~/components/CartDrawer";
 import { CookieConsentBanner } from "~/components/CookieConsentBanner";
 import { GA_MEASUREMENT_ID } from "~/lib/analytics";
+import { getAllProducts } from "~/lib/catalog";
+import { buildShopNavLinks } from "~/lib/nav-links";
+
+// Los enlaces de tipo de ropa del menú/footer salen del catálogo real (tarea
+// 127) — un tipo sin ningún producto (ej. "Legging" si se agota) desaparece
+// solo, y uno nuevo (ej. "Vestido") aparece sin tocar código. Se salta la
+// consulta en /admin: ese layout no renderiza SiteNav/SiteFooter (ver App()
+// abajo), así que sería una consulta a Supabase desperdiciada en cada
+// vista del admin.
+export async function loader({ request }: Route.LoaderArgs) {
+  if (new URL(request.url).pathname.startsWith("/admin")) {
+    return { navLinks: [] };
+  }
+  const products = await getAllProducts();
+  return { navLinks: buildShopNavLinks(products) };
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://images.unsplash.com" },
@@ -87,7 +103,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+export default function App({ loaderData }: Route.ComponentProps) {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
 
@@ -102,11 +118,11 @@ export default function App() {
   return (
     <CartProvider>
       <AnnouncementBar />
-      <SiteNav />
+      <SiteNav links={loaderData.navLinks} />
       <main id="contenido">
         <Outlet />
       </main>
-      <SiteFooter />
+      <SiteFooter links={loaderData.navLinks} />
       <CartDrawer />
       <CookieConsentBanner />
     </CartProvider>

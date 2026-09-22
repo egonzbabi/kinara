@@ -3,20 +3,9 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router";
 import { useCart } from "~/context/CartContext";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
 import { cn } from "~/lib/cn";
+import type { NavLinkItem } from "~/lib/nav-links";
 
-export const LINKS = [
-  { to: "/tienda", label: "Tienda" },
-  { to: "/tienda?oferta=1", label: "Ofertas" },
-  { to: "/tienda?tipo=Top", label: "Top" },
-  { to: "/tienda?tipo=Bottom", label: "Bottom" },
-  { to: "/tienda?tipo=Legging", label: "Legging" },
-  { to: "/tienda?tipo=Chaqueta", label: "Chaqueta" },
-  { to: "/tienda?tipo=Enterizo", label: "Enterizo" },
-  { to: "/tienda?tipo=Set", label: "Set" },
-  { to: "/tienda?cat=accesorios", label: "Accesorios" },
-];
-
-export function SiteNav() {
+export function SiteNav({ links }: { links: NavLinkItem[] }) {
   const { count, open } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -128,7 +117,7 @@ export function SiteNav() {
           className="hidden border-t border-line/60 md:block"
         >
           <ul className="pad flex h-12 items-center justify-center gap-7">
-            {LINKS.map((l) => (
+            {links.map((l) => (
               <li key={l.label}>
                 <NavLink
                   to={l.to}
@@ -154,6 +143,7 @@ export function SiteNav() {
           posicionado/recortado en vez de cubrir el viewport completo. */}
       <MobileMenu
         open={menuOpen}
+        links={links}
         onClose={() => setMenuOpen(false)}
         onSearch={() => {
           setMenuOpen(false);
@@ -253,10 +243,12 @@ function SearchIcon() {
 
 function MobileMenu({
   open,
+  links,
   onClose,
   onSearch,
 }: {
   open: boolean;
+  links: NavLinkItem[];
   onClose: () => void;
   onSearch: () => void;
 }) {
@@ -301,7 +293,7 @@ function MobileMenu({
           </button>
         </div>
         <ul className="flex flex-col gap-1">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <li key={l.label}>
               <Link
                 to={l.to}

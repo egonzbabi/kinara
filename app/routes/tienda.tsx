@@ -7,6 +7,7 @@ import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
 import { FAMILY_ORDER, FAMILY_SWATCH, getColorFamily } from "~/lib/colorFamilies";
+import { PREFERRED_KIND_ORDER } from "~/lib/nav-links";
 import { seoMeta } from "~/lib/seo";
 
 // El canonical siempre apunta a /tienda sin query string, sin importar qué
@@ -43,11 +44,12 @@ const normalize = (s: string) =>
     .toLowerCase();
 
 // Orden por defecto ("Destacados"): toda la ropa primero, agrupada por tipo
-// (mismo orden que el menú principal, SiteNav.tsx → LINKS), y los accesorios
-// siempre al final — a pedido explícito del usuario. Un tipo que no aparece
-// aquí (ej. un accesorio dado de alta con su propio `kind`, como "Guantes")
-// cae al final de su grupo, no rompe el orden de los que sí están listados.
-const KIND_ORDER = ["Top", "Bottom", "Legging", "Chaqueta", "Enterizo", "Set"];
+// (mismo orden que el menú principal — PREFERRED_KIND_ORDER en nav-links.ts,
+// tarea 127, así nunca se desincronizan), y los accesorios siempre al final
+// — a pedido explícito del usuario. Un tipo que no aparece ahí (ej. un
+// accesorio dado de alta con su propio `kind`, como "Guantes") cae al final
+// de su grupo, no rompe el orden de los que sí están listados.
+const KIND_ORDER = PREFERRED_KIND_ORDER;
 
 export async function loader() {
   const products = await getAllProducts();

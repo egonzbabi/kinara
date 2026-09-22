@@ -1,30 +1,29 @@
 import { Link } from "react-router";
-import { LINKS as NAV_LINKS } from "./SiteNav";
+import type { NavLinkItem } from "~/lib/nav-links";
 
-const COLS = [
-  {
-    title: "Tienda",
-    // Empieza con las mismas opciones que el menú principal (SiteNav) — se
-    // reutiliza la lista para que nunca se desincronicen — y agrega dos
-    // enlaces propios del footer a secciones del home (no son categorías de
-    // /tienda, así que no tiene sentido meterlos en el menú principal).
-    links: [
-      ...NAV_LINKS,
-      { label: "Lo nuevo", to: "/#lo-nuevo" },
-      { label: "Próximamente", to: "/#proximamente" },
-    ],
-  },
-  {
-    title: "Ayuda",
-    links: [
-      { label: "Envíos y entregas", to: "/politica-de-envios" },
-      { label: "Cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
-      { label: "Contacto", to: "/contacto" },
-    ],
-  },
+const HELP_LINKS: NavLinkItem[] = [
+  { label: "Envíos y entregas", to: "/politica-de-envios" },
+  { label: "Cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
+  { label: "Contacto", to: "/contacto" },
 ];
 
-export function SiteFooter() {
+export function SiteFooter({ links }: { links: NavLinkItem[] }) {
+  // "Tienda" empieza con las mismas opciones que el menú principal (mismo
+  // `links`, calculado desde el catálogo real — tarea 127) y agrega dos
+  // enlaces propios del footer a secciones del home (no son categorías de
+  // /tienda, así que no tiene sentido meterlos en el menú principal).
+  const cols = [
+    {
+      title: "Tienda",
+      links: [
+        ...links,
+        { label: "Lo nuevo", to: "/#lo-nuevo" },
+        { label: "Próximamente", to: "/#proximamente" },
+      ],
+    },
+    { title: "Ayuda", links: HELP_LINKS },
+  ];
+
   return (
     <footer className="bg-bone">
       <div className="pad py-[clamp(48px,6vw,88px)]">
@@ -41,7 +40,7 @@ export function SiteFooter() {
               suaves, color cálido, siluetas que acompañan.
             </p>
           </div>
-          {COLS.map((col) => (
+          {cols.map((col) => (
             <div key={col.title}>
               {/* h3, no h4: no hay ningún h3 antes en la página (las
                   secciones usan h2) — un h4 directo saltaba un nivel del
