@@ -23,7 +23,7 @@ export function EditorialSplit() {
             Ropa deportiva creada para mujeres reales, con diseños que se
             adaptan a cada etapa, cada cuerpo y cada forma de moverse.
           </p>
-          <p className="mt-3 max-w-[48ch] font-display italic text-espresso">
+          <p className="mt-3 max-w-[48ch] font-display text-lg italic text-espresso sm:text-xl">
             Hecha para moverte. <span className="text-clay">Creada para brillar.</span>
           </p>
           <div className="mt-7">
