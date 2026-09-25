@@ -3,36 +3,50 @@ import { LinkButton } from "./Button";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
 
-// Fotogramas reales del video del hero (mujeres reales, distintos cuerpos y
-// edades, distintas formas de moverse) convertidos a fotos fijas — a pedido
-// del usuario, en vez de la única foto de shooting que tenía esta sección
-// desde la tarea 103. Encajan con el copy de abajo (diversidad, comunidad).
+// Fotos reales del shooting de grupo (mismas usadas para armar el video
+// anterior del hero, tarea 118) — a pedido del usuario, en vez de la única
+// foto de shooting que tenía esta sección desde la tarea 103, o de
+// fotogramas sacados del video (peor calidad que las fotos originales).
+// Encajan con el copy de abajo (diversidad, comunidad). Orden deliberadamente
+// mezclado, no cronológico ni por tamaño de grupo.
 const EDITORIAL_BASE =
   "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/site";
 const EDITORIAL_PHOTOS = [
   {
-    url: `${EDITORIAL_BASE}/editorial-tenis-1790304354749.jpg`,
-    alt: "Mujer de KINARA jugando tenis, en pleno movimiento",
+    url: `${EDITORIAL_BASE}/editorial-grupo6-1790306360869.jpg`,
+    alt: "Seis mujeres de KINARA de distintas edades posando juntas",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-liga-1790304354749.jpg`,
-    alt: "Mujer de KINARA estirando una liga elástica de entrenamiento",
+    url: `${EDITORIAL_BASE}/editorial-grupo9-1790306360869.jpg`,
+    alt: "Las mujeres de KINARA juntas, la comunidad completa",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-yoga-1790304354749.jpg`,
-    alt: "Mujer de KINARA en una postura de yoga con aro elástico",
+    url: `${EDITORIAL_BASE}/editorial-grupo3-1790306360869.jpg`,
+    alt: "Cuatro mujeres de KINARA posando en tonos crema y morado",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-box-1790304354749.jpg`,
-    alt: "Mujer de KINARA en guardia de boxeo",
+    url: `${EDITORIAL_BASE}/editorial-grupo8-1790306360869.jpg`,
+    alt: "Mujeres de KINARA celebrando con los brazos en alto",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-serena-1790304354749.jpg`,
-    alt: "Mujer de KINARA en un momento de calma, ojos cerrados",
+    url: `${EDITORIAL_BASE}/editorial-grupo1-1790306360869.jpg`,
+    alt: "Cuatro mujeres de KINARA posando juntas, distintos estilos",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-retrato-1790304354749.jpg`,
-    alt: "Retrato de una mujer de KINARA sonriendo",
+    url: `${EDITORIAL_BASE}/editorial-grupo5-1790306360869.jpg`,
+    alt: "Cinco mujeres de KINARA en azul, negro y blanco",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-grupo2-1790306360869.jpg`,
+    alt: "Cuatro mujeres de KINARA posando, elegantes",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-grupo7-1790306360869.jpg`,
+    alt: "Cinco mujeres de KINARA en tonos rosas y pasteles",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-grupo4-1790306360869.jpg`,
+    alt: "Cinco mujeres de KINARA de distintas edades posando juntas",
   },
 ] as const;
 const EDITORIAL_WIDTHS = [480, 700, 1100];
