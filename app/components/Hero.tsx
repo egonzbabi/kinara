@@ -80,14 +80,14 @@ export function Hero() {
           className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-espresso/45 via-transparent to-transparent"
         />
 
-        {/* Texto anclado abajo-izquierda (no centrado ni con `top`): con el
-            video llenando todo el banner ya no hay una tarjeta que esquivar,
-            así que el texto puede vivir siempre en la misma esquina en
-            mobile y desktop. */}
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-end">
+        {/* Titular arriba, botón abajo (no un solo bloque abajo): así ninguno
+            de los dos queda encima del cuerpo de la modelo en el video —
+            antes ambos vivían pegados abajo-izquierda, y con un video vertical
+            de cuerpo completo eso los dejaba justo sobre ella. */}
+        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between">
           <div
             className={cn(
-              "pointer-events-auto max-w-xl px-[clamp(24px,5vw,72px)] pb-[clamp(56px,9vw,96px)] text-bone",
+              "pointer-events-auto max-w-xl px-[clamp(24px,5vw,72px)] pt-[clamp(24px,5vw,56px)] text-bone",
               revealBase,
               mounted || reducedMotion ? revealShown : revealHidden,
             )}
@@ -108,25 +108,32 @@ export function Hero() {
                 <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
               </svg>
             </h1>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <LinkButton to="/tienda" variant="clay" size="lg" className="group">
-                Comprar la colección
-                <svg
-                  aria-hidden
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  className="ml-2 inline-block h-4 w-4 -translate-y-px transition-transform duration-200 ease-out group-hover:translate-x-1"
-                >
-                  <path
-                    d="M4 10h12m0 0-5-5m5 5-5 5"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </LinkButton>
-            </div>
+          </div>
+
+          <div
+            className={cn(
+              "pointer-events-auto flex flex-wrap gap-3 px-[clamp(24px,5vw,72px)] pb-[clamp(24px,5vw,56px)]",
+              revealBase,
+              mounted || reducedMotion ? revealShown : revealHidden,
+            )}
+          >
+            <LinkButton to="/tienda" variant="clay" size="lg" className="group">
+              Comprar la colección
+              <svg
+                aria-hidden
+                viewBox="0 0 20 20"
+                fill="none"
+                className="ml-2 inline-block h-4 w-4 -translate-y-px transition-transform duration-200 ease-out group-hover:translate-x-1"
+              >
+                <path
+                  d="M4 10h12m0 0-5-5m5 5-5 5"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </LinkButton>
           </div>
         </div>
       </div>
