@@ -34,15 +34,6 @@ export const CATEGORY_TILES: CategoryTile[] = [
       "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/z2gep2ik/cocoa-1788997348894-2.jpg",
   },
   {
-    tipo: "Legging",
-    title: "Legging",
-    copy: "Segunda piel para entrenar o para el día a día.",
-    // Barbie Glow Leggins, color Café — foto real del shooting, con el logo
-    // de marca visible en la pretina (tarea 101).
-    image:
-      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/g8owd848/cafe-1789255540470-0.jpg",
-  },
-  {
     tipo: "Chaqueta",
     title: "Chaqueta",
     copy: "Capas técnicas para el after y el afuera.",
@@ -68,5 +59,16 @@ export const CATEGORY_TILES: CategoryTile[] = [
     // SCULPT SET, color Rosa — foto real del shooting (tarea 101).
     image:
       "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/b6qq5u7o/rosa-1788997459885-0.jpg",
+  },
+  {
+    tipo: "Vestido",
+    title: "Vestido",
+    copy: "Un solo movimiento, todo el efecto.",
+    // ZIPPER SKIRT, color Negro — foto real del shooting. Tile nuevo: "Vestido"
+    // reemplaza a "Legging" (quitado, ver arriba) ahora que el menú es
+    // dinámico según el catálogo real (tarea 127) — Legging no tiene ningún
+    // producto hoy y Vestido sí.
+    image:
+      "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/cvun2ie8/negro-1788997619602-0.jpg",
   },
 ];
