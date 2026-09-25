@@ -17,10 +17,15 @@ const HERO_BASE =
 
 export const HERO_COLLAGE = {
   main: {
-    url: `${HERO_BASE}/hero-video.mp4`,
+    // Nombre con timestamp (no "hero-video.mp4" a secas): el endpoint de
+    // transformación de imágenes de Supabase cachea por URL durante 1 hora
+    // sin importar que el archivo cambie — sobrescribir el mismo nombre deja
+    // el sitio sirviendo la versión vieja por un rato (mismo problema ya
+    // documentado en REQUISITOS.md, tarea 120). Un nombre nuevo lo evita.
+    url: `${HERO_BASE}/hero-video-1790300621322.mp4`,
     // Cuadro real del video (no una foto aparte) — se ve de inmediato mientras
     // el video todavía está bajando, en vez de una caja vacía (tarea 088).
-    poster: `${HERO_BASE}/hero-poster.jpg`,
-    alt: "Video de KINARA: ropa deportiva en movimiento",
+    poster: `${HERO_BASE}/hero-poster-1790300621322.jpg`,
+    alt: "Video de KINARA: mujer jugando tenis en movimiento",
   },
 } as const;

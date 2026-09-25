@@ -167,5 +167,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 125 | [125-fix-foto-rota-chaqueta-encuentra-lo-tuyo.md](125-fix-foto-rota-chaqueta-encuentra-lo-tuyo.md) | done | Fix: foto rota de Chaqueta en "Encuentra lo tuyo" |
 | 126 | [126-fix-carrusel-izquierda-no-scrolleaba.md](126-fix-carrusel-izquierda-no-scrolleaba.md) | done | Fix: el carrusel de fotos a la izquierda no hacía scroll con muchas fotos |
 | 127 | [127-menu-tipos-dinamico.md](127-menu-tipos-dinamico.md) | done | Menú y footer: los tipos de ropa salen del catálogo real, no de una lista fija |
+| 128 | [128-nuevo-video-hero.md](128-nuevo-video-hero.md) | done | Home: reemplazar el video del hero (mujer jugando tenis) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
