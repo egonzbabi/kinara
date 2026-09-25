@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { LinkButton } from "./Button";
 import { HERO_COLLAGE } from "~/data/images";
 import { productImage } from "~/lib/productImage";
@@ -20,50 +20,11 @@ export function Hero() {
   // accesibilidad del sistema (tarea 090).
   const [mounted, setMounted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     const id = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(id);
-  }, []);
-
-  // Para que "aparezca el cuadro completo y luego haga zoom" (tarea 117) el
-  // estado de reposo es `object-contain` (se ve TODO el video, con franjas
-  // arriba/abajo o a los lados según cómo se compare su proporción con la del
-  // banner) y la animación lo acerca hasta el mismo recorte que `object-cover`
-  // habría mostrado siempre — nunca más, o se saldría del cuadro real del
-  // video. Ese factor de escala depende de la proporción TANTO del video como
-  // del contenedor entre sí (no solo del contenedor solo): asumir que el
-  // video es cuadrado (como hacía esto antes) da un factor equivocado en
-  // cuanto el archivo fuente cambia a otra proporción (ej. 16:9, tarea 128,
-  // se vio con demasiado zoom). Por eso se recalcula tanto si cambia el
-  // tamaño del contenedor (ResizeObserver) como en cuanto se conocen las
-  // dimensiones reales del video (`loadedmetadata` — no están disponibles de
-  // entrada, el video todavía se está descargando).
-  useEffect(() => {
-    const container = containerRef.current;
-    const video = videoRef.current;
-    if (!container || !video) return;
-    const update = () => {
-      const { width: cw, height: ch } = container.getBoundingClientRect();
-      const vw = video.videoWidth;
-      const vh = video.videoHeight;
-      if (!cw || !ch || !vw || !vh) return;
-      const containerAspect = cw / ch;
-      const videoAspect = vw / vh;
-      const scale = Math.max(videoAspect / containerAspect, containerAspect / videoAspect);
-      container.style.setProperty("--kb-scale-end", scale.toFixed(3));
-    };
-    update();
-    video.addEventListener("loadedmetadata", update);
-    const ro = new ResizeObserver(update);
-    ro.observe(container);
-    return () => {
-      video.removeEventListener("loadedmetadata", update);
-      ro.disconnect();
-    };
   }, []);
 
   const playsVideo = !reducedMotion;
@@ -79,12 +40,8 @@ export function Hero() {
           revisar. Un solo titular corto abajo-izquierda en vez de los 5
           bloques de texto apilados que había antes (frase grande + "KINARA" +
           tagline + 2 botones). */}
-      <div
-        ref={containerRef}
-        className="relative h-[clamp(440px,68vh,720px)] w-full overflow-hidden rounded-[28px] bg-espresso"
-      >
+      <div className="relative h-[clamp(440px,68vh,720px)] w-full overflow-hidden rounded-[28px] bg-espresso">
         <video
-          ref={videoRef}
           src={HERO_COLLAGE.main.url}
           poster={HERO_VIDEO_POSTER}
           autoPlay={playsVideo}
@@ -93,16 +50,10 @@ export function Hero() {
           playsInline
           preload="auto"
           aria-label={HERO_COLLAGE.main.alt}
-          // `object-contain` (no `cover`): el usuario pidió ver el cuadro
-          // completo del video en reposo, no recortado — el zoom (abajo) es
-          // el que después lo acerca hasta el recorte equivalente a `cover`.
-          // Desactivado si el usuario prefiere menos movimiento (mismo
-          // criterio que `autoPlay`, tarea 090); en ese caso queda fijo
-          // mostrando el cuadro completo, sin animar.
-          className={cn(
-            "absolute inset-0 h-full w-full object-contain",
-            playsVideo && "animate-kenburns-fill",
-          )}
+          // `object-cover`: llena todo el rectángulo del banner sin franjas
+          // ni zoom animado (a pedido del usuario, tarea 129 — reemplaza el
+          // efecto "cuadro completo -> zoom a cover" de la tarea 117/128).
+          className="absolute inset-0 h-full w-full object-cover"
         />
 
         {/* Tinte cálido de marca sobre el video (mix-blend-overlay deja pasar
