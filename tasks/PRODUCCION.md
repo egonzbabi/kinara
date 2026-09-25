@@ -4,8 +4,12 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 
 ## Stripe (pagos)
 
-- [ ] Cambiar `STRIPE_SECRET_KEY` de test (`sk_test_...`) a live (`sk_live_...`) en `.env` y en Vercel (Production).
-- [ ] Crear el webhook endpoint de producción en el Dashboard de Stripe (modo Live) apuntando a `https://<dominio-real>/api/stripe-webhook`, y actualizar `STRIPE_WEBHOOK_SECRET` con el signing secret nuevo (el de test no sirve en Live).
+- **Decisión del usuario (2026-09-25): pasar Stripe a modo Live.** El webhook apunta por ahora a `https://kinara-ecommerce.vercel.app/api/stripe-webhook` (no hay dominio real conectado todavía) — se actualiza cuando se conecte el dominio (ver sección "Dominio y Vercel" abajo).
+- **Incidente de seguridad (2026-09-25):** el usuario pegó una `sk_live_...` directo en el chat — se le indicó rotarla en el Dashboard de Stripe antes de usarla (una clave pegada en un chat se considera expuesta). Claude nunca debe recibir, escribir ni cargar la clave secreta él mismo (política de credenciales financieras) — el usuario la agrega directo en `.env` y en Vercel.
+- [ ] Confirmar que la clave secreta fue rotada (no se usa la que se compartió en el chat).
+- [ ] Cambiar `STRIPE_SECRET_KEY` de test (`sk_test_...`) a live (`sk_live_...`, la rotada) en `.env` y en Vercel (Production) — lo hace el usuario directamente.
+- [ ] Confirmar la clave publicable Live (`pk_live_...`) — la primera que se compartió tenía un prefijo `mk_` que no es válido para Stripe, hay que volver a copiarla del Dashboard.
+- [ ] Crear el webhook endpoint de producción en el Dashboard de Stripe (modo Live) apuntando a `https://kinara-ecommerce.vercel.app/api/stripe-webhook`, y actualizar `STRIPE_WEBHOOK_SECRET` con el signing secret nuevo (el de test no sirve en Live).
 - [ ] Confirmar que el nombre de cuenta/negocio de Stripe sigue configurado en modo Live.
 - [ ] Hacer una compra real de prueba (monto bajo) con una tarjeta real antes de anunciar el lanzamiento.
 
