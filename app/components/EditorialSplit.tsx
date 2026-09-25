@@ -1,14 +1,78 @@
+import { useEffect, useState } from "react";
 import { LinkButton } from "./Button";
 import { productImage, productSrcSet } from "~/lib/productImage";
+import { cn } from "~/lib/cn";
 
-// Foto real del shooting (NEWYORK SET, Ivory/Cocoa) — reemplaza la foto de
-// stock de Unsplash que tenía esta sección (tarea 103, auditoría de
-// performance: "reemplazar fotos hotlinked por fotos reales del shooting").
-// Pose de movimiento genuina, en la paleta cálida de la marca — encaja con
-// el tono del copy de abajo (diversidad, fuerza, comunidad, tarea 106).
-const EDITORIAL_PHOTO =
-  "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/t5a8m19y/ivorycocoa-1788997367076-1.jpg";
+// Fotogramas reales del video del hero (mujeres reales, distintos cuerpos y
+// edades, distintas formas de moverse) convertidos a fotos fijas — a pedido
+// del usuario, en vez de la única foto de shooting que tenía esta sección
+// desde la tarea 103. Encajan con el copy de abajo (diversidad, comunidad).
+const EDITORIAL_BASE =
+  "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/site";
+const EDITORIAL_PHOTOS = [
+  {
+    url: `${EDITORIAL_BASE}/editorial-tenis-1790304354749.jpg`,
+    alt: "Mujer de KINARA jugando tenis, en pleno movimiento",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-liga-1790304354749.jpg`,
+    alt: "Mujer de KINARA estirando una liga elástica de entrenamiento",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-yoga-1790304354749.jpg`,
+    alt: "Mujer de KINARA en una postura de yoga con aro elástico",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-box-1790304354749.jpg`,
+    alt: "Mujer de KINARA en guardia de boxeo",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-serena-1790304354749.jpg`,
+    alt: "Mujer de KINARA en un momento de calma, ojos cerrados",
+  },
+  {
+    url: `${EDITORIAL_BASE}/editorial-retrato-1790304354749.jpg`,
+    alt: "Retrato de una mujer de KINARA sonriendo",
+  },
+] as const;
 const EDITORIAL_WIDTHS = [480, 700, 1100];
+const EDITORIAL_INTERVAL_MS = 4500;
+
+function EditorialCarousel() {
+  const [index, setIndex] = useState(0);
+  const [autoplay, setAutoplay] = useState(false);
+
+  useEffect(() => {
+    setAutoplay(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
+  useEffect(() => {
+    if (!autoplay) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % EDITORIAL_PHOTOS.length);
+    }, EDITORIAL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [autoplay]);
+
+  return (
+    <div className="relative aspect-[1100/1200] h-full w-full">
+      {EDITORIAL_PHOTOS.map((photo, i) => (
+        <img
+          key={photo.url}
+          src={productImage(photo.url, { width: 1100, height: 1200 })}
+          srcSet={productSrcSet(photo.url, EDITORIAL_WIDTHS, { heightRatio: 1200 / 1100 })}
+          sizes="(min-width: 768px) 46vw, 92vw"
+          alt={photo.alt}
+          loading="lazy"
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out",
+            i === index ? "opacity-100" : "opacity-0",
+          )}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function EditorialSplit() {
   return (
@@ -34,14 +98,7 @@ export function EditorialSplit() {
         </div>
 
         <div className="reveal order-1 overflow-hidden rounded-2xl md:order-2">
-          <img
-            src={productImage(EDITORIAL_PHOTO, { width: 1100, height: 1200 })}
-            srcSet={productSrcSet(EDITORIAL_PHOTO, EDITORIAL_WIDTHS, { heightRatio: 1200 / 1100 })}
-            sizes="(min-width: 768px) 46vw, 92vw"
-            alt="Modelo de KINARA en movimiento, brazo en alto"
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
+          <EditorialCarousel />
         </div>
       </div>
     </section>
