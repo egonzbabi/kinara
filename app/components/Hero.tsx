@@ -21,6 +21,7 @@ export function Hero() {
   const [mounted, setMounted] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -28,28 +29,41 @@ export function Hero() {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  // El video fuente es cuadrado; para que "aparezca la foto completa y luego
-  // haga zoom" (tarea 117) el estado de reposo es `object-contain` (se ve
-  // TODO el cuadro, con franjas del fondo a los lados o arriba/abajo según el
-  // ancho del banner) y la animación lo acerca hasta el mismo recorte que
-  // `object-cover` habría mostrado siempre. Ese factor de escala depende de
-  // la proporción real del contenedor (cambia con el viewport), así que se
-  // calcula en vivo en vez de un valor fijo — de lo contrario en algunos
-  // anchos se quedaría corto (sigue viéndose franja) o se pasaría (recorta
-  // de más) del punto exacto donde `contain` se vuelve `cover`.
+  // Para que "aparezca el cuadro completo y luego haga zoom" (tarea 117) el
+  // estado de reposo es `object-contain` (se ve TODO el video, con franjas
+  // arriba/abajo o a los lados según cómo se compare su proporción con la del
+  // banner) y la animación lo acerca hasta el mismo recorte que `object-cover`
+  // habría mostrado siempre — nunca más, o se saldría del cuadro real del
+  // video. Ese factor de escala depende de la proporción TANTO del video como
+  // del contenedor entre sí (no solo del contenedor solo): asumir que el
+  // video es cuadrado (como hacía esto antes) da un factor equivocado en
+  // cuanto el archivo fuente cambia a otra proporción (ej. 16:9, tarea 128,
+  // se vio con demasiado zoom). Por eso se recalcula tanto si cambia el
+  // tamaño del contenedor (ResizeObserver) como en cuanto se conocen las
+  // dimensiones reales del video (`loadedmetadata` — no están disponibles de
+  // entrada, el video todavía se está descargando).
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
+    const container = containerRef.current;
+    const video = videoRef.current;
+    if (!container || !video) return;
     const update = () => {
-      const { width, height } = el.getBoundingClientRect();
-      if (!width || !height) return;
-      const scale = Math.max(width, height) / Math.min(width, height);
-      el.style.setProperty("--kb-scale-end", scale.toFixed(3));
+      const { width: cw, height: ch } = container.getBoundingClientRect();
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!cw || !ch || !vw || !vh) return;
+      const containerAspect = cw / ch;
+      const videoAspect = vw / vh;
+      const scale = Math.max(videoAspect / containerAspect, containerAspect / videoAspect);
+      container.style.setProperty("--kb-scale-end", scale.toFixed(3));
     };
     update();
+    video.addEventListener("loadedmetadata", update);
     const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
+    ro.observe(container);
+    return () => {
+      video.removeEventListener("loadedmetadata", update);
+      ro.disconnect();
+    };
   }, []);
 
   const playsVideo = !reducedMotion;
@@ -70,6 +84,7 @@ export function Hero() {
         className="relative h-[clamp(440px,68vh,720px)] w-full overflow-hidden rounded-[28px] bg-espresso"
       >
         <video
+          ref={videoRef}
           src={HERO_COLLAGE.main.url}
           poster={HERO_VIDEO_POSTER}
           autoPlay={playsVideo}

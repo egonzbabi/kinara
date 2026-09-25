@@ -239,16 +239,18 @@
   .animate-kenburns {
     animation: kenburns 6.5s var(--ease-out-soft) forwards;
   }
-  /* Variante "de cuadro completo a recorte" (Hero.tsx, tarea 117): el video
-     fuente es cuadrado y el usuario pidió que se vea completo en reposo
-     (`object-contain`, sin recortar nada) y que el zoom lo lleve hasta el
-     mismo encuadre que `object-cover` habría mostrado siempre — nunca más
-     allá, o se saldría del cuadro real del video. `--kb-scale-end` lo calcula
-     Hero.tsx en vivo (`Math.max(w,h)/Math.min(w,h)` del contenedor) porque
-     ese factor cambia con la proporción del viewport; el `1.5` de respaldo
-     es solo por si el JS no llegó a correr (ej. JS deshabilitado). Va y
-     viene sin parar (infinite alternate), sin sincronizarse a propósito con
-     el loop del video, para que nunca se sienta un salto/corte al mismo
+  /* Variante "de cuadro completo a recorte" (Hero.tsx, tarea 117): el usuario
+     pidió que el video se vea completo en reposo (`object-contain`, sin
+     recortar nada) y que el zoom lo lleve hasta el mismo encuadre que
+     `object-cover` habría mostrado siempre — nunca más allá, o se saldría
+     del cuadro real del video. `--kb-scale-end` lo calcula Hero.tsx en vivo,
+     a partir de CÓMO SE COMPARAN las proporciones del video real (no
+     asumido cuadrado — tarea 128, un video 16:9 con la fórmula vieja se veía
+     con zoom de más) y del contenedor entre sí, porque ese factor cambia con
+     la proporción del viewport y con el video que se use; el `1.5` de
+     respaldo es solo por si el JS no llegó a correr (ej. JS deshabilitado).
+     Va y viene sin parar (infinite alternate), sin sincronizarse a propósito
+     con el loop del video, para que nunca se sienta un salto/corte al mismo
      tiempo que el video reinicia. */
   @keyframes kenburns-fill {
     from {
