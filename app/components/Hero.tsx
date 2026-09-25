@@ -87,7 +87,7 @@ export function Hero() {
         <div className="pointer-events-none absolute inset-0 z-10 flex items-end">
           <div
             className={cn(
-              "pointer-events-auto max-w-xl px-[clamp(24px,5vw,72px)] pb-[clamp(32px,6vw,64px)] text-bone",
+              "pointer-events-auto max-w-xl px-[clamp(24px,5vw,72px)] pb-[clamp(56px,9vw,96px)] text-bone",
               revealBase,
               mounted || reducedMotion ? revealShown : revealHidden,
             )}
@@ -97,7 +97,7 @@ export function Hero() {
                 comenzar..." + "El mundo de las mujeres.") — a pedido del
                 usuario, combinadas en una sola oración corta, como en las
                 referencias revisadas (un titular, no varios bloques). */}
-            <h1 className="max-w-[18ch] font-accent text-[clamp(28px,4.6vw,56px)] font-bold leading-[1.08] tracking-[-0.01em]">
+            <h1 className="max-w-[18ch] font-accent text-[clamp(24px,3.8vw,46px)] font-bold leading-[1.08] tracking-[-0.01em]">
               El mundo de las mujeres no tiene edad.
               <svg
                 aria-hidden
