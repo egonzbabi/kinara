@@ -68,7 +68,7 @@ export function SiteNav({ links }: { links: NavLinkItem[] }) {
             >
               KINARA
             </Link>
-            <p className="mt-2 whitespace-nowrap font-display text-[clamp(12px,2.8vw,15px)] italic leading-none tracking-[0.02em] text-muted">
+            <p className="mt-2 whitespace-nowrap font-display text-[clamp(13px,3vw,17px)] italic leading-none tracking-[0.02em] text-muted">
               Hecha para moverte. <span className="text-clay">Creada para brillar.</span>
             </p>
           </div>
