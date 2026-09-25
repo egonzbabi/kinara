@@ -17,7 +17,7 @@ const EDITORIAL_PHOTOS = [
     alt: "Seis mujeres de KINARA de distintas edades posando juntas",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-grupo9-1790306360869.jpg`,
+    url: `${EDITORIAL_BASE}/editorial-grupo9b-1790306951320.jpg`,
     alt: "Las mujeres de KINARA juntas, la comunidad completa",
   },
   {

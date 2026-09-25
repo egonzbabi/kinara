@@ -50,7 +50,7 @@ La sección "Nuestra filosofía" muestra un carrusel de 9 fotos reales de grupo 
 - [x] Las fotos cambian solas (crossfade, ~4.5s de intervalo) sin interacción del usuario.
 - [x] Orden mezclado, no cronológico.
 - [x] Recorte a retrato correcto, grupo centrado, sin cabezas/pies cortados.
-- [x] La foto de grupo completo (ex-video) no corta a nadie de los lados — se resolvió con franjas de color de marca arriba/abajo en vez de recorte agresivo.
+- [x] La foto de grupo completo (ex-video) se ve consistente con las otras 8 (recorte a sangre, sin franjas) — el intento inicial con franjas de marca arriba/abajo se veía inconsistente ("feo", reportado por el usuario) frente al resto del carrusel; se corrigió recortando directo como las demás, con margen suficiente en el encuadre original para no perder a nadie relevante.
 - [x] `prefers-reduced-motion` respetado (no autoplay del carrusel).
 - [x] `alt` descriptivo por foto.
 - [x] Fotos subidas con nombre nuevo (timestamp), `cache-control` de 1 año; fotos huérfanas del primer intento borradas de Storage.
@@ -69,4 +69,5 @@ La sección "Nuestra filosofía" muestra un carrusel de 9 fotos reales de grupo 
 
 ## Notas de progreso
 
-- 2026-09-24: Primer intento con fotogramas del video de tenis (tarea 128), descartado por el usuario ("no pero hablo del video anterior"). Segundo intento con fotogramas del video anterior (`hero-video.mp4`, el de las 15 fotos), también descartado a favor de las fotos originales cuando el usuario preguntó "tienes las fotos originales?". Implementación final con 8 fotos recién compartidas por el usuario + 1 extraída del video anterior (única fuente disponible para esa en particular, ya que no estaba en Descargas), en orden aleatorio.
+- 2026-09-24: Primer intento con fotogramas del video de tenis (tarea 128), descartado por el usuario ("no pero hablo del video anterior"). Segundo intento con fotogramas del video anterior (`hero-video.mp4`, el de las 15 fotos), también descartado a favor de las fotos originales cuando el usuario preguntó "tienes las fotos originales?". Implementación con 8 fotos recién compartidas por el usuario + 1 extraída del video anterior, en orden aleatorio.
+- 2026-09-24 (ajuste): el usuario reportó que la foto de grupo completo se veía "fea" con las franjas de marca arriba/abajo, inconsistente con el resto del carrusel (sin franjas, a sangre). Se recortó esa foto igual que las demás (sin franjas) — el encuadre original del video ya dejaba margen suficiente a los lados, así que el recorte a sangre casi no pierde a nadie del grupo.
