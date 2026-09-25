@@ -17,8 +17,14 @@ const EDITORIAL_PHOTOS = [
     alt: "Seis mujeres de KINARA de distintas edades posando juntas",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-grupo9b-1790306951320.jpg`,
+    url: `${EDITORIAL_BASE}/editorial-grupo9c-1790307386277.jpg`,
     alt: "Las mujeres de KINARA juntas, la comunidad completa",
+    // Única foto horizontal (viene del video, no del shooting vertical) — no
+    // cabe completa en el recuadro retrato sin cortar a alguien de los lados.
+    // "contain" (no "cover") la muestra entera; el fondo blanco del propio
+    // estudio en la foto se funde con el fondo blanco del contenedor, así
+    // que no se nota como una franja de color distinto (a pedido del usuario).
+    fit: "contain",
   },
   {
     url: `${EDITORIAL_BASE}/editorial-grupo3-1790306360869.jpg`,
@@ -69,21 +75,36 @@ function EditorialCarousel() {
   }, [autoplay]);
 
   return (
-    <div className="relative aspect-[1100/1200] h-full w-full">
-      {EDITORIAL_PHOTOS.map((photo, i) => (
-        <img
-          key={photo.url}
-          src={productImage(photo.url, { width: 1100, height: 1200 })}
-          srcSet={productSrcSet(photo.url, EDITORIAL_WIDTHS, { heightRatio: 1200 / 1100 })}
-          sizes="(min-width: 768px) 46vw, 92vw"
-          alt={photo.alt}
-          loading="lazy"
-          className={cn(
-            "absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out",
-            i === index ? "opacity-100" : "opacity-0",
-          )}
-        />
-      ))}
+    <div className="relative aspect-[1100/1200] h-full w-full bg-white">
+      {EDITORIAL_PHOTOS.map((photo, i) => {
+        // La foto "contain" es horizontal (viene del video) — pedirla con
+        // height+resize=cover la recortaría en el servidor antes de que
+        // object-contain pueda hacer nada; se pide a su proporción natural.
+        const isContain = "fit" in photo && photo.fit === "contain";
+        return (
+          <img
+            key={photo.url}
+            src={
+              isContain
+                ? productImage(photo.url, { width: 1100 })
+                : productImage(photo.url, { width: 1100, height: 1200 })
+            }
+            srcSet={
+              isContain
+                ? productSrcSet(photo.url, EDITORIAL_WIDTHS)
+                : productSrcSet(photo.url, EDITORIAL_WIDTHS, { heightRatio: 1200 / 1100 })
+            }
+            sizes="(min-width: 768px) 46vw, 92vw"
+            alt={photo.alt}
+            loading="lazy"
+            className={cn(
+              "absolute inset-0 h-full w-full transition-opacity duration-1000 ease-in-out",
+              isContain ? "object-contain" : "object-cover",
+              i === index ? "opacity-100" : "opacity-0",
+            )}
+          />
+        );
+      })}
     </div>
   );
 }
