@@ -22,7 +22,11 @@ export const HERO_COLLAGE = {
     // sin importar que el archivo cambie — sobrescribir el mismo nombre deja
     // el sitio sirviendo la versión vieja por un rato (mismo problema ya
     // documentado en REQUISITOS.md, tarea 120). Un nombre nuevo lo evita.
-    url: `${HERO_BASE}/hero-video-1790300621322.mp4`,
+    url: `${HERO_BASE}/hero-video-1790302689302.mp4`,
+    // Versión más liviana (854x480, ~500kbps vs. ~900kbps) servida solo en
+    // mobile vía <source media>, tarea 130 — ahí es donde más pesa una
+    // descarga grande, y la pantalla es igual de chica.
+    urlMobile: `${HERO_BASE}/hero-video-mobile-1790302689302.mp4`,
     // Cuadro real del video (no una foto aparte) — se ve de inmediato mientras
     // el video todavía está bajando, en vez de una caja vacía (tarea 088).
     poster: `${HERO_BASE}/hero-poster-1790300621322.jpg`,

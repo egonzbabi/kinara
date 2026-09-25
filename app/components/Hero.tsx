@@ -42,19 +42,27 @@ export function Hero() {
           tagline + 2 botones). */}
       <div className="relative h-[clamp(440px,68vh,720px)] w-full overflow-hidden rounded-[28px] bg-espresso">
         <video
-          src={HERO_COLLAGE.main.url}
           poster={HERO_VIDEO_POSTER}
           autoPlay={playsVideo}
           muted
           loop
           playsInline
-          preload="auto"
+          // "metadata" en vez de "auto": el navegador solo baja duración/
+          // dimensiones antes de reproducir, no el video completo por
+          // adelantado — el poster ya cubre la espera visual (tarea 130).
+          preload="metadata"
           aria-label={HERO_COLLAGE.main.alt}
           // `object-cover`: llena todo el rectángulo del banner sin franjas
           // ni zoom animado (a pedido del usuario, tarea 129 — reemplaza el
           // efecto "cuadro completo -> zoom a cover" de la tarea 117/128).
           className="absolute inset-0 h-full w-full object-cover"
-        />
+        >
+          {/* Variante más liviana solo para mobile (tarea 130): el <source>
+              condicionado por `media` debe ir antes que el genérico para que
+              el navegador lo prefiera cuando aplica. */}
+          <source media="(max-width: 767px)" src={HERO_COLLAGE.main.urlMobile} type="video/mp4" />
+          <source src={HERO_COLLAGE.main.url} type="video/mp4" />
+        </video>
 
         {/* Tinte cálido de marca sobre el video (mix-blend-overlay deja pasar
             el detalle, no lo tapa) — mismo tratamiento que ya existía, ahora
