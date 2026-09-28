@@ -1,4 +1,5 @@
 import type { MetaDescriptor } from "react-router";
+import { HERO_COLLAGE } from "~/data/images";
 
 /**
  * SEO técnico (tarea 003). Dominio real del sitio, confirmado con el usuario
@@ -13,9 +14,12 @@ export const SITE_NAME = "KINARA";
 // Imagen de respaldo para Open Graph/Twitter cuando la página no tiene una
 // foto propia (contacto, políticas, home) — no hay un logo cuadrado
 // dedicado todavía, así que se usa el poster del hero (real, ya en Storage,
-// el mismo que usa <Hero> como LCP — ver tarea 104).
-export const DEFAULT_OG_IMAGE =
-  "https://njvfxzmbyckktygeiwhi.supabase.co/storage/v1/object/public/product-images/site/hero-poster.jpg";
+// el mismo que usa <Hero> como LCP — ver tarea 104). Se importa desde
+// `HERO_COLLAGE` (no una URL fija copiada aquí aparte) porque un nombre fijo
+// se quedó apuntando al poster viejo varias rondas seguidas de reemplazo del
+// video del hero (tareas 128/130/131) sin que nadie se acordara de
+// actualizarlo también aquí — así ya no puede volver a desincronizarse.
+export const DEFAULT_OG_IMAGE = HERO_COLLAGE.main.poster;
 
 export function absoluteUrl(path: string): string {
   return `${SITE_URL}${path}`;

@@ -169,5 +169,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 127 | [127-menu-tipos-dinamico.md](127-menu-tipos-dinamico.md) | done | Menú y footer: los tipos de ropa salen del catálogo real, no de una lista fija |
 | 128 | [128-nuevo-video-hero.md](128-nuevo-video-hero.md) | done | Home: reemplazar el video del hero (mujer jugando tenis) |
 | 129 | [129-editorial-carrusel-fotos-grupo.md](129-editorial-carrusel-fotos-grupo.md) | done | Home: "Nuestra filosofía" ahora muestra un carrusel de 9 fotos reales de grupo, en orden aleatorio |
+| 130 | [130-segundo-reemplazo-video-hero.md](130-segundo-reemplazo-video-hero.md) | done | Home: segundo reemplazo del video del hero + fix de imagen OG desactualizada |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
