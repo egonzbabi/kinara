@@ -17,12 +17,14 @@ const EDITORIAL_PHOTOS = [
     alt: "Seis mujeres de KINARA de distintas edades posando juntas",
   },
   {
-    url: `${EDITORIAL_BASE}/editorial-grupo9c-1790307386277.jpg`,
+    url: `${EDITORIAL_BASE}/editorial-grupo9d-1790637933745.jpg`,
     alt: "Las mujeres de KINARA juntas, la comunidad completa",
     // Única foto horizontal (viene del video, no del shooting vertical) — no
     // cabe completa en el recuadro retrato sin cortar a alguien de los lados.
-    // "contain" (no "cover") la muestra entera; el fondo blanco del propio
-    // estudio en la foto se funde con el fondo blanco del contenedor, así
+    // "contain" (no "cover") la muestra entera; el fondo del estudio en la
+    // foto se aclaró a blanco puro (el video lo comprimía a un gris ~230/255,
+    // se notaba la costura contra el fondo blanco del contenedor) para que se
+    // funda con el fondo blanco del contenedor, así
     // que no se nota como una franja de color distinto (a pedido del usuario).
     fit: "contain",
   },
