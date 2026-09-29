@@ -55,10 +55,10 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 
 ## Opcional pero recomendado antes o poco después de lanzar
 
-- [ ] **Tarea 003** (SEO técnico) — pendiente.
-- [ ] **Tarea 004** (Google Analytics 4) — pendiente, requiere que el usuario cree la property de GA4 y entregue el Measurement ID.
-- [ ] **Tarea 005** (Auditoría UI/UX y accesibilidad WCAG AA) — pendiente.
-- [ ] Re-medir Lighthouse (mobile) contra el dominio real ya en producción (las mediciones locales dieron buenos resultados pero sin la red/CDN real de producción).
+- [x] **Tarea 003** (SEO técnico) — done.
+- [x] **Tarea 004** (Google Analytics 4) — done. Confirmado de nuevo en producción (2026-09-28): `gtag.js` carga con el Measurement ID real, Consent Mode arranca en "denied". Este checklist lo tenía marcado como pendiente por error — no estaba sincronizado con `tasks/README.md`.
+- [x] **Tarea 005** (Auditoría UI/UX y accesibilidad WCAG AA) — done.
+- [ ] Re-medir Lighthouse (mobile) contra el dominio real ya en producción (las mediciones anteriores fueron contra `.vercel.app`, antes de conectar el dominio) — sigue pendiente.
 
 ## Fase futura: vender también en Amazon, Mercado Libre y Liverpool
 
