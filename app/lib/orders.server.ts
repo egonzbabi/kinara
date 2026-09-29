@@ -80,6 +80,66 @@ function isUniqueViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && (err as { code?: string }).code === "23505";
 }
 
+/**
+ * Restaura stock vía `register_inventory_movement` (tipo "entrada"), no un
+ * incremento directo — así un reembolso también deja rastro en
+ * `inventory_movements`, igual que cualquier otro ajuste manual de stock
+ * (ver tarea 064/075). Nunca lanza: un reembolso ya es un evento fuera del
+ * control del checkout, un fallo aquí solo se registra, no debe tumbar el
+ * webhook.
+ */
+async function restoreStockForItems(items: OrderItem[], concept: string) {
+  const today = new Date().toISOString().slice(0, 10);
+  for (const item of items) {
+    const { error } = await supabaseAdmin.rpc("register_inventory_movement", {
+      p_product_id: item.productId,
+      p_color_name: item.colorName ?? "",
+      p_size: item.size,
+      p_type: "entrada",
+      p_quantity: item.quantity,
+      p_concept: concept,
+      p_movement_date: today,
+      p_admin_id: null,
+      p_admin_name: "Sistema (reembolso Stripe)",
+    });
+    if (error) {
+      console.error(
+        `[orders] falló la restauración de stock (${item.productId}/${item.colorName}/${item.size}):`,
+        error,
+      );
+    }
+  }
+}
+
+/**
+ * Cancela el pedido y restaura el stock de sus artículos — llamado desde el
+ * webhook de Stripe ante un reembolso total. Idempotente: si el pedido ya
+ * estaba cancelado (el webhook puede reintentar/duplicarse), no vuelve a
+ * restaurar stock una segunda vez.
+ */
+export async function cancelOrderAndRestoreStock(
+  stripeSessionId: string,
+): Promise<{ orderId: string; alreadyCancelled: boolean } | null> {
+  const { data: order, error } = await supabaseAdmin
+    .from("orders")
+    .select("id, items, status")
+    .eq("stripe_session_id", stripeSessionId)
+    .maybeSingle();
+  if (error || !order) return null;
+  if (order.status === "cancelled") return { orderId: order.id, alreadyCancelled: true };
+
+  const { error: updateError } = await supabaseAdmin
+    .from("orders")
+    .update({ status: "cancelled" })
+    .eq("id", order.id);
+  if (updateError) throw updateError;
+
+  const items = Array.isArray(order.items) ? (order.items as OrderItem[]) : [];
+  await restoreStockForItems(items, `Reembolso total del pedido ${order.id}`);
+
+  return { orderId: order.id, alreadyCancelled: false };
+}
+
 async function decrementStockForItems(items: OrderItem[]) {
   for (const item of items) {
     const { data: variant, error } = await supabaseAdmin

@@ -1,8 +1,7 @@
 import type Stripe from "stripe";
 import type { Route } from "./+types/api.stripe-webhook";
 import { getStripe } from "~/lib/stripe.server";
-import { ensureOrderFromCheckoutSession } from "~/lib/orders.server";
-import { supabaseAdmin } from "~/lib/supabase.server";
+import { ensureOrderFromCheckoutSession, cancelOrderAndRestoreStock } from "~/lib/orders.server";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -72,13 +71,8 @@ export async function action({ request }: Route.ActionArgs) {
         console.warn(`[stripe-webhook] charge.refunded: no se encontró la sesión para el PI ${paymentIntentId}`);
         return Response.json({ received: true });
       }
-      const { data, error } = await supabaseAdmin
-        .from("orders")
-        .update({ status: "cancelled" })
-        .eq("stripe_session_id", sessionId)
-        .select("id");
-      if (error) throw error;
-      return Response.json({ received: true, cancelled: (data?.length ?? 0) > 0 });
+      const result = await cancelOrderAndRestoreStock(sessionId);
+      return Response.json({ received: true, cancelled: result !== null });
     } catch (err) {
       console.error(`[stripe-webhook] fallo manejando el reembolso de ${paymentIntentId}:`, err);
       return Response.json({ error: "Refund handling failed, retry" }, { status: 500 });
