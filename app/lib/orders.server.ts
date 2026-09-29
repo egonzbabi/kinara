@@ -125,7 +125,11 @@ export async function cancelOrderAndRestoreStock(
     .select("id, items, status")
     .eq("stripe_session_id", stripeSessionId)
     .maybeSingle();
-  if (error || !order) return null;
+  // Un error de verdad (DB caída, timeout) debe propagarse para que el
+  // webhook responda 500 y Stripe reintente — nunca tratarlo igual que
+  // "no existe esa orden" (eso sí es un 200 legítimo, sin reintento).
+  if (error) throw error;
+  if (!order) return null;
   if (order.status === "cancelled") return { orderId: order.id, alreadyCancelled: true };
 
   const { error: updateError } = await supabaseAdmin
