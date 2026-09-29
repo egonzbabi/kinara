@@ -7,6 +7,7 @@ import { getShippingRates, type ShippingAddress } from "~/lib/skydropx.server";
 import { validateDiscountCode } from "~/lib/discount-signups.server";
 import { DISCOUNT_MIN_SUBTOTAL_MXN } from "~/lib/discount-constants";
 import { formatPrice } from "~/lib/formatPrice";
+import { sendOwnerAlert } from "~/lib/resend.server";
 import type { CartItem } from "~/context/CartContext";
 
 interface ChosenShipping {
@@ -259,6 +260,14 @@ export async function action({ request }: Route.ActionArgs) {
   } catch (err) {
     console.error("[checkout] error creando la Checkout Session:", err);
     const message = err instanceof Error ? err.message : "No se pudo iniciar el pago";
+    // Este catch es justo el que dispara cuando algo real está roto (clave de
+    // Stripe inválida, API caída, etc.) — no los 400 de arriba (carrito vacío,
+    // sin stock, código de descuento inválido), que son parte normal del uso
+    // del sitio y no ameritan avisar cada vez.
+    await sendOwnerAlert({
+      subject: `🚨 Checkout falló — no se pudo crear la sesión de pago`,
+      text: `Un cliente no pudo iniciar el pago.\n\nCorreo: ${address.email}\nSubtotal: ${formatPrice(subtotal)}\n\nError: ${message}`,
+    });
     return Response.json({ error: message }, { status: 500 });
   }
 }
