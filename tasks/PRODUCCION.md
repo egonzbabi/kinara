@@ -16,11 +16,12 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 
 ## Skydropx (envíos)
 
-- [ ] Cambiar `SKYDROPX_BASE_URL` de `https://sb-pro.skydropx.com` (sandbox) a `https://pro.skydropx.com` (producción).
-- [ ] Cambiar `SKYDROPX_CLIENT_ID`/`SKYDROPX_CLIENT_SECRET` de sandbox a las credenciales de producción.
-- [ ] **Corregir `SKYDROPX_ORIGIN_STREET1`** — hoy es literalmente el placeholder `"Pendiente de confirmar"`, nunca se cargó la calle real. Confirmar también en el dashboard de `pro.skydropx.com` (Direcciones) que la dirección de origen ahí sea la real — se detectó (tarea 028) que la API puede estar usando una dirección default de cuenta en vez de la que se manda.
-- [ ] Cargar los datos fiscales (RFC, razón social, uso de CFDI) en `pro.skydropx.com` si quieren facturas deducibles de las guías.
-- [ ] Probar cotizaciones reales en producción para varias ciudades (no solo CDMX) — el sandbox demostró ser poco confiable (tarea 030), producción debería ser más estable pero hay que confirmarlo antes de lanzar.
+- [x] `SKYDROPX_BASE_URL` cambiado a `https://pro.skydropx.com` (producción), en Vercel y en `.env` local (2026-09-28).
+- [x] `SKYDROPX_CLIENT_ID`/`SKYDROPX_CLIENT_SECRET` de producción cargados en Vercel.
+- [x] **Dirección de origen corregida** (2026-09-28) — además de la calle (placeholder), el teléfono (`5500000000`, también placeholder) y el correo (`hola@kinara.mx`, dominio distinto al verificado) tampoco eran reales. Dirección real confirmada por el usuario: Nunkini 234, Col. Jardines del Ajusco, C.P. 14200, Tlalpan, CDMX; tel. 5512735325; correo `contacto@kinarafit.com.mx` (mismo dominio ya verificado en Resend). **Importante**: el CP/alcaldía anteriores (10910, La Magdalena Contreras) no correspondían a la alcaldía real (Tlalpan) — no era solo la calle la que faltaba, la combinación completa estaba mal.
+- [x] Probado en producción (2026-09-28, sin completar ninguna compra): cotizaciones reales obtenidas para **CDMX** (13 tarifas), **Guadalajara** (15 tarifas), **Mérida** (14 tarifas) y **Puebla** (13 tarifas) — ninguna cayó al fallback de $150. Confirma que el problema de ciudades sin tarifa (tarea 030) era del sandbox, no del código.
+- [ ] Cargar los datos fiscales (RFC, razón social, uso de CFDI) en `pro.skydropx.com` si quieren facturas deducibles de las guías — sigue pendiente, no bloquea el envío en sí.
+- [ ] Confirmar en el dashboard de `pro.skydropx.com` (Direcciones) que la dirección de origen ahí también sea la real — se detectó (tarea 028) que la API puede estar usando una dirección default de cuenta en vez de la que se manda por request; con la dirección ya corregida en el código, vale la pena revisar si esto seguía siendo un problema.
 
 ## Resend (correo de contacto, confirmación de pedido, código de bienvenida)
 
