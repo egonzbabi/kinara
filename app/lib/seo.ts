@@ -2,11 +2,8 @@ import type { MetaDescriptor } from "react-router";
 import { HERO_COLLAGE } from "~/data/images";
 
 /**
- * SEO técnico (tarea 003). Dominio real del sitio, confirmado con el usuario
- * — el sitio hoy vive en kinara-ecommerce.vercel.app, pero el dominio propio
- * (ya usado para el correo, `contacto@kinarafit.com.mx`) es
- * www.kinarafit.com.mx; se usa ese aquí para no tener que rehacer todo el
- * SEO cuando se conecte el dominio en Vercel.
+ * SEO técnico (tarea 003). Dominio real del sitio — conectado en Vercel
+ * (2026-09-28); `kinarafit.com.mx` redirige a esta versión con `www`.
  */
 export const SITE_URL = "https://www.kinarafit.com.mx";
 export const SITE_NAME = "KINARA";

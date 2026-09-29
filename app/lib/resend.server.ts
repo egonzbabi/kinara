@@ -7,6 +7,7 @@ import {
   DISCOUNT_MIN_SUBTOTAL_MXN,
   DISCOUNT_EXPIRY_DAYS,
 } from "./discount-constants";
+import { absoluteUrl } from "./seo";
 
 /**
  * Envío de correo del formulario de contacto vía Resend. A propósito nunca
@@ -243,7 +244,7 @@ function buildOrderConfirmationHtml(params: {
             </tr>
             <tr>
               <td style="padding:32px 40px 40px;text-align:center;font-family:Helvetica,Arial,sans-serif;">
-                <a href="https://kinara-ecommerce.vercel.app/tienda" style="display:inline-block;background:${CLAY};color:${BONE};text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:999px;">
+                <a href="${absoluteUrl("/tienda")}" style="display:inline-block;background:${CLAY};color:${BONE};text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:999px;">
                   Seguir explorando
                 </a>
               </td>
@@ -386,7 +387,7 @@ function buildWelcomeDiscountHtml(params: { code: string }): string {
             </tr>
             <tr>
               <td style="padding:32px 40px 40px;text-align:center;font-family:Helvetica,Arial,sans-serif;">
-                <a href="https://kinara-ecommerce.vercel.app/tienda" style="display:inline-block;background:${CLAY};color:${BONE};text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:999px;">
+                <a href="${absoluteUrl("/tienda")}" style="display:inline-block;background:${CLAY};color:${BONE};text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:999px;">
                   Ir a la tienda
                 </a>
               </td>

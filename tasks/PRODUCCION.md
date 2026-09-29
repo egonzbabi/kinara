@@ -33,10 +33,12 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 
 ## Dominio y Vercel
 
-- [ ] Decidir y conectar el dominio real (`kinarafit.com.mx`) al proyecto de Vercel — hoy el sitio solo vive en `kinara-ecommerce.vercel.app`.
-- [ ] Una vez el dominio esté activo, actualizar los webhooks de Stripe (arriba) para que apunten al dominio real, no al `.vercel.app`.
-- [ ] **Actualizar los 2 enlaces fijos en `app/lib/resend.server.ts`** ("Ver tienda" del correo de confirmación de pedido) — hoy apuntan a `https://kinara-ecommerce.vercel.app/tienda`, hay que cambiarlos al dominio real cuando esté conectado (si no, el botón del correo siempre manda al sitio de Vercel, aunque el cliente ya esté comprando desde el dominio real).
-- [ ] Actualizar todas las variables de entorno de arriba en Vercel → Production, y disparar un redeploy.
+- [x] **Dominio real conectado (2026-09-28)**: `kinarafit.com.mx` y `www.kinarafit.com.mx` agregados en Vercel, DNS actualizado en GoDaddy (registro A `@` → `216.198.79.1`, más el CNAME de `www`), ambos con "Valid Configuration". Confirmado con `curl`: `www.kinarafit.com.mx` → 200, `kinarafit.com.mx` → 308 redirect → `www.kinarafit.com.mx` (coincide con `SITE_URL` en `app/lib/seo.ts`).
+- **Cuidado con la opción "Redirect old domain to new" de Vercel**: al editar/agregar el dominio, Vercel puede ofrecer redirigir `kinara-ecommerce.vercel.app` completo hacia el dominio nuevo (o incluso borrarlo). Se evitó activar esto hasta migrar el webhook de Stripe primero — un redirect en el `.vercel.app` podría romper la entrega de webhooks (peticiones POST servidor-a-servidor no siempre siguen redirects). Revisar antes de activarlo que ya no dependa nada del dominio viejo.
+- [x] Webhook de Stripe recreado apuntando a `https://www.kinarafit.com.mx/api/stripe-webhook`, `STRIPE_WEBHOOK_SECRET` actualizado en Vercel (2026-09-28). El webhook viejo (apuntando a `kinara-ecommerce.vercel.app`) se dejó activo temporalmente como respaldo — desactivarlo en el Dashboard de Stripe una vez confirmado que el nuevo funciona.
+- [x] **Los 2 enlaces fijos en `app/lib/resend.server.ts`** corregidos — ya no hardcodean el dominio (`https://kinara-ecommerce.vercel.app/tienda`), ahora usan `absoluteUrl("/tienda")` importado de `app/lib/seo.ts` (mismo `SITE_URL` que usa el resto del sitio), así no puede volver a quedar desincronizado si el dominio cambia de nuevo.
+- [ ] Confirmar que las variables de entorno en Vercel → Production ya reflejan todo lo de arriba (Stripe, Skydropx, Resend) y que el redeploy final las tomó.
+- [ ] Una vez confirmado que todo funciona en el dominio real, considerar activar el redirect de `kinara-ecommerce.vercel.app` → `www.kinarafit.com.mx` (opcional, no urgente) y desactivar el webhook viejo de Stripe.
 - [ ] Decidir si conectar el repo original del compañero (`maxruizg/Kinara-ecommerce`, remoto `origin`) a Vercel, o mantener el proyecto solo enlazado a `mio` (`egonzbabi/kinara`).
 
 ## Catálogo (fotos y precios)
