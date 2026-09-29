@@ -28,8 +28,8 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 - [x] Cuenta en resend.com creada, `RESEND_API_KEY` generada y cargada en `.env` local — verificada con un envío real de prueba (2026-08-26).
 - [x] Dominio propio `kinarafit.com.mx` verificado en Resend (DKIM + SPF vía subdominio `send.`, sin conflicto con el correo existente del dominio en GoDaddy) — ya no se manda desde `onboarding@resend.dev`.
 - [x] `CONTACT_EMAIL_FROM=KINARA <contacto@kinarafit.com.mx>` cargado en `.env` local.
-- [ ] Definir `CONTACT_EMAIL_TO` (a qué correo real deben llegar los mensajes de `/contacto` — sigue sin definirse).
-- [ ] Cargar `RESEND_API_KEY` y `CONTACT_EMAIL_FROM` (y `CONTACT_EMAIL_TO` cuando se defina) en Vercel → Production — hoy solo están en `.env` local, así que en el sitio real (`.vercel.app`) estos 3 correos (contacto, confirmación de pedido, código de bienvenida) todavía no se mandan.
+- [x] `CONTACT_EMAIL_TO=contacto@kinarafit.com.mx` confirmado (2026-09-28).
+- [x] Las 3 variables (`RESEND_API_KEY`, `CONTACT_EMAIL_TO`, `CONTACT_EMAIL_FROM`) cargadas en Vercel → Production y verificadas con un envío real en producción (2026-09-28): mensaje de prueba enviado desde `/contacto`, confirmado que llegó a la bandeja de `contacto@kinarafit.com.mx`. Los 3 flujos (contacto, confirmación de pedido, código de bienvenida) ya deberían mandar correo en el sitio real.
 
 ## Dominio y Vercel
 
