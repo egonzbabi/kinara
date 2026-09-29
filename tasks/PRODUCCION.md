@@ -4,13 +4,13 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 
 ## Stripe (pagos)
 
-- **Decisión del usuario (2026-09-25): pasar Stripe a modo Live.** El webhook apunta por ahora a `https://kinara-ecommerce.vercel.app/api/stripe-webhook` (no hay dominio real conectado todavía) — se actualiza cuando se conecte el dominio (ver sección "Dominio y Vercel" abajo).
+- **Decisión del usuario (2026-09-25): pasar Stripe a modo Live.** El webhook se migró al dominio real (`https://www.kinarafit.com.mx/api/stripe-webhook`) una vez conectado — ver sección "Dominio y Vercel" abajo.
 - **Incidente de seguridad (2026-09-25):** el usuario pegó una `sk_live_...` directo en el chat — se le indicó rotarla en el Dashboard de Stripe antes de usarla (una clave pegada en un chat se considera expuesta). Claude nunca debe recibir, escribir ni cargar la clave secreta él mismo (política de credenciales financieras) — el usuario la agrega directo en `.env` y en Vercel.
 - [x] Clave secreta rotada y cargada en Vercel (2026-09-28) — primer intento quedó con el valor de la publicable por error (`pk_live_...` en vez de `sk_live_...`, causaba `secret_key_required` en Stripe), corregido rotándola de nuevo y confirmando que el checkout ya no da ese error.
 - [x] Clave publicable Live confirmada (`pk_live_51U0Oyu...`) — no se usa en el código actual (el checkout redirige a Stripe Checkout, sin Stripe.js en el cliente).
 - [x] Webhook Live creado (`Kinara Producción`) apuntando a `https://kinara-ecommerce.vercel.app/api/stripe-webhook`, con los 4 eventos (`checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `charge.refunded`) y `STRIPE_WEBHOOK_SECRET` cargado en Vercel.
 - [x] Verificado end-to-end (2026-09-28, sin completar ningún pago real): carrito → checkout → `/api/create-checkout-session` → redirect exitoso a la página hospedada de Stripe (`checkout.stripe.com`, nombre de negocio "Kinara Fit" correcto, métodos de pago Card/OXXO visibles) — confirma que la clave secreta Live y el flujo de creación de sesión funcionan.
-- **Bloqueado (2026-09-28): el usuario no tiene acceso al correo con el que está registrada la cuenta de Stripe** (la usa con otro correo que no puede ver) — intentó agregarse como miembro del equipo con su propio correo, pero Stripe manda la verificación de identidad al correo original registrado, no al nuevo. Esto requiere Soporte de Stripe directamente (recuperación de cuenta) — Claude no puede resolverlo. El usuario abrió un caso con Soporte; pendiente de respuesta. No bloquea el resto del checklist.
+- [x] **Resuelto (2026-09-28): acceso a la cuenta de Stripe con el correo propio del usuario.** Estaba bloqueado porque Stripe mandaba la verificación de identidad al correo original registrado (al que el usuario no tenía acceso) — se resolvió vía Soporte de Stripe.
 - [ ] Confirmar que el nombre de cuenta/negocio de Stripe sigue configurado en modo Live (verificación de identidad/negocio completa para aceptar cargos reales, no solo crear sesiones).
 - [ ] Hacer una compra real de prueba (monto bajo) con una tarjeta real antes de anunciar el lanzamiento.
 
