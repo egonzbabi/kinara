@@ -24,7 +24,7 @@ export default function PoliticaDeCambiosYDevoluciones() {
           <h1 className="font-display text-[clamp(30px,4vw,44px)]">
             Política de Cambios y Devoluciones
           </h1>
-          <p className="mt-2 text-sm text-muted">Última actualización: Agosto de 2026</p>
+          <p className="mt-2 text-sm text-muted">Última actualización: Septiembre de 2026</p>
         </div>
 
         <p className={pClass}>
@@ -36,18 +36,18 @@ export default function PoliticaDeCambiosYDevoluciones() {
         <section className={sectionClass}>
           <h2 className={h2Class}>1. Regla general de cambios y devoluciones</h2>
           <p className={pClass}>
-            Por políticas internas de la marca, KINARA no realiza devoluciones, reembolsos de
-            dinero ni cambios de talla o modelo, salvo en aquellos casos en que el producto
-            presente un daño o defecto de fabricación comprobable de origen, o que la legislación
-            aplicable determine lo contrario.
+            Por políticas internas de la marca, KINARA no realiza devoluciones ni reembolsos de
+            dinero. Sí procede un cambio de producto en dos casos: (a) cuando la prenda presente
+            un daño o defecto de fabricación comprobable de origen, o (b) cuando el cliente
+            necesite una talla distinta a la comprada, siempre del mismo modelo y color.
           </p>
         </section>
 
         <section className={sectionClass}>
           <h2 className={h2Class}>2. Procedencia por defectos o daños de fábrica</h2>
           <p className={pClass}>
-            Los cambios procederán únicamente cuando la prenda entregada presente imperfecciones
-            atribuibles al proceso de producción o confección de KINARA.
+            Los cambios por defecto procederán únicamente cuando la prenda entregada presente
+            imperfecciones atribuibles al proceso de producción o confección de KINARA.
           </p>
           <p className={pClass}>Ejemplos de fallas de fábrica cubiertas:</p>
           <ul className={ulClass}>
@@ -65,10 +65,17 @@ export default function PoliticaDeCambiosYDevoluciones() {
             </li>
             <li>• Errores de confección: piezas mal ensambladas o asimetrías evidentes de fábrica.</li>
           </ul>
+        </section>
+
+        <section className={sectionClass}>
+          <h2 className={h2Class}>3. Cambios de talla</h2>
+          <p className={pClass}>
+            Si la prenda te quedó chica o grande, puedes cambiarla por otra talla del mismo
+            modelo y color, sujeto a disponibilidad de inventario.
+          </p>
           <p className={pClass}>Casos que NO aplican para cambio o devolución:</p>
           <ul className={ulClass}>
             <li>• Cambios por gusto personal, preferencia de color o error en la elección del modelo.</li>
-            <li>• Selección incorrecta de la talla por parte del cliente.</li>
             <li>• Daños ocasionados por uso, desgaste natural o fuerza mayor.</li>
             <li>
               • Daños derivados de un lavado, secado o cuidado inadecuado (no seguir las
@@ -82,10 +89,10 @@ export default function PoliticaDeCambiosYDevoluciones() {
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>3. Requisitos para la autorización del cambio</h2>
+          <h2 className={h2Class}>4. Requisitos para la autorización del cambio</h2>
           <p className={pClass}>
-            Para que la solicitud de cambio por defecto de fábrica sea evaluada y aprobada, el
-            producto deberá cumplir sin excepción con las siguientes condiciones:
+            Para que la solicitud de cambio (por defecto de fábrica o por talla) sea evaluada y
+            aprobada, el producto deberá cumplir sin excepción con las siguientes condiciones:
           </p>
           <ul className={ulClass}>
             <li>
@@ -97,29 +104,30 @@ export default function PoliticaDeCambiosYDevoluciones() {
             <li>
               • Evaluación técnica: una vez recibido el producto en nuestras instalaciones,
               nuestro equipo verificará las evidencias físicas para validar que el daño es de
-              fábrica y no causado por el usuario.
+              fábrica y no causado por el usuario (aplica solo a cambios por defecto).
             </li>
           </ul>
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>4. Resolución y disponibilidad</h2>
-          <p className={pClass}>Una vez aprobado el defecto de fábrica por nuestro equipo:</p>
+          <h2 className={h2Class}>5. Resolución y disponibilidad</h2>
+          <p className={pClass}>Una vez aprobado el cambio por nuestro equipo:</p>
           <ul className={ulClass}>
             <li>
-              • Se realizará el cambio por una prenda en perfecto estado de la misma referencia y
-              talla, sujeto a disponibilidad de inventario.
+              • Se realizará el cambio por una prenda en perfecto estado de la misma referencia
+              (defecto de fábrica) o de la talla solicitada (cambio de talla), sujeto a
+              disponibilidad de inventario.
             </li>
             <li>
-              • Si el producto se encuentra agotado, el cliente podrá elegir otro producto del
-              catálogo. Si existe una diferencia a favor de KINARA, el cliente deberá cubrir el
-              saldo pendiente.
+              • Si el producto o la talla solicitada se encuentra agotada, el cliente podrá elegir
+              otro producto del catálogo. Si existe una diferencia a favor de KINARA, el cliente
+              deberá cubrir el saldo pendiente.
             </li>
           </ul>
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>5. Costos de envío</h2>
+          <h2 className={h2Class}>6. Costos de envío</h2>
           <ul className={ulClass}>
             <li>
               • Por defecto o daño de fábrica validado: KINARA asumirá la logística y los costos
@@ -127,20 +135,18 @@ export default function PoliticaDeCambiosYDevoluciones() {
               prenda.
             </li>
             <li>
-              • Cualquier otra solicitud ajena a un defecto comprobado: en el evento
-              extraordinario de autorizarse una gestión fuera de la regla por decisión especial
-              de la marca, los gastos de envío (tanto el retorno a nuestras instalaciones como el
-              nuevo despacho) serán cubiertos en su totalidad por el cliente.
+              • Por cambio de talla: al no ser un error de KINARA, el cliente cubre los gastos de
+              envío tanto de la prenda que regresa como del envío de la nueva talla.
             </li>
           </ul>
         </section>
 
         <section className={sectionClass}>
-          <h2 className={h2Class}>6. Proceso de reporte y contacto</h2>
+          <h2 className={h2Class}>7. Proceso de reporte y contacto</h2>
           <p className={pClass}>
-            Si recibiste un producto con algún daño de fábrica de los mencionados anteriormente,
-            por favor contáctanos adjuntando tu número de pedido y evidencia fotográfica/en video
-            del detalle afectado:
+            Si recibiste un producto con algún daño de fábrica de los mencionados anteriormente, o
+            necesitas cambiarlo por otra talla, contáctanos con tu número de pedido (y, en caso de
+            defecto, evidencia fotográfica/en video del detalle afectado):
           </p>
           <ul className={ulClass}>
             <li>
