@@ -1,6 +1,6 @@
 import type { Route } from "./+types/api.newsletter-signup";
 import { getOrCreateDiscountSignup } from "~/lib/discount-signups.server";
-import { sendWelcomeDiscountEmail } from "~/lib/resend.server";
+import { sendWelcomeDiscountEmail, sendOwnerAlert } from "~/lib/resend.server";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,9 +22,11 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   let signup;
+  let isNew;
   try {
     const result = await getOrCreateDiscountSignup(email);
     signup = result.signup;
+    isNew = result.isNew;
   } catch (err) {
     console.error("[newsletter-signup] error creando el código:", err);
     return Response.json({ error: "No se pudo generar tu código, intenta de nuevo." }, { status: 500 });
@@ -42,6 +44,15 @@ export async function action({ request }: Route.ActionArgs) {
   const emailResult = await sendWelcomeDiscountEmail({ email: signup.email, code: signup.code });
   if (!emailResult.sent) {
     console.error(`[newsletter-signup] correo no enviado para ${signup.email}:`, emailResult.error);
+  }
+
+  // Solo avisa en un registro nuevo de verdad — no en un reenvío del mismo
+  // código a alguien que ya se había registrado antes.
+  if (isNew) {
+    await sendOwnerAlert({
+      subject: `✨ Registro nuevo — ${signup.email}`,
+      text: `${signup.email} se registró para el 10% de descuento de bienvenida.\n\nCódigo: ${signup.code}`,
+    });
   }
 
   return Response.json({ ok: true, emailSent: emailResult.sent });

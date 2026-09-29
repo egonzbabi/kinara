@@ -69,6 +69,37 @@ export async function sendContactEmail(params: {
 }
 
 /**
+ * Aviso corto al dueño del sitio (pedido nuevo, mensaje de contacto o
+ * registro nuevo) — a `OWNER_ALERT_EMAIL`, separado de `CONTACT_EMAIL_TO`
+ * (el correo oficial del negocio, que puede revisar alguien más). Mismas
+ * garantías que el resto de este archivo: nunca lanza si falta
+ * configuración, y nunca bloquea el flujo que lo llama (el pedido/mensaje/
+ * registro ya se guardó antes).
+ */
+export async function sendOwnerAlert(params: {
+  subject: string;
+  text: string;
+}): Promise<SendContactEmailResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const to = process.env.OWNER_ALERT_EMAIL;
+  if (!apiKey || !to) {
+    return { sent: false, error: "RESEND_API_KEY o OWNER_ALERT_EMAIL no configurados" };
+  }
+
+  const from = process.env.CONTACT_EMAIL_FROM || "KINARA <onboarding@resend.dev>";
+  const resend = new Resend(apiKey);
+
+  return sendWithRetry(() =>
+    resend.emails.send({
+      from,
+      to,
+      subject: params.subject,
+      text: params.text,
+    }),
+  );
+}
+
+/**
  * Correo de confirmación de pedido al cliente. Mismas garantías que
  * sendContactEmail: nunca lanza si falta configuración de Resend — la orden
  * ya se creó y descontó stock antes de llamar esto, así que un correo no

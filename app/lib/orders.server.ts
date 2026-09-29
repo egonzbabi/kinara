@@ -1,8 +1,9 @@
 import type Stripe from "stripe";
 import { supabaseAdmin } from "./supabase.server";
-import { sendOrderConfirmationEmail } from "./resend.server";
+import { sendOrderConfirmationEmail, sendOwnerAlert } from "./resend.server";
 import { markDiscountCodeUsed } from "./discount-signups.server";
 import type { ProductSize } from "./catalog-constants";
+import { formatPrice } from "./formatPrice";
 
 export interface OrderItem {
   productId: string;
@@ -214,6 +215,14 @@ export async function ensureOrderFromCheckoutSession(
   if (!emailResult.sent) {
     console.error(`[orders] correo de confirmación no enviado para ${orderId}:`, emailResult.error);
   }
+
+  const itemsSummary = items
+    .map((i) => `${i.quantity}x ${i.productName} (${i.colorName}, ${i.size})`)
+    .join(", ");
+  await sendOwnerAlert({
+    subject: `🛍️ Pedido nuevo — ${orderId} — ${formatPrice(total)}`,
+    text: `${customerName} (${customerEmail}) acaba de comprar:\n\n${itemsSummary}\n\nSubtotal: ${formatPrice(subtotal)}\nEnvío: ${formatPrice(shippingFee)}\nTotal: ${formatPrice(total)}\n\nPedido: ${orderId}`,
+  });
 
   return { orderId, created: true };
 }

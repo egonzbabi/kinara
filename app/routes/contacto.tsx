@@ -1,7 +1,7 @@
 import { Form, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/contacto";
 import { supabaseAdmin } from "~/lib/supabase.server";
-import { sendContactEmail } from "~/lib/resend.server";
+import { sendContactEmail, sendOwnerAlert } from "~/lib/resend.server";
 import { cn } from "~/lib/cn";
 import { seoMeta } from "~/lib/seo";
 
@@ -51,6 +51,11 @@ export async function action({ request }: Route.ActionArgs): Promise<ActionData>
   } else {
     await supabaseAdmin.from("contact_messages").update({ email_sent: true }).eq("id", saved.id);
   }
+
+  await sendOwnerAlert({
+    subject: `📩 Mensaje de contacto nuevo — ${name}`,
+    text: `${name} <${email}> escribió:\n\n${message}`,
+  });
 
   return { ok: true };
 }
