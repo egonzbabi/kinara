@@ -43,12 +43,8 @@ Esto no es una tarea de `tasks/NNN-*` — es una lista operativa de todo lo que 
 
 ## Catálogo (fotos y precios)
 
-- [ ] **2 productos sin precio** (borrador, no aparecen en `/tienda`): NEWYORK TOP, NEWYORKLEGGIN. Publicarlos desde `/admin/productos` en cuanto se defina el precio real.
-- [ ] **7 colores sin foto propia** (usan la foto genérica del producto, que puede no ser ese color exacto):
-  - NEWYORK TOP (borrador): Ivory, Verde, Azul Gris — los 3 colores del producto, ninguno tiene foto.
-  - NEWYORKLEGGIN (borrador): Cocoa, Gris, Marino — los 3 colores del producto, ninguno tiene foto.
-  - SET ESSENTIAL (publicado): Ivory — 1 de 7 colores sin foto (los otros 6 sí tienen).
-  - Todos los demás productos ya tienen foto genérica de respaldo (no hay ninguno mostrando el placeholder gris).
+- [x] **NEWYORK TOP / NEWYORKLEGGIN ya no existen como productos separados** (2026-09-28) — se consolidaron en un solo producto publicado, **NEWYORK SET** (id `t5a8m19y`, $899), con sus 3 colores (Azul Gris/Marino, Ivory/Cocoa, Verde/Gris) ya con foto propia. Este punto y el de sus colores sin foto quedan resueltos.
+- [ ] **Color sin foto propia**: **CORE SET** (antes "SET ESSENTIAL", id `a33unpjw`) — color **Agua** sin foto (usa la genérica del producto); sus otros 6 colores sí tienen foto propia.
 - [ ] **Foto de proveedor duplicada entre dos productos distintos**: SOFT FLARE PANTS y ALLURE LEG PANTS usan cada uno su propia foto (archivos distintos en Storage), pero al compararlas visualmente son la misma foto de stock del proveedor (mismo modelo/pose/encuadre) — se ve como si fuera el mismo producto repetido dos veces. Conviene subir una foto propia real para al menos uno de los dos antes de lanzar, para que no parezcan el mismo artículo.
 
 ## Legal (recomendado, no implementado — confirmar con un contador/abogado)
