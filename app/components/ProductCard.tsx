@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Product } from "~/data/products";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
@@ -54,6 +54,15 @@ export function ProductCard({
   );
   const [attempted, setAttempted] = useState(false);
 
+  // Mismo caso que en la página de producto: el stock real es por
+  // combinación color+talla, no por talla sola — si el color cambia y la
+  // talla elegida quedó sin stock en ese color, se limpia.
+  const stockFor = (c: string, s: string) => product.stockByVariant[`${c}|${s}`] ?? 0;
+  useEffect(() => {
+    if (color && size && stockFor(color, size) <= 0) setSize(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color]);
+
   const displayImage =
     (familyColorWithPhoto && product.colorImages?.[familyColorWithPhoto.name]) ||
     product.gallery[0];
@@ -74,7 +83,7 @@ export function ProductCard({
 
   const confirmQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!color || !size) {
+    if (!color || !size || stockFor(color, size) <= 0) {
       setAttempted(true);
       return;
     }
@@ -208,32 +217,46 @@ export function ProductCard({
                       attempted && !size && "outline outline-2 outline-offset-2 outline-clay",
                     )}
                   >
-                    {product.sizes.map((s) => (
-                      <button
-                        key={s}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setSize(s);
-                        }}
-                        aria-pressed={size === s}
-                        className={cn(
-                          "min-w-7 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
-                          size === s
-                            ? "border-espresso bg-espresso text-bone"
-                            : "border-line hover:border-espresso",
-                        )}
-                      >
-                        {s}
-                      </button>
-                    ))}
+                    {product.sizes.map((s) => {
+                      const outOfStock = Boolean(color) && stockFor(color!, s) <= 0;
+                      return (
+                        <button
+                          key={s}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (!outOfStock) setSize(s);
+                          }}
+                          disabled={outOfStock}
+                          aria-pressed={size === s}
+                          title={outOfStock ? `Agotado en ${color}` : undefined}
+                          className={cn(
+                            "min-w-7 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
+                            outOfStock
+                              ? "cursor-not-allowed border-line text-muted/50 line-through"
+                              : size === s
+                                ? "border-espresso bg-espresso text-bone"
+                                : "border-line hover:border-espresso",
+                          )}
+                        >
+                          {s}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
                 <button
                   onClick={confirmQuickAdd}
-                  className="mt-2.5 w-full rounded-full bg-espresso py-2 text-[12px] font-semibold text-bone transition-colors hover:bg-clay"
+                  className={cn(
+                    "mt-2.5 w-full rounded-full py-2 text-[12px] font-semibold transition-colors",
+                    color && size && stockFor(color, size) <= 0
+                      ? "cursor-not-allowed bg-line text-muted"
+                      : "bg-espresso text-bone hover:bg-clay",
+                  )}
                 >
-                  Agregar al carrito
+                  {color && size && stockFor(color, size) <= 0
+                    ? "Agotado en esta combinación"
+                    : "Agregar al carrito"}
                 </button>
               </div>
             ) : (

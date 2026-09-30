@@ -37,6 +37,7 @@ function mapRow(row: ProductRow): Product {
   const colorMap = new Map<string, ColorOption>();
   const stockBySize = new Map<string, number>();
   const skuByVariant: Record<string, string> = {};
+  const stockByVariant: Record<string, number> = {};
 
   for (const v of row.product_variants) {
     if (!colorMap.has(v.color_name)) {
@@ -44,6 +45,8 @@ function mapRow(row: ProductRow): Product {
     }
     stockBySize.set(v.size, (stockBySize.get(v.size) ?? 0) + v.stock);
     if (v.modelo) skuByVariant[`${v.color_name}|${v.size}`] = v.modelo;
+    const variantKey = `${v.color_name}|${v.size}`;
+    stockByVariant[variantKey] = (stockByVariant[variantKey] ?? 0) + v.stock;
   }
 
   const sizes = ALL_SIZES.filter((s) => (stockBySize.get(s) ?? 0) > 0);
@@ -80,6 +83,7 @@ function mapRow(row: ProductRow): Product {
     colorImages: hasColorPhotos ? colorImages : undefined,
     colorGallery: hasColorPhotos ? colorGallery : undefined,
     skuByVariant: Object.keys(skuByVariant).length > 0 ? skuByVariant : undefined,
+    stockByVariant,
     badge: row.badge && VALID_BADGES.has(row.badge) ? (row.badge as Product["badge"]) : undefined,
     isNew: row.is_new,
     isBestseller: row.is_bestseller,

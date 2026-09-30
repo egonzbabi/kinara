@@ -101,6 +101,19 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   const [attempted, setAttempted] = useState(false);
   const sku = color && size ? product.skuByVariant?.[`${color}|${size}`] : undefined;
 
+  // El stock real es por combinación color+talla, no por talla sola (ver
+  // tasks/REQUISITOS.md) — `product.sizes` solo dice qué tallas tienen stock
+  // en ALGÚN color, así que una talla puede mostrarse pero estar agotada para
+  // el color elegido. Si el color cambia y la talla ya elegida quedó sin
+  // stock en ese color, se limpia para no dejar seleccionada una combinación
+  // que no se puede vender.
+  const stockFor = (c: string, s: string) => product.stockByVariant[`${c}|${s}`] ?? 0;
+  useEffect(() => {
+    if (color && size && stockFor(color, size) <= 0) setSize(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color]);
+  const selectedOutOfStock = Boolean(color && size && stockFor(color, size) <= 0);
+
   const colorImage = color ? product.colorImages?.[color] : undefined;
 
   // La galería de fotos (a la izquierda) ya no cambia de color al hacer clic
@@ -140,7 +153,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   }
 
   const onAdd = () => {
-    if (!color || !size) {
+    if (!color || !size || stockFor(color, size) <= 0) {
       setAttempted(true);
       return;
     }
@@ -258,21 +271,28 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                 attempted && !size && "outline outline-2 outline-offset-4 outline-clay",
               )}
             >
-              {product.sizes.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(s)}
-                  aria-pressed={size === s}
-                  className={cn(
-                    "min-w-12 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
-                    size === s
-                      ? "border-espresso bg-espresso text-bone"
-                      : "border-line hover:border-espresso",
-                  )}
-                >
-                  {s}
-                </button>
-              ))}
+              {product.sizes.map((s) => {
+                const outOfStock = Boolean(color) && stockFor(color!, s) <= 0;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => !outOfStock && setSize(s)}
+                    disabled={outOfStock}
+                    aria-pressed={size === s}
+                    title={outOfStock ? `Agotado en ${color}` : undefined}
+                    className={cn(
+                      "min-w-12 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
+                      outOfStock
+                        ? "cursor-not-allowed border-line text-muted/50 line-through"
+                        : size === s
+                          ? "border-espresso bg-espresso text-bone"
+                          : "border-line hover:border-espresso",
+                    )}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -289,17 +309,24 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               size="lg"
               full
               onClick={onAdd}
-              aria-disabled={missingSelection}
-              className={cn(missingSelection && "is-inactive")}
+              aria-disabled={missingSelection || selectedOutOfStock}
+              className={cn((missingSelection || selectedOutOfStock) && "is-inactive")}
             >
-              {missingSelection
-                ? "Selecciona color y talla"
-                : `Añadir al carrito de compras · ${formatPrice(product.price)}`}
+              {selectedOutOfStock
+                ? "Agotado en esta combinación"
+                : missingSelection
+                  ? "Selecciona color y talla"
+                  : `Añadir al carrito de compras · ${formatPrice(product.price)}`}
             </Button>
           </div>
           {attempted && missingSelection && (
             <p className="mt-2 text-[13px] font-medium text-clay">
               Selecciona color y talla para continuar.
+            </p>
+          )}
+          {attempted && !missingSelection && selectedOutOfStock && (
+            <p className="mt-2 text-[13px] font-medium text-clay">
+              Esa combinación de color y talla está agotada.
             </p>
           )}
 

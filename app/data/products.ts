@@ -22,6 +22,10 @@ export type Product = {
   colorGallery?: Record<string, string[]>;
   /** SKU por combinación color+talla ("Negro|M" -> "JV014-NEGRO-M"), cuando existe. Ver tasks/040-sku-detalle-producto.md. */
   skuByVariant?: Record<string, string>;
+  /** Stock por combinación color+talla ("Negro|M" -> 3). `product.sizes` solo
+   * dice qué tallas tienen stock en ALGÚN color — esto es lo único que dice
+   * si una combinación específica sí se puede vender. */
+  stockByVariant: Record<string, number>;
   badge?: "Nuevo" | "Best-seller" | "Oferta" | "Edición" | "Últimas unidades";
   isNew?: boolean;
   isBestseller?: boolean;
