@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { MIN_SHIPPING_RATE_MXN } from "./shipping";
 
 const BASE_URL = process.env.SKYDROPX_BASE_URL;
 const CLIENT_ID = process.env.SKYDROPX_CLIENT_ID;
@@ -197,6 +198,10 @@ async function pollQuotation(id: string): Promise<ShippingRate[]> {
           currency: r.currency_code,
           days: r.days,
         }))
+        // Red de seguridad contra tarifas mal configuradas del lado del
+        // proveedor (ver caso PuntoPost $1.19) — nunca se le ofrece al
+        // cliente ni se acepta al validar el pago.
+        .filter((r) => r.total >= MIN_SHIPPING_RATE_MXN)
         .sort((a, b) => a.total - b.total);
     }
 
