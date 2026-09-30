@@ -1,11 +1,11 @@
 import type { Route } from "./+types/api.create-checkout-session";
-import { getStripe, getOrCreateWelcomeCoupon } from "~/lib/stripe.server";
+import { getStripe } from "~/lib/stripe.server";
 import { supabaseAdmin } from "~/lib/supabase.server";
 import { chunkMetadata } from "~/lib/orders.server";
 import { estimateParcel, SHIPPING_FEE_MXN } from "~/lib/shipping";
 import { getShippingRates, type ShippingAddress } from "~/lib/skydropx.server";
 import { validateDiscountCode } from "~/lib/discount-signups.server";
-import { DISCOUNT_MIN_SUBTOTAL_MXN } from "~/lib/discount-constants";
+import { DISCOUNT_MIN_SUBTOTAL_MXN, DISCOUNT_PERCENT } from "~/lib/discount-constants";
 import { formatPrice } from "~/lib/formatPrice";
 import { sendOwnerAlert } from "~/lib/resend.server";
 import type { CartItem } from "~/context/CartContext";
@@ -180,7 +180,7 @@ export async function action({ request }: Route.ActionArgs) {
   // compra, código sin usar/vencido) contra el subtotal de PRODUCTOS que ya se
   // recalculó arriba — nunca contra lo que mande el cliente, ni contra el total
   // con envío incluido (ver tarea 070).
-  let discountCouponId: string | null = null;
+  let discountApplies = false;
   const discountCode = body.discountCode?.trim();
   if (discountCode) {
     if (subtotal < DISCOUNT_MIN_SUBTOTAL_MXN) {
@@ -195,12 +195,7 @@ export async function action({ request }: Route.ActionArgs) {
     if (!validation.valid) {
       return Response.json({ error: validation.error }, { status: 400 });
     }
-    try {
-      discountCouponId = await getOrCreateWelcomeCoupon();
-    } catch (err) {
-      console.error("[checkout] error creando/obteniendo el coupon de bienvenida:", err);
-      return Response.json({ error: "No se pudo aplicar el código, intenta de nuevo." }, { status: 500 });
-    }
+    discountApplies = true;
   }
 
   const itemsJson = JSON.stringify(trustedItems);
@@ -214,8 +209,15 @@ export async function action({ request }: Route.ActionArgs) {
     shipping_carrier: shippingCarrier,
     shipping_provider_name: shippingProviderName ?? "",
     shipping_service_code: shippingServiceCode ?? "",
-    discount_code: discountCode && discountCouponId ? discountCode.toUpperCase() : "",
+    discount_code: discountApplies && discountCode ? discountCode.toUpperCase() : "",
   };
+
+  // El 10% de bienvenida aplica solo al precio de los productos, nunca al
+  // envío (el copy del sitio ya dice "en productos, sin contar el envío") —
+  // por eso se descuenta directo en cada line_item de producto en vez de usar
+  // un coupon de Stripe a nivel de sesión, que descontaría todas las líneas
+  // por igual, incluida la de envío que se agrega más abajo.
+  const discountFactor = discountApplies ? 1 - DISCOUNT_PERCENT / 100 : 1;
 
   const line_items: Array<{
     price_data: {
@@ -228,7 +230,7 @@ export async function action({ request }: Route.ActionArgs) {
     price_data: {
       currency: "mxn",
       product_data: { name: `${i.productName} · ${i.colorName} · Talla ${i.size}` },
-      unit_amount: Math.round(i.price * 100),
+      unit_amount: Math.round(i.price * 100 * discountFactor),
     },
     quantity: i.quantity,
   }));
@@ -254,7 +256,6 @@ export async function action({ request }: Route.ActionArgs) {
       cancel_url: `${origin}/checkout/cancelado`,
       metadata,
       payment_intent_data: { metadata },
-      ...(discountCouponId ? { discounts: [{ coupon: discountCouponId }] } : {}),
     });
     return Response.json({ url: session.url });
   } catch (err) {
