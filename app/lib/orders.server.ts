@@ -264,6 +264,7 @@ export async function ensureOrderFromCheckoutSession(
     subtotal,
     shippingFee,
     total,
+    discountCode,
     shippingAddress: shippingAddress
       ? {
           street1: shippingAddress.street1,

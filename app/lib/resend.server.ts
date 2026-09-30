@@ -136,12 +136,28 @@ function buildOrderConfirmationHtml(params: {
   subtotal: number;
   shippingFee: number;
   total: number;
+  discountCode?: string | null;
   shippingAddress: OrderShippingAddress | null;
   shippingCarrier: string | null;
   shippingDays: number | null;
 }): string {
-  const { orderId, customerName, items, subtotal, shippingFee, total, shippingAddress, shippingCarrier, shippingDays } =
-    params;
+  const {
+    orderId,
+    customerName,
+    items,
+    subtotal,
+    shippingFee,
+    total,
+    discountCode,
+    shippingAddress,
+    shippingCarrier,
+    shippingDays,
+  } = params;
+  // El cupón de Stripe descuenta sobre TODA la sesión (productos + envío como
+  // línea aparte, ver api.create-checkout-session.tsx), así que el monto del
+  // descuento no es un dato guardado aparte — se deriva de lo que falta entre
+  // subtotal+envío (antes del cupón) y total (lo que Stripe realmente cobró).
+  const discountAmount = discountCode ? subtotal + shippingFee - total : 0;
   const firstName = customerName.split(" ")[0] || customerName;
   const date = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "long", year: "numeric" }).format(
     new Date(),
@@ -249,6 +265,14 @@ function buildOrderConfirmationHtml(params: {
                     <td style="padding:6px 0;font-size:14px;color:${MUTED};">Envío</td>
                     <td style="padding:6px 0;text-align:right;font-size:14px;color:${ESPRESSO};">${formatPrice(shippingFee)}</td>
                   </tr>
+                  ${
+                    discountAmount > 0
+                      ? `<tr>
+                    <td style="padding:6px 0;font-size:14px;color:${MUTED};">Descuento (${escapeHtml(discountCode ?? "")})</td>
+                    <td style="padding:6px 0;text-align:right;font-size:14px;color:${CLAY};">-${formatPrice(discountAmount)}</td>
+                  </tr>`
+                      : ""
+                  }
                   <tr>
                     <td style="padding:14px 0 0;border-top:1px solid ${LINE};font-size:16px;color:${ESPRESSO};font-weight:700;">Total</td>
                     <td style="padding:14px 0 0;border-top:1px solid ${LINE};text-align:right;font-size:18px;color:${CLAY};font-weight:700;">${formatPrice(total)}</td>
@@ -303,6 +327,7 @@ export async function sendOrderConfirmationEmail(params: {
   subtotal: number;
   shippingFee: number;
   total: number;
+  discountCode?: string | null;
   shippingAddress: OrderShippingAddress | null;
   shippingCarrier: string | null;
   shippingDays: number | null;

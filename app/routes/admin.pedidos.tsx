@@ -265,6 +265,12 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
         <dl className="space-y-1 text-sm">
           <Row label="Subtotal" value={formatPrice(order.subtotal)} />
           <Row label="Envío" value={formatPrice(order.shippingFee)} />
+          {order.discountCode && (
+            <Row
+              label="Descuento aplicado"
+              value={`-${formatPrice(order.subtotal + order.shippingFee - order.total)}`}
+            />
+          )}
           <Row label="Total" value={formatPrice(order.total)} />
           <Row label="Moneda" value={order.currency.toUpperCase()} />
           {order.discountCode && <Row label="Código de descuento" value={order.discountCode} />}
