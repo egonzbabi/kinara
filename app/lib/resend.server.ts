@@ -347,6 +347,9 @@ export async function sendOrderConfirmationEmail(params: {
     resend.emails.send({
       from,
       to: params.customerEmail,
+      // Copia oculta al correo del negocio para que el dueño pueda ver qué se
+      // le está mandando a los clientes — el cliente nunca ve este destinatario.
+      ...(process.env.CONTACT_EMAIL_TO ? { bcc: process.env.CONTACT_EMAIL_TO } : {}),
       subject: `Pedido confirmado · ${params.orderId}`,
       html: buildOrderConfirmationHtml(params),
     }),
@@ -375,6 +378,9 @@ export async function sendWelcomeDiscountEmail(params: {
     resend.emails.send({
       from,
       to: params.email,
+      // Copia oculta al correo del negocio para que el dueño pueda ver qué se
+      // le está mandando a los clientes — el cliente nunca ve este destinatario.
+      ...(process.env.CONTACT_EMAIL_TO ? { bcc: process.env.CONTACT_EMAIL_TO } : {}),
       subject: `Tu código de ${DISCOUNT_PERCENT}% de descuento · KINARA`,
       html: buildWelcomeDiscountHtml(params),
     }),
