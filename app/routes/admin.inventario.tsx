@@ -6,7 +6,6 @@ import { listInventory } from "~/lib/admin-catalog.server";
 import { SIZE_ORDER, groupByProduct } from "~/lib/admin-inventory-groups";
 import { baseSkuFrom } from "~/lib/slug";
 import { formatPrice } from "~/lib/formatPrice";
-import { productImage } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
 
 export function meta(_: Route.MetaArgs) {
@@ -166,7 +165,7 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
               <div className="flex flex-wrap items-center gap-4 border-b border-line p-4">
                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-sand">
                   <img
-                    src={productImage(g.photoUrl, { width: 128, height: 128 })}
+                    src={g.photoUrl}
                     alt={g.productName}
                     className="h-full w-full object-cover"
                   />
@@ -242,7 +241,7 @@ export default function AdminInventario({ loaderData }: Route.ComponentProps) {
                           <div className="flex items-center gap-2.5">
                             <div className="h-7 w-7 shrink-0 overflow-hidden rounded-md bg-sand">
                               <img
-                                src={productImage(c.photoUrl, { width: 56, height: 56 })}
+                                src={c.photoUrl}
                                 alt={c.colorName}
                                 className="h-full w-full object-cover"
                               />

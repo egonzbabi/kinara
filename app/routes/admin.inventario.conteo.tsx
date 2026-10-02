@@ -11,7 +11,6 @@ import {
 } from "~/lib/admin-inventory-counts.server";
 import { SIZE_ORDER } from "~/lib/admin-inventory-groups";
 import { baseSkuFrom } from "~/lib/slug";
-import { productImage } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
 
 export function meta(_: Route.MetaArgs) {
@@ -338,7 +337,7 @@ export default function AdminInventarioConteo({ loaderData }: Route.ComponentPro
               <div className="flex flex-wrap items-center gap-4 border-b border-line p-4">
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-sand">
                   <img
-                    src={productImage(g.photoUrl, { width: 112, height: 112 })}
+                    src={g.photoUrl}
                     alt={g.productName}
                     className="h-full w-full object-cover"
                   />
@@ -384,7 +383,7 @@ export default function AdminInventarioConteo({ loaderData }: Route.ComponentPro
                           <div className="flex items-center gap-2.5">
                             <div className="h-7 w-7 shrink-0 overflow-hidden rounded-md bg-sand">
                               <img
-                                src={productImage(c.photoUrl, { width: 56, height: 56 })}
+                                src={c.photoUrl}
                                 alt={c.colorName}
                                 className="h-full w-full object-cover"
                               />
