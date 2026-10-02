@@ -7,7 +7,9 @@ import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
 import { getColorFamily } from "~/lib/colorFamilies";
 
-const CARD_WIDTHS = [400, 600, 900];
+// Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
+// "Image Transformations" de Supabase.
+const CARD_WIDTHS = [400, 900];
 const CARD_SIZES = "(min-width: 1024px) 23vw, (min-width: 640px) 30vw, 46vw";
 
 export function ProductCard({
@@ -112,7 +114,7 @@ export function ProductCard({
       >
         <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-bone">
           <img
-            src={productImage(displayImage, { width: 600, height: 750 })}
+            src={productImage(displayImage, { width: 400, height: 500 })}
             srcSet={productSrcSet(displayImage, CARD_WIDTHS, { heightRatio: 1.25 })}
             sizes={CARD_SIZES}
             alt={matchingColor ? `${product.name} — ${matchingColor}` : product.name}
@@ -125,7 +127,7 @@ export function ProductCard({
           />
           {hasSecond && (
             <img
-              src={productImage(product.gallery[1], { width: 600, height: 750 })}
+              src={productImage(product.gallery[1], { width: 400, height: 500 })}
               srcSet={productSrcSet(product.gallery[1], CARD_WIDTHS, { heightRatio: 1.25 })}
               sizes={CARD_SIZES}
               alt=""

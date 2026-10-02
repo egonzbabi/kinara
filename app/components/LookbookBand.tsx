@@ -4,7 +4,9 @@ import { LOOKS } from "~/data/looks";
 import { useDragScroll } from "~/hooks/useDragScroll";
 import { productImage, productSrcSet } from "~/lib/productImage";
 
-const LOOK_WIDTHS = [420, 640, 840];
+// Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
+// "Image Transformations" de Supabase.
+const LOOK_WIDTHS = [420, 840];
 
 export function LookbookBand() {
   const railRef = useRef<HTMLDivElement>(null);
@@ -37,7 +39,7 @@ export function LookbookBand() {
             <figure>
               <div className="aspect-[3/4] overflow-hidden">
                 <img
-                  src={productImage(look.image, { width: 640, height: 853 })}
+                  src={productImage(look.image, { width: 420, height: 560 })}
                   srcSet={productSrcSet(look.image, LOOK_WIDTHS, { heightRatio: 4 / 3 })}
                   sizes="(min-width: 1024px) 26vw, (min-width: 768px) 32vw, (min-width: 640px) 44vw, 72vw"
                   alt={look.name}

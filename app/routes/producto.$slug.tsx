@@ -144,7 +144,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   // Precarga la imagen inicial de la galería (LCP de esta ruta) — sin esto el
   // navegador la descubre recién al parsear el <img> en el body.
   if (galleryItems[0]) {
-    preload(productImage(galleryItems[0].src, { width: 800, height: 1000 }), {
+    preload(productImage(galleryItems[0].src, { width: 500, height: 625 }), {
       as: "image",
       imageSrcSet: productSrcSet(galleryItems[0].src, MAIN_WIDTHS, { heightRatio: 1.25 }),
       imageSizes: MAIN_SIZES,

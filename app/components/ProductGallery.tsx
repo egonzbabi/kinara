@@ -2,7 +2,11 @@ import { useState } from "react";
 import { cn } from "~/lib/cn";
 import { productImage, productSrcSet } from "~/lib/productImage";
 
-export const MAIN_WIDTHS = [500, 800, 1100];
+// Solo 2 anchos (antes 3): cada combinación de ancho/alto que se le pide al
+// endpoint de transformación de imágenes de Supabase cuenta contra su cuota
+// mensual de "Image Transformations" — con el catálogo completo, 3 anchos por
+// foto se come esa cuota muy rápido (ver aviso de Supabase, 2026-10-01).
+export const MAIN_WIDTHS = [500, 1100];
 // La miniatura ahora vive siempre al lado de la foto principal (columna de
 // ~64px + gap), incluso en mobile — ya no ocupa el 100vw completo como
 // cuando las miniaturas quedaban abajo. `calc()` resta esa columna + el
@@ -87,7 +91,7 @@ export function ProductGallery({
         )}
       >
         <img
-          src={productImage(current ?? "", { width: 800, height: 1000 })}
+          src={productImage(current ?? "", { width: 500, height: 625 })}
           srcSet={productSrcSet(current ?? "", MAIN_WIDTHS, { heightRatio: 1.25 })}
           sizes={MAIN_SIZES}
           alt={alt}

@@ -57,7 +57,9 @@ const EDITORIAL_PHOTOS = [
     alt: "Cinco mujeres de KINARA de distintas edades posando juntas",
   },
 ] as const;
-const EDITORIAL_WIDTHS = [480, 700, 1100];
+// Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
+// "Image Transformations" de Supabase.
+const EDITORIAL_WIDTHS = [480, 1100];
 const EDITORIAL_INTERVAL_MS = 4500;
 
 function EditorialCarousel() {

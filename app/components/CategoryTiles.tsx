@@ -2,7 +2,9 @@ import { Link } from "react-router";
 import { CATEGORY_TILES } from "~/data/categories";
 import { productImage, productSrcSet } from "~/lib/productImage";
 
-const TILE_WIDTHS = [320, 480, 640];
+// Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
+// "Image Transformations" de Supabase.
+const TILE_WIDTHS = [320, 640];
 
 export function CategoryTiles() {
   return (
@@ -32,7 +34,7 @@ export function CategoryTiles() {
           >
             <div className="aspect-[3/4] overflow-hidden md:aspect-[4/5]">
               <img
-                src={productImage(tile.image, { width: 480, height: 600 })}
+                src={productImage(tile.image, { width: 320, height: 400 })}
                 srcSet={productSrcSet(tile.image, TILE_WIDTHS, { heightRatio: 1.25 })}
                 sizes="(min-width: 768px) 32vw, (min-width: 640px) 46vw, 92vw"
                 alt={`Tipo ${tile.title}`}
