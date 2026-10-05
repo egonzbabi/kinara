@@ -3,7 +3,12 @@ import { Link, redirect } from "react-router";
 import type Stripe from "stripe";
 import type { Route } from "./+types/checkout.success";
 import { getStripe } from "~/lib/stripe.server";
-import { ensureOrderFromCheckoutSession, type OrderItem } from "~/lib/orders.server";
+import { getOrCapturePaypalOrder } from "~/lib/paypal.server";
+import {
+  ensureOrderFromCheckoutSession,
+  ensureOrderFromPaypalCapture,
+  type OrderItem,
+} from "~/lib/orders.server";
 import { supabaseAdmin } from "~/lib/supabase.server";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
@@ -23,24 +28,49 @@ export function meta(_: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const sessionId = url.searchParams.get("session_id");
-  if (!sessionId) throw redirect("/tienda");
+  const paypalOrderId = url.searchParams.get("paypal_order_id");
+  if (!sessionId && !paypalOrderId) throw redirect("/tienda");
 
-  let session: Stripe.Checkout.Session;
-  try {
-    const stripe = getStripe();
-    session = await stripe.checkout.sessions.retrieve(sessionId);
-  } catch (err) {
-    console.error("[checkout.success] no se pudo recuperar la sesión:", err);
-    throw redirect("/checkout/cancelado");
+  let result: { orderId: string; created: boolean } | null;
+
+  if (sessionId) {
+    let session: Stripe.Checkout.Session;
+    try {
+      const stripe = getStripe();
+      session = await stripe.checkout.sessions.retrieve(sessionId);
+    } catch (err) {
+      console.error("[checkout.success] no se pudo recuperar la sesión:", err);
+      throw redirect("/checkout/cancelado");
+    }
+
+    // El query param por sí solo nunca autoriza la pantalla de éxito — se verifica
+    // el estado real de la sesión contra Stripe server-side.
+    if (session.payment_status !== "paid") {
+      return { status: "pending" as const, orderId: null, items: [] as OrderItem[], total: 0 };
+    }
+    result = await ensureOrderFromCheckoutSession(session);
+  } else {
+    // Igual que arriba con Stripe: el query param no autoriza nada por sí
+    // solo — se captura/confirma el pago contra la propia API de PayPal antes
+    // de mostrar la pantalla de éxito. `getOrCapturePaypalOrder` es idempotente
+    // (si ya se había capturado, ej. recarga de esta página, solo lee el
+    // resultado en vez de intentar capturar una segunda vez).
+    let capture: Awaited<ReturnType<typeof getOrCapturePaypalOrder>>;
+    try {
+      capture = await getOrCapturePaypalOrder(paypalOrderId!);
+    } catch (err) {
+      console.error("[checkout.success] no se pudo capturar la orden de PayPal:", err);
+      throw redirect("/checkout/cancelado");
+    }
+    if (capture.status !== "COMPLETED" || !capture.captureId || !capture.customId) {
+      return { status: "pending" as const, orderId: null, items: [] as OrderItem[], total: 0 };
+    }
+    result = await ensureOrderFromPaypalCapture({
+      captureId: capture.captureId,
+      pendingCheckoutId: capture.customId,
+    });
   }
 
-  // El query param por sí solo nunca autoriza la pantalla de éxito — se verifica
-  // el estado real de la sesión contra Stripe server-side.
-  if (session.payment_status !== "paid") {
-    return { status: "pending" as const, orderId: null, items: [] as OrderItem[], total: 0 };
-  }
-
-  const result = await ensureOrderFromCheckoutSession(session);
   if (!result) {
     return { status: "pending" as const, orderId: null, items: [] as OrderItem[], total: 0 };
   }

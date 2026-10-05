@@ -6,6 +6,7 @@ import { formatPrice } from "~/lib/formatPrice";
 import { cn } from "~/lib/cn";
 import { seoMeta } from "~/lib/seo";
 import { trackBeginCheckout } from "~/lib/analytics";
+import { PayPalButton } from "~/components/PayPalButton";
 
 // noindex: página transitoria y específica del carrito de cada visitante,
 // no contenido a posicionar (tarea 003, SEO técnico).
@@ -58,6 +59,11 @@ const inputClass =
   "mt-1.5 w-full rounded-lg border border-line bg-bone px-3 py-2.5 text-sm text-espresso focus:border-clay focus:outline-none";
 const labelClass = "text-sm font-medium text-espresso";
 
+// Mientras no haya credenciales de PayPal cargadas (tarea 131 — hoy solo
+// existen en sandbox, en local), el botón ni se renderiza en producción, en
+// vez de mostrarle a un cliente real un error de "no configurado".
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined;
+
 export default function Checkout() {
   const { items, subtotal, hydrated } = useCart();
   const navigate = useNavigate();
@@ -75,6 +81,7 @@ export default function Checkout() {
 
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
+  const [paypalError, setPaypalError] = useState<string | null>(null);
   const [discountCode, setDiscountCode] = useState("");
 
   useEffect(() => {
@@ -385,12 +392,38 @@ export default function Checkout() {
             disabled={!selectedRate || payLoading}
             className="btn btn-clay mt-5 w-full sm:w-auto"
           >
-            {payLoading ? "Redirigiendo…" : "Pagar"}
+            {payLoading ? "Redirigiendo…" : "Pagar con tarjeta u OXXO"}
           </button>
           {payError && (
             <p className="mt-2 rounded-lg bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">
               {payError}
             </p>
+          )}
+
+          {selectedRate && PAYPAL_CLIENT_ID && (
+            <div className="mt-5 max-w-xs">
+              <div className="mb-3 flex items-center gap-3 text-[13px] text-muted">
+                <span className="h-px flex-1 bg-line" />
+                o
+                <span className="h-px flex-1 bg-line" />
+              </div>
+              <PayPalButton
+                items={items}
+                address={address}
+                shipping={{
+                  providerName: selectedRate.providerName,
+                  serviceCode: selectedRate.serviceCode,
+                  total: selectedRate.total,
+                }}
+                discountCode={discountCode}
+                onError={setPaypalError}
+              />
+              {paypalError && (
+                <p className="mt-2 rounded-lg bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">
+                  {paypalError}
+                </p>
+              )}
+            </div>
           )}
         </section>
       )}

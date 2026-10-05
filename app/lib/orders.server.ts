@@ -113,17 +113,19 @@ async function restoreStockForItems(items: OrderItem[], concept: string) {
 
 /**
  * Cancela el pedido y restaura el stock de sus artículos — llamado desde el
- * webhook de Stripe ante un reembolso total. Idempotente: si el pedido ya
- * estaba cancelado (el webhook puede reintentar/duplicarse), no vuelve a
- * restaurar stock una segunda vez.
+ * webhook de Stripe o de PayPal ante un reembolso total. Idempotente: si el
+ * pedido ya estaba cancelado (el webhook puede reintentar/duplicarse), no
+ * vuelve a restaurar stock una segunda vez.
  */
 export async function cancelOrderAndRestoreStock(
-  stripeSessionId: string,
+  lookup: { stripeSessionId: string } | { paypalOrderId: string },
 ): Promise<{ orderId: string; alreadyCancelled: boolean } | null> {
+  const column = "stripeSessionId" in lookup ? "stripe_session_id" : "paypal_order_id";
+  const value = "stripeSessionId" in lookup ? lookup.stripeSessionId : lookup.paypalOrderId;
   const { data: order, error } = await supabaseAdmin
     .from("orders")
     .select("id, items, status")
-    .eq("stripe_session_id", stripeSessionId)
+    .eq(column, value)
     .maybeSingle();
   // Un error de verdad (DB caída, timeout) debe propagarse para que el
   // webhook responda 500 y Stripe reintente — nunca tratarlo igual que
@@ -142,6 +144,163 @@ export async function cancelOrderAndRestoreStock(
   await restoreStockForItems(items, `Reembolso total del pedido ${order.id}`);
 
   return { orderId: order.id, alreadyCancelled: false };
+}
+
+export interface PendingCheckoutAddress {
+  name: string;
+  email: string;
+  phone: string;
+  street1: string;
+  postalCode: string;
+  areaLevel1: string;
+  areaLevel2: string;
+  areaLevel3: string;
+}
+
+export interface PendingCheckoutPayload {
+  items: OrderItem[];
+  address: PendingCheckoutAddress;
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  shippingCarrier: string;
+  shippingDays: number | null;
+  shippingProviderName: string | null;
+  shippingServiceCode: string | null;
+  discountCode: string | null;
+}
+
+/**
+ * Guarda el snapshot del carrito ya validado server-side mientras el
+ * comprador aprueba el pago en PayPal (ver checkout-validation.server.ts) —
+ * equivalente a lo que para Stripe viaja en la metadata de la Checkout
+ * Session. Se referencia desde PayPal vía `purchase_units[0].custom_id`.
+ */
+export async function createPendingCheckout(payload: PendingCheckoutPayload): Promise<string | null> {
+  const { data, error } = await supabaseAdmin
+    .from("pending_checkouts")
+    .insert({ payload })
+    .select("id")
+    .single();
+  if (error || !data) {
+    console.error("[orders] no se pudo guardar pending_checkout:", error);
+    return null;
+  }
+  return data.id as string;
+}
+
+/**
+ * Crea el pedido a partir de una captura de pago de PayPal ya completada
+ * (`status: "COMPLETED"`), si todavía no existe. Mismo patrón de
+ * deduplicación que `ensureOrderFromCheckoutSession`: índice único en
+ * `orders.paypal_order_id` + check-antes-de-insertar + catch de la violación
+ * de unicidad — el webhook y la llamada de captura desde el navegador pueden
+ * llegar casi al mismo tiempo.
+ */
+export async function ensureOrderFromPaypalCapture(params: {
+  captureId: string;
+  pendingCheckoutId: string;
+}): Promise<{ orderId: string; created: boolean } | null> {
+  const { data: existing } = await supabaseAdmin
+    .from("orders")
+    .select("id")
+    .eq("paypal_order_id", params.captureId)
+    .maybeSingle();
+  if (existing) return { orderId: existing.id, created: false };
+
+  const { data: pending, error: pendingError } = await supabaseAdmin
+    .from("pending_checkouts")
+    .select("payload")
+    .eq("id", params.pendingCheckoutId)
+    .maybeSingle();
+  if (pendingError || !pending) {
+    console.error(
+      `[orders] no se encontró pending_checkout ${params.pendingCheckoutId} para la captura de PayPal ${params.captureId}:`,
+      pendingError,
+    );
+    return null;
+  }
+
+  const payload = pending.payload as PendingCheckoutPayload;
+  const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
+
+  const { error: insertError } = await supabaseAdmin.from("orders").insert({
+    id: orderId,
+    customer_name: payload.address.name,
+    customer_email: payload.address.email,
+    customer_phone: payload.address.phone || null,
+    items: payload.items,
+    subtotal: payload.subtotal,
+    shipping_fee: payload.shippingFee,
+    total: payload.total,
+    currency: "mxn",
+    status: "processing",
+    shipping_address: payload.address,
+    shipping_carrier: payload.shippingCarrier,
+    shipping_days: payload.shippingDays,
+    shipping_provider_name: payload.shippingProviderName,
+    shipping_service_code: payload.shippingServiceCode,
+    skydropx_shipment_id: null,
+    tracking_number: null,
+    tracking_url: null,
+    label_url: null,
+    stripe_session_id: null,
+    payment_provider: "paypal",
+    paypal_order_id: params.captureId,
+    discount_code: payload.discountCode,
+  });
+
+  if (insertError) {
+    if (isUniqueViolation(insertError)) {
+      const { data: winner } = await supabaseAdmin
+        .from("orders")
+        .select("id")
+        .eq("paypal_order_id", params.captureId)
+        .maybeSingle();
+      if (winner) return { orderId: winner.id, created: false };
+    }
+    console.error("[orders] no se pudo crear la orden (paypal):", insertError);
+    return null;
+  }
+
+  await decrementStockForItems(payload.items);
+
+  if (payload.discountCode) {
+    await markDiscountCodeUsed(payload.discountCode);
+  }
+
+  const emailResult = await sendOrderConfirmationEmail({
+    orderId,
+    customerName: payload.address.name,
+    customerEmail: payload.address.email,
+    items: payload.items,
+    subtotal: payload.subtotal,
+    shippingFee: payload.shippingFee,
+    total: payload.total,
+    discountCode: payload.discountCode,
+    shippingAddress: {
+      street1: payload.address.street1,
+      postalCode: payload.address.postalCode,
+      areaLevel1: payload.address.areaLevel1,
+      areaLevel2: payload.address.areaLevel2,
+      areaLevel3: payload.address.areaLevel3,
+    },
+    shippingCarrier: payload.shippingCarrier,
+    shippingDays: payload.shippingDays,
+  });
+  if (!emailResult.sent) {
+    console.error(`[orders] correo de confirmación no enviado para ${orderId}:`, emailResult.error);
+  }
+
+  const itemsSummary = payload.items
+    .map((i) => `${i.quantity}x ${i.productName} (${i.colorName}, ${i.size})`)
+    .join(", ");
+  await sendOwnerAlert({
+    subject: `🛍️ Pedido nuevo (PayPal) — ${orderId} — ${formatPrice(payload.total)}`,
+    text: `${payload.address.name} (${payload.address.email}) acaba de comprar con PayPal:\n\n${itemsSummary}\n\nSubtotal: ${formatPrice(payload.subtotal)}\nEnvío: ${formatPrice(payload.shippingFee)}\nTotal: ${formatPrice(payload.total)}\n\nPedido: ${orderId}`,
+  });
+
+  return { orderId, created: true };
 }
 
 async function decrementStockForItems(items: OrderItem[]) {
@@ -232,6 +391,8 @@ export async function ensureOrderFromCheckoutSession(
     tracking_url: null,
     label_url: null,
     stripe_session_id: session.id,
+    payment_provider: "stripe",
+    paypal_order_id: null,
     discount_code: discountCode,
   });
 

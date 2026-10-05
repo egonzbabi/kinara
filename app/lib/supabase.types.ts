@@ -110,15 +110,34 @@ export type Database = {
           tracking_number: string | null;
           tracking_url: string | null;
           label_url: string | null;
-          stripe_session_id: string;
+          stripe_session_id: string | null;
+          payment_provider: "stripe" | "paypal";
+          paypal_order_id: string | null;
           discount_code: string | null;
           created_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["orders"]["Row"], "created_at" | "status"> & {
+        Insert: Omit<
+          Database["public"]["Tables"]["orders"]["Row"],
+          "created_at" | "status" | "payment_provider"
+        > & {
           created_at?: string;
           status?: Database["public"]["Tables"]["orders"]["Row"]["status"];
+          payment_provider?: Database["public"]["Tables"]["orders"]["Row"]["payment_provider"];
         };
         Update: Partial<Database["public"]["Tables"]["orders"]["Insert"]>;
+        Relationships: [];
+      };
+      pending_checkouts: {
+        Row: {
+          id: string;
+          payload: unknown;
+          created_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["pending_checkouts"]["Row"], "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["pending_checkouts"]["Insert"]>;
         Relationships: [];
       };
       postal_codes: {

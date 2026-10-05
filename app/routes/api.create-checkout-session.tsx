@@ -1,27 +1,10 @@
 import type { Route } from "./+types/api.create-checkout-session";
 import { getStripe } from "~/lib/stripe.server";
-import { supabaseAdmin } from "~/lib/supabase.server";
 import { chunkMetadata } from "~/lib/orders.server";
-import { estimateParcel, SHIPPING_FEE_MXN } from "~/lib/shipping";
-import { getShippingRates, type ShippingAddress } from "~/lib/skydropx.server";
-import { validateDiscountCode } from "~/lib/discount-signups.server";
-import { DISCOUNT_MIN_SUBTOTAL_MXN, DISCOUNT_PERCENT } from "~/lib/discount-constants";
+import { validateCheckout, type CheckoutRequest } from "~/lib/checkout-validation.server";
+import { DISCOUNT_PERCENT } from "~/lib/discount-constants";
 import { formatPrice } from "~/lib/formatPrice";
 import { sendOwnerAlert } from "~/lib/resend.server";
-import type { CartItem } from "~/context/CartContext";
-
-interface ChosenShipping {
-  providerName: string;
-  serviceCode: string;
-  total: number;
-}
-
-interface CheckoutRequest {
-  items: CartItem[];
-  address: ShippingAddress;
-  shipping: ChosenShipping;
-  discountCode?: string;
-}
 
 export async function action({ request }: Route.ActionArgs) {
   if (request.method !== "POST") {
@@ -35,171 +18,24 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ error: "Cuerpo de la solicitud inválido" }, { status: 400 });
   }
 
-  const items = body.items;
-  const address = body.address;
-  const shipping = body.shipping;
-  if (!items || items.length === 0) {
-    return Response.json({ error: "El carrito está vacío" }, { status: 400 });
+  const result = await validateCheckout(body);
+  if (!result.ok) {
+    return Response.json({ error: result.error }, { status: result.status });
   }
-  if (!address || !shipping || !shipping.providerName || !shipping.serviceCode) {
-    return Response.json({ error: "Faltan datos de envío" }, { status: 400 });
-  }
-
-  for (const item of items) {
-    if (
-      !item.productId ||
-      !item.color ||
-      !item.size ||
-      !Number.isInteger(item.qty) ||
-      item.qty < 1 ||
-      item.qty > 50
-    ) {
-      return Response.json({ error: "Cantidad o datos de línea inválidos" }, { status: 400 });
-    }
-  }
-
-  // ── Precio y stock confiables: el carrito vive en el navegador, así que
-  // nunca se confía en item.price — se recalcula todo contra Supabase.
-  const productIds = Array.from(new Set(items.map((i) => i.productId)));
-  const { data: products, error: productsError } = await supabaseAdmin
-    .from("products")
-    .select("id, name, price")
-    .in("id", productIds);
-  if (productsError) {
-    console.error("[checkout] error consultando products:", productsError);
-    return Response.json({ error: "No se pudo validar el carrito" }, { status: 500 });
-  }
-  const productById = new Map((products ?? []).map((p) => [p.id, p]));
-
-  const { data: variants, error: variantsError } = await supabaseAdmin
-    .from("product_variants")
-    .select("product_id, color_name, size, stock, modelo")
-    .in("product_id", productIds);
-  if (variantsError) {
-    console.error("[checkout] error consultando product_variants:", variantsError);
-    return Response.json({ error: "No se pudo validar el carrito" }, { status: 500 });
-  }
-
-  const variantByKey = new Map(
-    (variants ?? []).map((v) => [`${v.product_id}|${v.color_name}|${v.size}`, v]),
-  );
-
-  // Suma cantidades repetidas del mismo producto+color+talla antes de comparar contra stock.
-  const requestedByKey = new Map<string, number>();
-  for (const item of items) {
-    const key = `${item.productId}|${item.color}|${item.size}`;
-    requestedByKey.set(key, (requestedByKey.get(key) ?? 0) + item.qty);
-  }
-
-  const missing: string[] = [];
-  const outOfStock: string[] = [];
-  const trustedItems: {
-    productId: string;
-    productName: string;
-    modelo: string | null;
-    colorName: string;
-    size: string;
-    quantity: number;
-    price: number;
-  }[] = [];
-  let subtotal = 0;
-
-  for (const item of items) {
-    const key = `${item.productId}|${item.color}|${item.size}`;
-    const product = productById.get(item.productId);
-    const variant = variantByKey.get(key);
-    const label = `${item.name} — ${item.color} (${item.size})`;
-
-    if (!product || product.price == null || !variant) {
-      missing.push(label);
-      continue;
-    }
-    const requestedTotal = requestedByKey.get(key) ?? item.qty;
-    if (variant.stock < requestedTotal) {
-      outOfStock.push(`${label}: quedan ${variant.stock}, se pidieron ${requestedTotal}`);
-      continue;
-    }
-
-    trustedItems.push({
-      productId: item.productId,
-      productName: product.name,
-      modelo: variant.modelo,
-      colorName: item.color,
-      size: item.size,
-      quantity: item.qty,
-      price: product.price,
-    });
-    subtotal += product.price * item.qty;
-  }
-
-  if (missing.length > 0) {
-    return Response.json(
-      { error: `Estos artículos ya no están disponibles: ${missing.join("; ")}. Quítalos del carrito.` },
-      { status: 400 },
-    );
-  }
-  if (outOfStock.length > 0) {
-    return Response.json({ error: `Sin stock suficiente — ${outOfStock.join("; ")}` }, { status: 400 });
-  }
-
-  // ── Envío confiable: igual que el precio de producto, nunca se confía en el
-  // total de envío que manda el cliente — se vuelve a cotizar server-side y se
-  // empareja la tarifa elegida por provider_name + service_code (el id de
-  // cotización de Skydropx es efímero y cambia en cada llamada).
-  let shippingFee: number;
-  let shippingCarrier: string;
-  let shippingDays: number | null;
-  let shippingProviderName: string | null;
-  let shippingServiceCode: string | null;
-  if (shipping.providerName === "fallback") {
-    shippingFee = SHIPPING_FEE_MXN;
-    shippingCarrier = "Envío estándar";
-    shippingDays = null;
-    shippingProviderName = null;
-    shippingServiceCode = null;
-  } else {
-    const totalQty = items.reduce((n, i) => n + i.qty, 0);
-    const freshRates = await getShippingRates(address, [estimateParcel(totalQty)]);
-    const match = freshRates.find(
-      (r) => r.providerName === shipping.providerName && r.serviceCode === shipping.serviceCode,
-    );
-    if (!match) {
-      return Response.json(
-        { error: "Esa tarifa de envío ya no está disponible. Vuelve a cotizar e intenta de nuevo." },
-        { status: 400 },
-      );
-    }
-    shippingFee = match.total;
-    shippingCarrier = `${match.providerDisplayName} · ${match.serviceName}`;
-    shippingDays = match.days;
-    shippingProviderName = match.providerName;
-    shippingServiceCode = match.serviceCode;
-  }
-
-  // ── Código de descuento de bienvenida: se valida aquí (correo, primera
-  // compra, código sin usar/vencido) contra el subtotal de PRODUCTOS que ya se
-  // recalculó arriba — nunca contra lo que mande el cliente, ni contra el total
-  // con envío incluido (ver tarea 070).
-  let discountApplies = false;
-  const discountCode = body.discountCode?.trim();
-  if (discountCode) {
-    if (subtotal < DISCOUNT_MIN_SUBTOTAL_MXN) {
-      return Response.json(
-        {
-          error: `Ese código requiere una compra mínima de ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos, sin contar el envío.`,
-        },
-        { status: 400 },
-      );
-    }
-    const validation = await validateDiscountCode(discountCode, address.email);
-    if (!validation.valid) {
-      return Response.json({ error: validation.error }, { status: 400 });
-    }
-    discountApplies = true;
-  }
+  const {
+    trustedItems,
+    subtotal,
+    shippingFee,
+    shippingCarrier,
+    shippingDays,
+    shippingProviderName,
+    shippingServiceCode,
+    discountApplies,
+    discountCode,
+  } = result.data;
 
   const itemsJson = JSON.stringify(trustedItems);
-  const addressJson = JSON.stringify(address);
+  const addressJson = JSON.stringify(body.address);
   const metadata: Record<string, string> = {
     ...chunkMetadata("items_json", itemsJson),
     ...chunkMetadata("shipping_address_json", addressJson),
@@ -209,7 +45,7 @@ export async function action({ request }: Route.ActionArgs) {
     shipping_carrier: shippingCarrier,
     shipping_provider_name: shippingProviderName ?? "",
     shipping_service_code: shippingServiceCode ?? "",
-    discount_code: discountApplies && discountCode ? discountCode.toUpperCase() : "",
+    discount_code: discountCode ?? "",
   };
 
   // El 10% de bienvenida aplica solo al precio de los productos, nunca al
@@ -251,7 +87,7 @@ export async function action({ request }: Route.ActionArgs) {
       mode: "payment",
       line_items,
       payment_method_types: ["card", "oxxo"],
-      customer_email: address.email,
+      customer_email: body.address.email,
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout/cancelado`,
       metadata,
@@ -267,7 +103,7 @@ export async function action({ request }: Route.ActionArgs) {
     // del sitio y no ameritan avisar cada vez.
     await sendOwnerAlert({
       subject: `🚨 Checkout falló — no se pudo crear la sesión de pago`,
-      text: `Un cliente no pudo iniciar el pago.\n\nCorreo: ${address.email}\nSubtotal: ${formatPrice(subtotal)}\n\nError: ${message}`,
+      text: `Un cliente no pudo iniciar el pago.\n\nCorreo: ${body.address.email}\nSubtotal: ${formatPrice(subtotal)}\n\nError: ${message}`,
     });
     return Response.json({ error: message }, { status: 500 });
   }

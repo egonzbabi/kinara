@@ -273,6 +273,10 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
           )}
           <Row label="Total" value={formatPrice(order.total)} />
           <Row label="Moneda" value={order.currency.toUpperCase()} />
+          <Row
+            label="Método de pago"
+            value={order.paymentProvider === "paypal" ? "PayPal" : "Tarjeta/OXXO (Stripe)"}
+          />
           {order.discountCode && <Row label="Código de descuento" value={order.discountCode} />}
         </dl>
       </section>

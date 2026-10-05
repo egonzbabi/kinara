@@ -71,7 +71,7 @@ export async function action({ request }: Route.ActionArgs) {
         console.warn(`[stripe-webhook] charge.refunded: no se encontró la sesión para el PI ${paymentIntentId}`);
         return Response.json({ received: true });
       }
-      const result = await cancelOrderAndRestoreStock(sessionId);
+      const result = await cancelOrderAndRestoreStock({ stripeSessionId: sessionId });
       return Response.json({ received: true, cancelled: result !== null });
     } catch (err) {
       console.error(`[stripe-webhook] fallo manejando el reembolso de ${paymentIntentId}:`, err);
