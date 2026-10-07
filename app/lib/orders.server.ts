@@ -263,7 +263,7 @@ export async function ensureOrderFromPaypalCapture(params: {
     return null;
   }
 
-  await decrementStockForItems(payload.items);
+  await decrementStockForItems(payload.items, orderId);
 
   if (payload.discountCode) {
     await markDiscountCodeUsed(payload.discountCode);
@@ -303,7 +303,15 @@ export async function ensureOrderFromPaypalCapture(params: {
   return { orderId, created: true };
 }
 
-async function decrementStockForItems(items: OrderItem[]) {
+/**
+ * Descuenta el stock de cada artículo vendido y deja un renglón de "salida" en
+ * Movimientos (concepto "Venta ORD-..."). El stock lo mueve solo
+ * `decrement_variant_stock`; el renglón es únicamente el registro, no vuelve a
+ * tocar el stock. Un fallo al registrar el renglón nunca afecta la venta.
+ */
+async function decrementStockForItems(items: OrderItem[], orderId: string) {
+  const movementDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/Mexico_City" });
+
   for (const item of items) {
     const { data: variant, error } = await supabaseAdmin
       .from("product_variants")
@@ -321,12 +329,29 @@ async function decrementStockForItems(items: OrderItem[]) {
       continue;
     }
 
-    const { error: rpcError } = await supabaseAdmin.rpc("decrement_variant_stock", {
+    const { data: resultingStock, error: rpcError } = await supabaseAdmin.rpc("decrement_variant_stock", {
       p_variant_id: variant.id,
       p_qty: item.quantity,
     });
     if (rpcError) {
       console.error(`[orders] falló el decremento de stock de la variante ${variant.id}:`, rpcError);
+      continue;
+    }
+
+    const { error: movementError } = await supabaseAdmin.from("inventory_movements").insert({
+      product_id: item.productId,
+      color_name: item.colorName ?? "",
+      size: item.size as ProductSize,
+      type: "salida",
+      quantity: item.quantity,
+      concept: `Venta ${orderId}`,
+      movement_date: movementDate,
+      resulting_stock: resultingStock ?? 0,
+      admin_id: null,
+      admin_name: "Venta en línea",
+    });
+    if (movementError) {
+      console.error(`[orders] no se pudo registrar el movimiento de salida de ${orderId}:`, movementError);
     }
   }
 }
@@ -409,7 +434,7 @@ export async function ensureOrderFromCheckoutSession(
     return null;
   }
 
-  await decrementStockForItems(items);
+  await decrementStockForItems(items, orderId);
 
   if (discountCode) {
     await markDiscountCodeUsed(discountCode);
