@@ -130,6 +130,7 @@ function CartLine({
   onDec: () => void;
   onInc: () => void;
 }) {
+  const atMax = item.maxQty != null && item.qty >= item.maxQty;
   return (
     <li className="flex gap-4 py-5">
       <Link
@@ -158,6 +159,11 @@ function CartLine({
         <p className="mt-1 text-[13px] text-muted">
           {item.color} · Talla {item.size}
         </p>
+        {atMax && (
+          <p className="mt-1 text-[12px] text-clay">
+            {item.maxQty === 1 ? "Solo hay 1 disponible" : `Máximo disponible: ${item.maxQty}`}
+          </p>
+        )}
         <div className="mt-auto flex items-center justify-between pt-3">
           <div className="flex items-center rounded-full border border-line">
             <Stepper label="Quitar uno" onClick={onDec}>
@@ -166,7 +172,7 @@ function CartLine({
             <span className="w-7 text-center text-sm tabular-nums">
               {item.qty}
             </span>
-            <Stepper label="Añadir uno" onClick={onInc}>
+            <Stepper label="Añadir uno" onClick={onInc} disabled={atMax}>
               +
             </Stepper>
           </div>
@@ -186,16 +192,19 @@ function Stepper({
   children,
   label,
   onClick,
+  disabled,
 }: {
   children: React.ReactNode;
   label: string;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       aria-label={label}
       onClick={onClick}
-      className="grid h-8 w-8 place-items-center text-base leading-none transition-colors hover:text-clay"
+      disabled={disabled}
+      className="grid h-8 w-8 place-items-center text-base leading-none transition-colors hover:text-clay disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:text-current"
     >
       {children}
     </button>

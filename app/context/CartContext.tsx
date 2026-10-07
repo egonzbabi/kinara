@@ -20,6 +20,10 @@ export type CartItem = {
   color: string;
   size: string;
   qty: number;
+  /** Unidades disponibles de esta combinación color+talla al agregarla. El
+   * carrito nunca pasa de aquí; el checkout vuelve a validar el stock real.
+   * Opcional: carritos guardados antes de este campo no lo traen. */
+  maxQty?: number;
 };
 
 export type AddPayload = Omit<CartItem, "key" | "qty"> & { qty?: number };
@@ -41,7 +45,7 @@ type CartCtx = {
 
 const Ctx = createContext<CartCtx | null>(null);
 
-const lineKey = (p: { productId: string; color: string; size: string }) =>
+export const lineKey = (p: { productId: string; color: string; size: string }) =>
   `${p.productId}::${p.color}::${p.size}`;
 
 // El carrito sale de la página por completo al ir a la Checkout Session
@@ -93,9 +97,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const qty = payload.qty ?? 1;
     setItems((prev) => {
       const existing = prev.find((i) => i.key === key);
+      const cap = payload.maxQty ?? Number.POSITIVE_INFINITY;
       const next = existing
-        ? prev.map((i) => (i.key === key ? { ...i, qty: i.qty + qty } : i))
-        : [...prev, { ...payload, key, qty }];
+        ? prev.map((i) =>
+            i.key === key
+              ? { ...i, qty: Math.min(i.qty + qty, cap), maxQty: payload.maxQty ?? i.maxQty }
+              : i,
+          )
+        : [...prev, { ...payload, key, qty: Math.min(qty, cap) }];
       writeStoredCart(next);
       return next;
     });
@@ -125,7 +134,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const next =
         qty <= 0
           ? prev.filter((i) => i.key !== key)
-          : prev.map((i) => (i.key === key ? { ...i, qty } : i));
+          : prev.map((i) =>
+              i.key === key ? { ...i, qty: Math.min(qty, i.maxQty ?? Number.POSITIVE_INFINITY) } : i,
+            );
       writeStoredCart(next);
       return next;
     });

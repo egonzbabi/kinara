@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import type { Product } from "~/data/products";
-import { useCart } from "~/context/CartContext";
+import { useCart, lineKey } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
@@ -33,7 +33,7 @@ export function ProductCard({
    * tocar el dato guardado del producto. */
   forceBadge?: string;
 }) {
-  const { add } = useCart();
+  const { add, items } = useCart();
   const [hover, setHover] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   // Un producto puede tener más de un color dentro de la misma familia (ej.
@@ -64,6 +64,12 @@ export function ProductCard({
     if (color && size && stockFor(color, size) <= 0) setSize(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color]);
+  // Ya hay en el carrito todas las unidades disponibles de esta combinación.
+  const allInCart =
+    Boolean(color && size) &&
+    stockFor(color!, size!) > 0 &&
+    (items.find((i) => i.key === lineKey({ productId: product.id, color: color!, size: size! }))
+      ?.qty ?? 0) >= stockFor(color!, size!);
 
   const displayImage =
     (familyColorWithPhoto && product.colorImages?.[familyColorWithPhoto.name]) ||
@@ -89,6 +95,7 @@ export function ProductCard({
       setAttempted(true);
       return;
     }
+    if (allInCart) return;
     add({
       productId: product.id,
       slug: product.slug,
@@ -97,6 +104,7 @@ export function ProductCard({
       image: product.colorImages?.[color] ?? product.gallery[0],
       color,
       size,
+      maxQty: stockFor(color, size),
     });
     resetQuickAdd();
   };
@@ -251,14 +259,16 @@ export function ProductCard({
                   onClick={confirmQuickAdd}
                   className={cn(
                     "mt-2.5 w-full rounded-full py-2 text-[12px] font-semibold transition-colors",
-                    color && size && stockFor(color, size) <= 0
+                    (color && size && stockFor(color, size) <= 0) || allInCart
                       ? "cursor-not-allowed bg-line text-muted"
                       : "bg-espresso text-bone hover:bg-clay",
                   )}
                 >
                   {color && size && stockFor(color, size) <= 0
                     ? "Agotado en esta combinación"
-                    : "Agregar al carrito"}
+                    : allInCart
+                      ? "Ya tienes todas las disponibles"
+                      : "Agregar al carrito"}
                 </button>
               </div>
             ) : (

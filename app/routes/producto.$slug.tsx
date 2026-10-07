@@ -13,7 +13,7 @@ import {
 import { Accordion } from "~/components/Accordion";
 import { ProductCard } from "~/components/ProductCard";
 import { Button } from "~/components/Button";
-import { useCart } from "~/context/CartContext";
+import { useCart, lineKey } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
@@ -76,7 +76,7 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function ProductDetail({ loaderData }: Route.ComponentProps) {
   const { product, related } = loaderData;
-  const { add } = useCart();
+  const { add, items } = useCart();
   useScrollReveal();
 
   // GA4 view_item (tarea 004) — una vez por producto visto, no por cada
@@ -113,6 +113,12 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color]);
   const selectedOutOfStock = Boolean(color && size && stockFor(color, size) <= 0);
+  // Ya hay en el carrito todas las unidades disponibles de esta combinación.
+  const allInCart =
+    Boolean(color && size) &&
+    !selectedOutOfStock &&
+    (items.find((i) => i.key === lineKey({ productId: product.id, color: color!, size: size! }))
+      ?.qty ?? 0) >= stockFor(color!, size!);
 
   const colorImage = color ? product.colorImages?.[color] : undefined;
 
@@ -157,6 +163,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
       setAttempted(true);
       return;
     }
+    if (allInCart) return;
     add({
       productId: product.id,
       slug: product.slug,
@@ -165,6 +172,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
       image: colorImage ?? product.gallery[0],
       color,
       size,
+      maxQty: stockFor(color, size),
     });
   };
 
@@ -309,12 +317,14 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               size="lg"
               full
               onClick={onAdd}
-              aria-disabled={missingSelection || selectedOutOfStock}
-              className={cn((missingSelection || selectedOutOfStock) && "is-inactive")}
+              aria-disabled={missingSelection || selectedOutOfStock || allInCart}
+              className={cn((missingSelection || selectedOutOfStock || allInCart) && "is-inactive")}
             >
               {selectedOutOfStock
                 ? "Agotado en esta combinación"
-                : missingSelection
+                : allInCart
+                  ? "Ya tienes todas las unidades disponibles"
+                  : missingSelection
                   ? "Selecciona color y talla"
                   : `Añadir al carrito de compras · ${formatPrice(product.price)}`}
             </Button>
