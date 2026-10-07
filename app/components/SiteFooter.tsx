@@ -9,13 +9,12 @@ const HELP_LINKS: NavLinkItem[] = [
 
 export function SiteFooter({ links }: { links: NavLinkItem[] }) {
   // "Tienda" empieza con las mismas opciones que el menú principal (mismo
-  // `links`, calculado desde el catálogo real — tarea 127) y agrega un
-  // enlace propio del footer a una sección del home ("Próximamente" ya viene
-  // en `links` porque también está en el menú principal).
+  // `links`, calculado desde el catálogo real — tarea 127). "Lo nuevo" y
+  // "Próximamente" también vienen en `links` porque están en el menú principal.
   const cols = [
     {
       title: "Tienda",
-      links: [...links, { label: "Lo nuevo", to: "/#lo-nuevo" }],
+      links,
     },
     { title: "Ayuda", links: HELP_LINKS },
   ];

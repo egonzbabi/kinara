@@ -44,6 +44,7 @@ export function buildShopNavLinks(products: Product[]): NavLinkItem[] {
     { to: "/tienda?oferta=1", label: "Ofertas" },
     ...typeLinks,
     { to: "/tienda?cat=accesorios", label: "Accesorios" },
+    { to: "/#lo-nuevo", label: "Lo nuevo" },
     { to: "/#proximamente", label: "Próximamente" },
   ];
 }

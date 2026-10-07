@@ -67,7 +67,14 @@ export default function Index({ loaderData }: Route.ComponentProps) {
     document.getElementById(location.hash.slice(1))?.scrollIntoView({ block: "start" });
   }, [location.hash]);
 
-  const novedades = products.filter((p) => p.isNew).slice(0, 4);
+  // El catálogo llega ordenado por fecha de alta (más viejo primero, ver
+  // `getAllProducts`), así que se invierte para mostrar los 8 más recientes
+  // marcados "Nuevo" — sin invertir, salían siempre los primeros que se
+  // dieron de alta.
+  const novedades = products
+    .filter((p) => p.isNew)
+    .reverse()
+    .slice(0, 8);
   // Sin límite: a diferencia de "Lo nuevo" (una vitrina acotada), esta sección
   // debe mostrar todos los productos en oferta, no solo los primeros 4.
   const ofertas = products.filter((p) => p.isOnSale);
