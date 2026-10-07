@@ -12,7 +12,6 @@ export type ComingSoonItem = {
 export const COMING_SOON_ITEMS: ComingSoonItem[] = [
   { slug: "enterizo-eclipse-fit", name: "Enterizo Eclipse Fit", imageBase: "enterizo-eclipse-fit" },
   { slug: "flexi-liston-tshirt", name: "Flexi Listón T-Shirt", imageBase: "flexi-liston-tshirt" },
-  { slug: "motion-top", name: "Motion Top", imageBase: "motion-top" },
   { slug: "move-enterizo", name: "Move Enterizo", imageBase: "move-enterizo" },
   { slug: "enterizo-sculpt-one", name: "Enterizo Sculpt One", imageBase: "enterizo-sculpt-one" },
   { slug: "enterizo-sprint-one", name: "Enterizo Sprint One", imageBase: "enterizo-sprint-one" },
