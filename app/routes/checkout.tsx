@@ -228,16 +228,22 @@ export default function Checkout() {
         <h2 className="font-display text-lg text-espresso">Dirección de envío</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className={labelClass}>Nombre completo</label>
+            <label htmlFor="checkout-name" className={labelClass}>Nombre completo</label>
             <input
+              id="checkout-name"
+              name="name"
+              autoComplete="name"
               value={address.name}
               onChange={setField("name")}
               className={cn(inputClass, attempted && !address.name.trim() && "outline outline-2 outline-offset-2 outline-clay")}
             />
           </div>
           <div>
-            <label className={labelClass}>Email</label>
+            <label htmlFor="checkout-email" className={labelClass}>Email</label>
             <input
+              id="checkout-email"
+              name="email"
+              autoComplete="email"
               type="email"
               value={address.email}
               onChange={setField("email")}
@@ -245,16 +251,23 @@ export default function Checkout() {
             />
           </div>
           <div>
-            <label className={labelClass}>Teléfono</label>
+            <label htmlFor="checkout-phone" className={labelClass}>Teléfono</label>
             <input
+              id="checkout-phone"
+              name="phone"
+              autoComplete="tel"
+              type="tel"
               value={address.phone}
               onChange={setField("phone")}
               className={cn(inputClass, attempted && !address.phone.trim() && "outline outline-2 outline-offset-2 outline-clay")}
             />
           </div>
           <div>
-            <label className={labelClass}>Código postal</label>
+            <label htmlFor="checkout-postal-code" className={labelClass}>Código postal</label>
             <input
+              id="checkout-postal-code"
+              name="postalCode"
+              autoComplete="postal-code"
               value={address.postalCode}
               onChange={setField("postalCode")}
               inputMode="numeric"
@@ -269,17 +282,23 @@ export default function Checkout() {
             )}
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Calle y número</label>
+            <label htmlFor="checkout-street" className={labelClass}>Calle y número</label>
             <input
+              id="checkout-street"
+              name="street1"
+              autoComplete="address-line1"
               value={address.street1}
               onChange={setField("street1")}
               className={cn(inputClass, attempted && !address.street1.trim() && "outline outline-2 outline-offset-2 outline-clay")}
             />
           </div>
           <div>
-            <label className={labelClass}>Colonia</label>
+            <label htmlFor="checkout-colonia" className={labelClass}>Colonia</label>
             {cpLookup?.found ? (
               <select
+                id="checkout-colonia"
+                name="areaLevel3"
+                autoComplete="address-level3"
                 value={address.areaLevel3}
                 onChange={(e) => updateField("areaLevel3", e.target.value)}
                 className={cn(inputClass, attempted && !address.areaLevel3.trim() && "outline outline-2 outline-offset-2 outline-clay")}
@@ -292,6 +311,9 @@ export default function Checkout() {
               </select>
             ) : (
               <input
+                id="checkout-colonia"
+                name="areaLevel3"
+                autoComplete="address-level3"
                 value={address.areaLevel3}
                 onChange={setField("areaLevel3")}
                 className={cn(inputClass, attempted && !address.areaLevel3.trim() && "outline outline-2 outline-offset-2 outline-clay")}
@@ -299,8 +321,11 @@ export default function Checkout() {
             )}
           </div>
           <div>
-            <label className={labelClass}>Alcaldía / Municipio</label>
+            <label htmlFor="checkout-municipio" className={labelClass}>Alcaldía / Municipio</label>
             <input
+              id="checkout-municipio"
+              name="areaLevel2"
+              autoComplete="address-level2"
               value={address.areaLevel2}
               onChange={setField("areaLevel2")}
               readOnly={cpLookup?.found === true}
@@ -312,8 +337,11 @@ export default function Checkout() {
             />
           </div>
           <div>
-            <label className={labelClass}>Estado</label>
+            <label htmlFor="checkout-estado" className={labelClass}>Estado</label>
             <input
+              id="checkout-estado"
+              name="areaLevel1"
+              autoComplete="address-level1"
               value={address.areaLevel1}
               onChange={setField("areaLevel1")}
               readOnly={cpLookup?.found === true}
