@@ -10,7 +10,6 @@ export type ComingSoonItem = {
 // con el catálogo de Supabase: cuando una de estas prendas esté lista para
 // vender, se da de alta ahí como cualquier producto y se quita de esta lista.
 export const COMING_SOON_ITEMS: ComingSoonItem[] = [
-  { slug: "enterizo-eclipse-fit", name: "Enterizo Eclipse Fit", imageBase: "enterizo-eclipse-fit" },
   { slug: "flexi-liston-tshirt", name: "Flexi Listón T-Shirt", imageBase: "flexi-liston-tshirt" },
   { slug: "move-enterizo", name: "Move Enterizo", imageBase: "move-enterizo" },
   { slug: "enterizo-sculpt-one", name: "Enterizo Sculpt One", imageBase: "enterizo-sculpt-one" },
