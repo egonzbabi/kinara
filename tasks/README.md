@@ -171,5 +171,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 129 | [129-editorial-carrusel-fotos-grupo.md](129-editorial-carrusel-fotos-grupo.md) | done | Home: "Nuestra filosofía" ahora muestra un carrusel de 9 fotos reales de grupo, en orden aleatorio |
 | 130 | [130-segundo-reemplazo-video-hero.md](130-segundo-reemplazo-video-hero.md) | done | Home: segundo reemplazo del video del hero + fix de imagen OG desactualizada |
 | 131 | [131-paypal-checkout.md](131-paypal-checkout.md) | in-progress | Pagar con PayPal (además de Stripe) — flujo de pago probado en sandbox; falta registrar webhook en producción para reembolsos |
+| 132 | [132-feed-google-merchant.md](132-feed-google-merchant.md) | in-progress | Feed de productos `/feed.xml` para Google Merchant Center (solo ropa) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

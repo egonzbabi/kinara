@@ -14,6 +14,7 @@ export default [
   route("politica-de-cambios-y-devoluciones", "routes/politica-de-cambios-y-devoluciones.tsx"),
   route("politica-de-envios", "routes/politica-de-envios.tsx"),
   route("sitemap.xml", "routes/sitemap.xml.tsx"),
+  route("feed.xml", "routes/feed.xml.tsx"),
 
   route("admin", "routes/admin.login.tsx"),
   route("admin/logout", "routes/admin.logout.tsx"),
