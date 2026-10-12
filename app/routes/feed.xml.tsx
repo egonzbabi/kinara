@@ -86,7 +86,10 @@ function buildItems(product: Product): string[] {
     const extraImages = [...gallery.slice(1), ...product.gallery]
       .filter(isAbsoluteImage)
       .filter((url) => url !== mainImage)
-      .slice(0, 10);
+      // Solo 1 foto extra (2 en total por variante): con hasta 10, Google pedía
+      // ~1,000 imágenes de golpe y Supabase respondía 429, que Merchant Center
+      // reporta como "Tipo de imagen no admitido".
+      .slice(0, 1);
 
     items.push(
       [
