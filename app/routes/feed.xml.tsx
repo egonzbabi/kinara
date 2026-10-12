@@ -37,6 +37,23 @@ function isAbsoluteImage(url: string | undefined): url is string {
   return Boolean(url && /^https?:\/\//.test(url));
 }
 
+// El campo "materiales" del catálogo a veces trae la composición real ("82.5%
+// Poliéster / 17.5% Elastano") y a veces frases de características ("Tela
+// suave. Corte relajado…"). Google espera solo la composición, así que solo se
+// manda cuando hay porcentajes.
+function materialFor(materials: string): string | undefined {
+  const text = materials.trim();
+  if (!/\d\s*%/.test(text)) return undefined;
+  // Los conjuntos traen una composición por prenda ("Top:" / porcentajes /
+  // "Pantalón:" / porcentajes) — cada encabezado abre un grupo nuevo.
+  let out = "";
+  for (const line of text.split(/[\r\n]+/).map((l) => l.trim()).filter(Boolean)) {
+    if (line.endsWith(":")) out += `${out ? "; " : ""}${line} `;
+    else out += `${out && !out.endsWith(" ") ? ", " : ""}${line}`;
+  }
+  return out;
+}
+
 function variantId(product: Product, color: string, size: string): string {
   const sku = product.skuByVariant?.[`${color}|${size}`];
   if (sku) return sku;
@@ -93,7 +110,7 @@ function buildItems(product: Product): string[] {
         tag("age_group", "adult"),
         tag("color", color),
         tag("size", size),
-        tag("material", product.materials.trim() || undefined),
+        tag("material", materialFor(product.materials)),
         "    </item>\n",
       ].join(""),
     );
