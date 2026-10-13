@@ -18,6 +18,17 @@ export const SITE_NAME = "KINARA";
 // actualizarlo también aquí — así ya no puede volver a desincronizarse.
 export const DEFAULT_OG_IMAGE = HERO_COLLAGE.main.poster;
 
+/**
+ * Perfiles oficiales de la marca (tarea 134) — van en `sameAs` del JSON-LD
+ * `Organization` para que Google los reconozca como la misma marca. Siempre
+ * la dirección limpia del perfil, sin parámetros de seguimiento (`?mdxt=…`).
+ * Agregar aquí cualquier red nueva.
+ */
+export const INSTAGRAM_URL = "https://www.instagram.com/kinarafit/";
+export const TIKTOK_URL = "https://www.tiktok.com/@kinarafit3";
+export const FACEBOOK_URL = "https://www.facebook.com/people/Kinara-Fit/61592285310073/";
+export const SOCIAL_PROFILES = [INSTAGRAM_URL, TIKTOK_URL, FACEBOOK_URL];
+
 export function absoluteUrl(path: string): string {
   return `${SITE_URL}${path}`;
 }

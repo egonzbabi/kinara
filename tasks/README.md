@@ -173,5 +173,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 131 | [131-paypal-checkout.md](131-paypal-checkout.md) | in-progress | Pagar con PayPal (además de Stripe) — flujo de pago probado en sandbox; falta registrar webhook en producción para reembolsos |
 | 132 | [132-feed-google-merchant.md](132-feed-google-merchant.md) | in-progress | Feed de productos `/feed.xml` para Google Merchant Center (solo ropa) |
 | 133 | [133-politica-devoluciones-datos-estructurados.md](133-politica-devoluciones-datos-estructurados.md) | in-progress | Política de devoluciones en los datos estructurados de cada producto (Google) |
+| 134 | [134-redes-sociales-datos-marca.md](134-redes-sociales-datos-marca.md) | in-progress | Instagram en los datos estructurados de la marca (Google) y en el pie de página |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

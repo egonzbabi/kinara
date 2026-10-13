@@ -11,7 +11,7 @@ import { BestsellerRail } from "~/components/BestsellerRail";
 import { ComingSoonRail } from "~/components/ComingSoonRail";
 import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
-import { seoMeta, SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "~/lib/seo";
+import { seoMeta, SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, SOCIAL_PROFILES } from "~/lib/seo";
 
 // Precarga el poster del video del hero (tarea 104/115): con el video ahora
 // full-bleed (única capa visual del hero, tarea 115) es el candidato a LCP
@@ -43,6 +43,7 @@ export function meta(_: Route.MetaArgs) {
         image: DEFAULT_OG_IMAGE,
         description:
           "Athleisure técnico mexicano en tonos cálidos, hecho para moverse y para vivir.",
+        sameAs: SOCIAL_PROFILES,
       },
     },
   ];
