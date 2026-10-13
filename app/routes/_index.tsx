@@ -49,6 +49,21 @@ export function meta(_: Route.MetaArgs) {
   ];
 }
 
+// Caché de borde de Vercel para el HTML del inicio (tarea 137): el servidor
+// tardaba ~0.8 s en cada visita y la página nunca se guardaba (x-vercel-cache:
+// MISS siempre) — todo lo demás (portada del hero, scripts, fotos) espera a
+// ese HTML. Con s-maxage la mayoría de las visitas lo reciben ya armado desde
+// el borde; stale-while-revalidate sirve la copia anterior mientras se
+// regenera en segundo plano. `max-age=0` deja que el navegador siempre
+// revalide. El inicio no tiene nada por usuario (carrito y cookies viven en el
+// cliente), solo catálogo: stock/precio en pantalla pueden atrasarse unos
+// minutos, pero el checkout valida contra la base.
+export function headers(_: Route.HeadersArgs) {
+  return {
+    "Cache-Control": "public, max-age=0, s-maxage=60, stale-while-revalidate=300",
+  };
+}
+
 export async function loader() {
   const products = await getAllProducts();
   return { products };
@@ -104,7 +119,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
               Ver todo →
             </Link>
           </div>
-          <ProductGrid products={ofertas} priorityCount={2} forceBadge="Oferta" />
+          <ProductGrid products={ofertas} forceBadge="Oferta" />
         </section>
       )}
 
@@ -126,7 +141,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
             Ver todo →
           </Link>
         </div>
-        <ProductGrid products={novedades} priorityCount={2} />
+        <ProductGrid products={novedades} />
       </section>
 
       <BestsellerRail products={products} />

@@ -97,7 +97,7 @@ function mapRow(row: ProductRow): Product {
 const SELECT =
   "*, product_variants(color_name, color_hex, size, stock, modelo), product_images(url, position, color_name)";
 
-export async function getAllProducts(): Promise<Product[]> {
+async function fetchAllProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select(SELECT)
@@ -105,6 +105,31 @@ export async function getAllProducts(): Promise<Product[]> {
     .order("created_at");
   if (error) throw new Error(`No se pudo cargar el catálogo: ${error.message}`);
   return (data as ProductRow[]).map(mapRow);
+}
+
+// Caché en memoria de la instancia (tarea 137): cada página pública llamaba a
+// getAllProducts() dos veces por visita (el loader de root.tsx para menú y
+// footer + el de la ruta), cada una una consulta pesada a Supabase (~58
+// productos con variantes e imágenes) — la mayor parte de los ~0.8 s que tarda
+// el servidor en responder. Con un TTL corto, las visitas seguidas a una
+// instancia caliente no repiten la consulta. Solo afecta lo que se MUESTRA
+// (stock/precio en pantalla se pueden atrasar ≤ TTL): el checkout valida
+// stock y precios directo contra la base con supabaseAdmin
+// (checkout-validation.server.ts) y el admin usa admin-catalog.server.ts, así
+// que ninguno depende de esta caché.
+const PRODUCTS_TTL_MS = 30_000;
+let productsCache: { at: number; value: Promise<Product[]> } | null = null;
+
+export function getAllProducts(): Promise<Product[]> {
+  const now = Date.now();
+  if (productsCache && now - productsCache.at < PRODUCTS_TTL_MS) return productsCache.value;
+  const value = fetchAllProducts();
+  productsCache = { at: now, value };
+  // Un error no se queda guardado: la siguiente visita vuelve a intentarlo.
+  value.catch(() => {
+    if (productsCache?.value === value) productsCache = null;
+  });
+  return value;
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {

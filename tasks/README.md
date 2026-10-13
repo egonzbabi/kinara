@@ -176,5 +176,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 134 | [134-redes-sociales-datos-marca.md](134-redes-sociales-datos-marca.md) | in-progress | Instagram en los datos estructurados de la marca (Google) y en el pie de página |
 | 135 | [135-cache-largo-imagenes-storage.md](135-cache-largo-imagenes-storage.md) | in-progress | Cache de 1 año para fotos de producto y video del hero en Supabase Storage |
 | 136 | [136-paginas-por-tipo-de-prenda.md](136-paginas-por-tipo-de-prenda.md) | in-progress | Páginas propias por tipo de prenda (SEO): conjuntos, tops, leggings, chamarras, enterizos, pants |
+| 137 | [137-estabilizar-velocidad-inicio.md](137-estabilizar-velocidad-inicio.md) | in-progress | Estabilizar la velocidad del inicio: HTML en caché de borde + caché del catálogo |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
