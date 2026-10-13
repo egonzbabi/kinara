@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import type { NavLinkItem } from "~/lib/nav-links";
+import { cn } from "~/lib/cn";
 import { INSTAGRAM_URL, TIKTOK_URL, FACEBOOK_URL } from "~/lib/seo";
 
 const HELP_LINKS: NavLinkItem[] = [
@@ -8,7 +9,14 @@ const HELP_LINKS: NavLinkItem[] = [
   { label: "Contacto", to: "/contacto" },
 ];
 
-export function SiteFooter({ links }: { links: NavLinkItem[] }) {
+export function SiteFooter({
+  links,
+  typePages = [],
+}: {
+  links: NavLinkItem[];
+  /** Páginas por tipo de prenda (tarea 136) — columna aparte para no alargar "Tienda". */
+  typePages?: NavLinkItem[];
+}) {
   // "Tienda" empieza con las mismas opciones que el menú principal (mismo
   // `links`, calculado desde el catálogo real — tarea 127). "Lo nuevo" y
   // "Próximamente" también vienen en `links` porque están en el menú principal.
@@ -17,13 +25,16 @@ export function SiteFooter({ links }: { links: NavLinkItem[] }) {
       title: "Tienda",
       links,
     },
+    ...(typePages.length > 0 ? [{ title: "Por tipo", links: typePages }] : []),
     { title: "Ayuda", links: HELP_LINKS },
   ];
 
   return (
     <footer className="bg-bone">
       <div className="pad py-[clamp(48px,6vw,88px)]">
-        <div className="grid gap-10 border-b border-line pb-12 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div className={cn("grid gap-10 border-b border-line pb-12",
+            typePages.length > 0 ? "md:grid-cols-[1.4fr_1fr_1fr_1fr]" : "md:grid-cols-[1.4fr_1fr_1fr]",
+          )}>
           <div>
             <Link
               to="/"

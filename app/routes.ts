@@ -8,6 +8,7 @@ import {
 export default [
   index("routes/_index.tsx"),
   route("tienda", "routes/tienda.tsx"),
+  route("tienda/:tipo", "routes/tienda.$tipo.tsx"),
   route("producto/:slug", "routes/producto.$slug.tsx"),
   route("contacto", "routes/contacto.tsx"),
   route("aviso-de-privacidad", "routes/aviso-de-privacidad.tsx"),

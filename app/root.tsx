@@ -19,6 +19,7 @@ import { CookieConsentBanner } from "~/components/CookieConsentBanner";
 import { GA_MEASUREMENT_ID } from "~/lib/analytics";
 import { getAllProducts } from "~/lib/catalog";
 import { buildShopNavLinks } from "~/lib/nav-links";
+import { activeLandings } from "~/lib/shop-landings";
 
 // Los enlaces de tipo de ropa del menú/footer salen del catálogo real (tarea
 // 127) — un tipo sin ningún producto (ej. "Legging" si se agota) desaparece
@@ -28,10 +29,18 @@ import { buildShopNavLinks } from "~/lib/nav-links";
 // vista del admin.
 export async function loader({ request }: Route.LoaderArgs) {
   if (new URL(request.url).pathname.startsWith("/admin")) {
-    return { navLinks: [] };
+    return { navLinks: [], typePages: [] };
   }
   const products = await getAllProducts();
-  return { navLinks: buildShopNavLinks(products) };
+  return {
+    navLinks: buildShopNavLinks(products),
+    // Páginas por tipo de prenda (tarea 136) para el pie de página — solo las
+    // que tienen productos; "para mujer" se quita del texto del enlace.
+    typePages: activeLandings(products).map((l) => ({
+      to: `/tienda/${l.slug}`,
+      label: l.h1.replace(/ para mujer$/, ""),
+    })),
+  };
 }
 
 export const links: Route.LinksFunction = () => [
@@ -122,7 +131,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
       <main id="contenido">
         <Outlet />
       </main>
-      <SiteFooter links={loaderData.navLinks} />
+      <SiteFooter links={loaderData.navLinks} typePages={loaderData.typePages} />
       <CartDrawer />
       <CookieConsentBanner />
     </CartProvider>

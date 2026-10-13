@@ -1,6 +1,7 @@
 import type { Route } from "./+types/sitemap.xml";
 import { getAllProducts } from "~/lib/catalog";
 import { SITE_URL } from "~/lib/seo";
+import { activeLandings } from "~/lib/shop-landings";
 
 // Páginas estáticas de contenido real (no /checkout*, /admin*, /api* — esas
 // ya están en robots.txt como Disallow, y /tienda con query params de
@@ -37,6 +38,8 @@ export async function loader(_: Route.LoaderArgs) {
 
   const urls = [
     ...STATIC_PATHS.map((path) => ({ loc: `${SITE_URL}${path}`, priority: path === "/" ? "1.0" : "0.7" })),
+    // Páginas por tipo de prenda (tarea 136) — solo las que tienen productos.
+    ...activeLandings(products).map((l) => ({ loc: `${SITE_URL}/tienda/${l.slug}`, priority: "0.8" })),
     ...products.map((p) => ({ loc: `${SITE_URL}/producto/${p.slug}`, priority: "0.8" })),
   ];
 
