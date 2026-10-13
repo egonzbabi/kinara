@@ -76,6 +76,7 @@ Formato de cada entrada: `- [ ] Requisito — (origen: tarea NNN)`
 - [x] PayPal, igual que Stripe, se queda en modo **sandbox** hasta que el usuario pida explícitamente pasar a producción (credenciales Live). — (origen: tarea 131)
 - [x] El feed de Google Merchant Center (`/feed.xml`, `app/routes/feed.xml.tsx`) se genera en vivo desde el catálogo de Supabase (nunca un archivo fijo), un item por color+talla, y **solo incluye ropa** (`mujer`/`hombre`): los accesorios quedan fuera por decisión explícita del usuario. Usa la URL original de Storage para las imágenes, no la de transformación (cuota de Image Transformations). Los datos del feed deben coincidir con los del sitio (precio, stock, políticas de envío/devolución), porque Google los compara. — (origen: tarea 132)
 - [x] El JSON-LD de cada producto declara la política de devoluciones (`RETURN_POLICY_SCHEMA` en `app/lib/seo.ts`: sin devoluciones, enlace a `/politica-de-cambios-y-devoluciones`). Si la política del sitio cambia, hay que actualizar también ese bloque y la política cargada en Merchant Center, porque Google los compara. No se declara `shippingDetails` (el costo de envío es variable y no se inventa uno fijo). — (origen: tarea 133)
+- [x] Toda subida a Supabase Storage (`product-images`) usa `cacheControl: "31536000"` (1 año) y un nombre único con `Date.now()` — así la foto nueva es otro archivo y nunca se queda una versión vieja en caché. Sin esto Supabase usa 1 hora. Un archivo que se reemplace bajo el mismo nombre NO debe llevar caché larga. — (origen: tarea 135)
 
 ## Código / convenciones
 

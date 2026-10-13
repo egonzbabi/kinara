@@ -57,7 +57,15 @@ export async function action({ request }: Route.ActionArgs) {
   const buffer = new Uint8Array(await file.arrayBuffer());
   const { error: uploadError } = await supabaseAdmin.storage
     .from(BUCKET)
-    .upload(key, buffer, { contentType: file.type, upsert: true });
+    .upload(key, buffer, {
+      contentType: file.type,
+      upsert: true,
+      // 1 año: el nombre lleva Date.now(), así que cada foto nueva es un
+      // archivo distinto y nunca se queda una versión vieja en caché. Sin
+      // esto Supabase usa 1 hora y la primera descarga (cache MISS +
+      // transformación al vuelo) se repite seguido (tarea 135).
+      cacheControl: "31536000",
+    });
   if (uploadError) {
     console.error("[admin.upload] Falló la subida:", uploadError);
     return Response.json({ error: "Falló la subida" }, { status: 500 });
