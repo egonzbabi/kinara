@@ -23,6 +23,21 @@ export function absoluteUrl(path: string): string {
 }
 
 /**
+ * Política de devoluciones para el `Offer` del JSON-LD de producto (tarea
+ * 133). Refleja `/politica-de-cambios-y-devoluciones`: no hay devoluciones ni
+ * reembolsos, solo cambios por defecto de fábrica o por talla. Google compara
+ * esto con lo declarado en Merchant Center, así que si la política cambia hay
+ * que actualizar los dos. No se incluye `shippingDetails` a propósito: el costo
+ * de envío es variable (cotización de Skydropx) y no se inventa uno fijo.
+ */
+export const RETURN_POLICY_SCHEMA = {
+  "@type": "MerchantReturnPolicy",
+  applicableCountry: "MX",
+  returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+  merchantReturnLink: absoluteUrl("/politica-de-cambios-y-devoluciones"),
+} as const;
+
+/**
  * Arma el bloque completo de metadatos de una ruta pública: title,
  * description, canonical, Open Graph y Twitter Card. Cada ruta con su
  * propio `meta()` reemplaza por completo el de sus ancestros (no se

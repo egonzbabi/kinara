@@ -18,7 +18,7 @@ import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
-import { seoMeta, absoluteUrl } from "~/lib/seo";
+import { seoMeta, absoluteUrl, RETURN_POLICY_SCHEMA } from "~/lib/seo";
 import { trackViewItem } from "~/lib/analytics";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -68,6 +68,7 @@ export function meta({ data }: Route.MetaArgs) {
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
           itemCondition: "https://schema.org/NewCondition",
+          hasMerchantReturnPolicy: RETURN_POLICY_SCHEMA,
         },
       },
     },

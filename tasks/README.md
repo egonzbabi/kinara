@@ -172,5 +172,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 130 | [130-segundo-reemplazo-video-hero.md](130-segundo-reemplazo-video-hero.md) | done | Home: segundo reemplazo del video del hero + fix de imagen OG desactualizada |
 | 131 | [131-paypal-checkout.md](131-paypal-checkout.md) | in-progress | Pagar con PayPal (además de Stripe) — flujo de pago probado en sandbox; falta registrar webhook en producción para reembolsos |
 | 132 | [132-feed-google-merchant.md](132-feed-google-merchant.md) | in-progress | Feed de productos `/feed.xml` para Google Merchant Center (solo ropa) |
+| 133 | [133-politica-devoluciones-datos-estructurados.md](133-politica-devoluciones-datos-estructurados.md) | in-progress | Política de devoluciones en los datos estructurados de cada producto (Google) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
