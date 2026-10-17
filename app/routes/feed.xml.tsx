@@ -63,7 +63,9 @@ function materialFor(materials: string): string | undefined {
 function garmentNoun(product: Product): string {
   const n = product.name.toLowerCase();
   const kind = product.kind;
-  if (/leggin/.test(n)) return "Legging deportivo";
+  // "Leggins" (ortografía más buscada en México); los nombres de producto ya
+  // traen "legging"/"leggin" y Google trata las variantes como equivalentes.
+  if (/leggin/.test(n)) return "Leggins deportivos";
   if (/pants/.test(n)) return "Pants deportivos";
   if (/short/.test(n)) return "Short deportivo";
   if (/skirt|falda/.test(n)) return kind === "Vestido" ? "Vestido deportivo" : "Falda deportiva";

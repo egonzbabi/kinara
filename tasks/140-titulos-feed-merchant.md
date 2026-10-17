@@ -41,3 +41,4 @@ Títulos con el formato que recomienda Google: marca + nombre + tipo de prenda +
 
 - 2026-10-16: implementado y verificado en local (43 productos, 579 variantes). Falta subir (aprobación pendiente) y esperar la siguiente lectura de Merchant Center (o "Obtener ahora").
 - 2026-10-16 (2): marca del título cambiada de "KINARA" a "Kinara Fit" a pedido de la usuaria; verificado en local (579 únicos).
+- 2026-10-16 (3): los leggings pasan de "Legging deportivo" a "Leggins deportivos" (ortografía más buscada en México) a pedido de la usuaria, porque la búsqueda genérica "leggins" no los mostraba. Verificado en local. Falta subir (aprobación pendiente).
