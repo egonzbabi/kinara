@@ -26,7 +26,7 @@ export function meta(_: Route.MetaArgs) {
     ...seoMeta({
       title: "KINARA · Ropa deportiva con alma",
       description:
-        "Athleisure técnico en tonos cálidos. Leggings, tops, sudaderas y capas hechas para moverse y para vivir. Nueva colección SS26.",
+        "Más que ropa deportiva: una comunidad de mujeres que se mueven y se sienten fuertes. Leggings, tops y conjuntos. Compra en línea con envíos a todo México.",
       path: "/",
     }),
     // Organization (tarea 003, SEO técnico) — se pone solo aquí, no en
