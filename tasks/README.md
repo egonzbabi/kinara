@@ -179,5 +179,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 137 | [137-estabilizar-velocidad-inicio.md](137-estabilizar-velocidad-inicio.md) | in-progress | Estabilizar la velocidad del inicio: HTML en caché de borde + caché del catálogo |
 | 138 | [138-favicon-circulo-k.md](138-favicon-circulo-k.md) | in-progress | Favicon con el logo (círculo con la K) |
 | 139 | [139-descripcion-inicio-comunidad.md](139-descripcion-inicio-comunidad.md) | in-progress | Descripción del inicio en Google: ropa deportiva + comunidad |
+| 140 | [140-titulos-feed-merchant.md](140-titulos-feed-merchant.md) | in-progress | Títulos descriptivos en el feed de Merchant Center |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

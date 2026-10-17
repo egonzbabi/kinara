@@ -54,6 +54,45 @@ function materialFor(materials: string): string | undefined {
   return out;
 }
 
+// Título del feed (tarea 140). Los nombres de producto son de marca ("AURA
+// LEGGIN", "NOVA BRA") y no dicen qué es la prenda ni para quién, así que
+// Google los relaciona poco con búsquedas como "legging deportivo mujer".
+// Formato recomendado por Google: marca + nombre + tipo de prenda + para quién
+// + color + talla. El tipo se deduce del `kind` del catálogo y del nombre (un
+// "Bottom" puede ser legging, pants, short o falda).
+function garmentNoun(product: Product): string {
+  const n = product.name.toLowerCase();
+  const kind = product.kind;
+  if (/leggin/.test(n)) return "Legging deportivo";
+  if (/pants/.test(n)) return "Pants deportivos";
+  if (/short/.test(n)) return "Short deportivo";
+  if (/skirt|falda/.test(n)) return kind === "Vestido" ? "Vestido deportivo" : "Falda deportiva";
+  if (/hoodie/.test(n)) return "Sudadera deportiva";
+  if (kind === "Chaqueta") return "Chamarra deportiva";
+  if (kind === "Enterizo") return "Enterizo deportivo";
+  if (kind === "Set") return "Conjunto deportivo";
+  if (kind === "Vestido") return "Vestido deportivo";
+  if (/shirt/.test(n)) return "Playera deportiva";
+  if (kind === "Top") return "Top deportivo";
+  return "Ropa deportiva";
+}
+
+const TITLE_BRAND = "Kinara Fit";
+
+const AUDIENCE: Record<string, string> = { mujer: "para mujer", hombre: "para hombre" };
+
+function feedTitle(product: Product, color: string, size: string): string {
+  const audience = AUDIENCE[product.category];
+  const type = [garmentNoun(product), audience].filter(Boolean).join(" ");
+  // Marca en el título como "Kinara Fit": así coincide tanto con quien busca
+  // "kinara" como con quien busca "kinara fit". El atributo `brand` del feed
+  // sigue siendo SITE_NAME. Se evita repetirla si el nombre ya la incluye.
+  const name = product.name.toLowerCase().includes("kinara")
+    ? product.name
+    : `${TITLE_BRAND} ${product.name}`;
+  return `${name} - ${type} - ${color} - Talla ${size}`;
+}
+
 function variantId(product: Product, color: string, size: string): string {
   const sku = product.skuByVariant?.[`${color}|${size}`];
   if (sku) return sku;
@@ -96,7 +135,7 @@ function buildItems(product: Product): string[] {
         "    <item>\n",
         tag("id", variantId(product, color, size)),
         tag("item_group_id", product.id),
-        tag("title", `${product.name} - ${color} - ${size}`),
+        tag("title", feedTitle(product, color, size)),
         tag("description", description),
         tag("link", link),
         tag("image_link", mainImage),
