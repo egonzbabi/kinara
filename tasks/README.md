@@ -180,5 +180,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 138 | [138-favicon-circulo-k.md](138-favicon-circulo-k.md) | in-progress | Favicon con el logo (círculo con la K) |
 | 139 | [139-descripcion-inicio-comunidad.md](139-descripcion-inicio-comunidad.md) | in-progress | Descripción del inicio en Google: ropa deportiva + comunidad |
 | 140 | [140-titulos-feed-merchant.md](140-titulos-feed-merchant.md) | in-progress | Títulos descriptivos en el feed de Merchant Center |
+| 141 | [141-fix-eventos-ga4.md](141-fix-eventos-ga4.md) | in-progress | Fix: los eventos de GA4 (view_item, add_to_cart, begin_checkout, purchase) no llegaban |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

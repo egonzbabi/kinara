@@ -25,10 +25,17 @@ export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as
 const CONSENT_STORAGE_KEY = "kinara-cookie-consent";
 type ConsentValue = "granted" | "denied";
 
-function gtag(...args: unknown[]) {
+// gtag.js solo procesa lo que se empuja al dataLayer como el objeto
+// `arguments` (igual que el script inline de root.tsx). Empujar un arreglo
+// normal (`push(args)`) lo ignora en silencio: durante meses view_item,
+// add_to_cart, begin_checkout, purchase y el "consent update" no llegaron a
+// GA4 (tarea 141). Por eso aquí NO se usan los parámetros: se empuja `arguments`.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function gtag(..._args: unknown[]) {
   if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push(args);
+  // eslint-disable-next-line prefer-rest-params
+  window.dataLayer.push(arguments);
 }
 
 export function getStoredConsent(): ConsentValue | null {
