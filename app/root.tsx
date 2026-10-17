@@ -44,6 +44,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export const links: Route.LinksFunction = () => [
+  // Favicon con el logo (círculo con la K, tarea 138). Google pide el ícono en
+  // múltiplos de 48 px; el .ico cubre navegadores viejos y /favicon.ico.
+  { rel: "icon", href: "/favicon.ico", sizes: "any" },
+  { rel: "icon", type: "image/png", sizes: "48x48", href: "/favicon-48x48.png" },
+  { rel: "icon", type: "image/png", sizes: "96x96", href: "/favicon-96x96.png" },
+  { rel: "icon", type: "image/png", sizes: "192x192", href: "/favicon-192x192.png" },
+  { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
   { rel: "preconnect", href: "https://images.unsplash.com" },
   {
     rel: "preconnect",

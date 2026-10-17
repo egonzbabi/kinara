@@ -177,5 +177,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 135 | [135-cache-largo-imagenes-storage.md](135-cache-largo-imagenes-storage.md) | in-progress | Cache de 1 año para fotos de producto y video del hero en Supabase Storage |
 | 136 | [136-paginas-por-tipo-de-prenda.md](136-paginas-por-tipo-de-prenda.md) | in-progress | Páginas propias por tipo de prenda (SEO): conjuntos, tops, leggings, chamarras, enterizos, pants |
 | 137 | [137-estabilizar-velocidad-inicio.md](137-estabilizar-velocidad-inicio.md) | in-progress | Estabilizar la velocidad del inicio: HTML en caché de borde + caché del catálogo |
+| 138 | [138-favicon-circulo-k.md](138-favicon-circulo-k.md) | in-progress | Favicon con el logo (círculo con la K) |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

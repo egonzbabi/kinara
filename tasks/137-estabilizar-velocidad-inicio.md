@@ -29,7 +29,8 @@ Que el HTML del inicio salga mayormente del borde de Vercel y que el servidor no
 - [x] Solo la portada del hero se precarga con prioridad alta en el inicio (antes + 4 fotos de producto).
 - [x] Con la caché del catálogo, visitas seguidas ya no repiten la consulta (local: 16–90 ms).
 - [x] Typecheck sin errores; `/tienda` conserva su comportamiento.
-- [ ] En producción: `x-vercel-cache: HIT` en el inicio y mejora medible en Lighthouse (4+ corridas).
+- [x] En producción: `x-vercel-cache: HIT` en el inicio (verificado: primer byte 0.26–0.33 s vs 0.78–0.94 s antes; el HTML completo termina en ~320 ms en Lighthouse).
+- [ ] Mejora medible del LCP del inicio en Lighthouse: NO lograda de forma estable (ver notas).
 
 ## Verificación de requisitos anteriores
 
@@ -44,3 +45,4 @@ Que el HTML del inicio salga mayormente del borde de Vercel y que el servidor no
 ## Notas de progreso
 
 - 2026-10-13: implementado en local y verificado (cabecera, precargas, tiempos). Falta: subir (pendiente de aprobación) y medir en producción.
+- 2026-10-13 (2): subido (commit 40dbc8b). Producción: `x-vercel-cache: HIT`, primer byte 0.26–0.33 s (antes 0.78–0.94 s), solo 1 precarga de imagen en el inicio. PERO el LCP de Lighthouse del inicio sigue bimodal: 5 corridas post-cambio dieron 67/68/68/95/70 (LCP 5.9/5.9/5.9/2.6/5.8 s). Hallazgos del diagnóstico: (a) la filmstrip de la corrida mala muestra pantalla en blanco hasta ~3 s simulados y luego aparece todo; en la buena ya se ve a 1.2 s; (b) con el MP4 bloqueado (`--blocked-url-patterns=*.mp4`) el resultado es igual de malo (70-72) → NO es el video; (c) las fuentes usan `font-display: swap` → no son la causa; (d) con una copia de producción local (servidor a 18 ms) la primera pintura REAL es rápida (obs. FCP 0.11–0.72 s) aunque Lighthouse simula FCP 3.6 s; (e) contra producción el FCP observado es 0.65 s en la corrida buena y 2.5 s en las malas. Hipótesis sin confirmar: artefacto del laboratorio (Chrome headless en esta Mac con render por software de capas full-bleed/mix-blend) o un retraso real que solo aparece contra Vercel. Producto y tienda (sin video) son estables 92–95. NO se tocó el diseño del hero. Siguiente paso propuesto: medir con usuarios reales (PageSpeed Insights desde el navegador del usuario / informe Core Web Vitals de Search Console / web-vitals a GA4) antes de seguir optimizando contra ruido de laboratorio.
