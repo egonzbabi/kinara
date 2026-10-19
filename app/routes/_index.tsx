@@ -98,6 +98,18 @@ export default function Index({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <Hero />
+
+      {/* Mensaje de marca en texto visible (tarea 142): Google arma el
+          fragmento del resultado con el texto de la página, y sin esta frase
+          tomaba pedazos de las descripciones de las prendas. Es un <p>, no
+          un encabezado: la página ya tiene su h1 en el Hero. */}
+      <section className="pad pt-[clamp(32px,5vw,56px)] text-center">
+        <p className="reveal mx-auto max-w-[34ch] font-display text-[clamp(22px,2.8vw,34px)] leading-snug">
+          Kinara es más que ropa deportiva: es una comunidad de mujeres que se mueven y se
+          sienten fuertes.
+        </p>
+      </section>
+
       <WelcomeDiscountBanner />
       <TrustStrip />
       <CategoryTiles />

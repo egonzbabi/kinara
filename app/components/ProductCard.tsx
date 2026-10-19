@@ -287,7 +287,10 @@ export function ProductCard({
             <h3 className="truncate font-medium leading-tight">
               {product.name}
             </h3>
-            <p className="mt-0.5 line-clamp-1 text-[13px] text-muted">
+            {/* data-nosnippet (tarea 142): el texto completo de la descripción
+                está en el HTML aunque se vea cortado a una línea, y Google lo
+                usaba como fragmento del resultado de la marca. */}
+            <p className="mt-0.5 line-clamp-1 text-[13px] text-muted" data-nosnippet="">
               {product.description}
             </p>
           </div>
