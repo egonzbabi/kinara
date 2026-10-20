@@ -313,7 +313,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               className="mt-3 inline-flex items-start gap-2 text-[13px] font-semibold text-clay-deep underline-offset-4 hover:underline"
             >
               <WhatsappIcon className="mt-px h-4 w-4 shrink-0" />
-              <span>¿Dudas de talla, envío o cualquier otra cosa? Escríbenos por WhatsApp</span>
+              <span>¿Necesitas ayuda con tu pedido? Escríbenos por WhatsApp</span>
             </a>
           </div>
 

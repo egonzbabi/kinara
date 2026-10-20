@@ -11,7 +11,7 @@ La ropa es elástica y aún no hay tabla de medidas por talla; además las clien
 ## Objetivo
 
 Enlaces a WhatsApp (`wa.me`) con mensaje ya escrito en tres lugares:
-1. Página de producto, bajo el selector de talla: "¿Dudas de talla, envío o cualquier otra cosa? Escríbenos por WhatsApp" (el mensaje menciona la prenda y el color si está elegido).
+1. Página de producto, bajo el selector de talla: "¿Necesitas ayuda con tu pedido? Escríbenos por WhatsApp" (el mensaje menciona la prenda y el color si está elegido).
 2. Pie de página, columna "Ayuda": "WhatsApp".
 3. Página `/contacto`: línea "¿Prefieres WhatsApp?" bajo la introducción.
 Cada clic se mide en GA4 (`contact`, `method: whatsapp`, `source`).
