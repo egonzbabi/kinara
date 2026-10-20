@@ -182,5 +182,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 140 | [140-titulos-feed-merchant.md](140-titulos-feed-merchant.md) | in-progress | Títulos descriptivos en el feed de Merchant Center |
 | 141 | [141-fix-eventos-ga4.md](141-fix-eventos-ga4.md) | in-progress | Fix: los eventos de GA4 (view_item, add_to_cart, begin_checkout, purchase) no llegaban |
 | 142 | [142-frase-comunidad-inicio-y-nosnippet.md](142-frase-comunidad-inicio-y-nosnippet.md) | in-progress | Frase de comunidad bajo la portada + data-nosnippet en descripciones (fragmento de Google) |
+| 143 | [143-pagina-tiktok.md](143-pagina-tiktok.md) | in-progress | Página /tiktok (enlace en la bio) con las prendas de los videos |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
