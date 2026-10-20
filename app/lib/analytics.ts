@@ -120,3 +120,8 @@ export function trackPurchase(params: {
     items: params.items.map(toGaItem),
   });
 }
+
+/** Clic en un enlace de WhatsApp (evento estándar `contact` de GA4). */
+export function trackWhatsappClick(source: "producto" | "footer" | "contacto") {
+  trackEvent("contact", { method: "whatsapp", source });
+}

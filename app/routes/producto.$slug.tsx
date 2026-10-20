@@ -19,7 +19,8 @@ import { productImage, productSrcSet } from "~/lib/productImage";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { cn } from "~/lib/cn";
 import { seoMeta, absoluteUrl, RETURN_POLICY_SCHEMA } from "~/lib/seo";
-import { trackViewItem } from "~/lib/analytics";
+import { trackViewItem, trackWhatsappClick } from "~/lib/analytics";
+import { productMessage, whatsappLink } from "~/lib/whatsapp";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const product = await getProductBySlug(params.slug);
@@ -303,6 +304,15 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                 );
               })}
             </div>
+            <a
+              href={whatsappLink(productMessage(product.name, color))}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackWhatsappClick("producto")}
+              className="mt-3 inline-block text-[13px] font-semibold text-clay-deep underline-offset-4 hover:underline"
+            >
+              ¿Dudas de talla, envío o cualquier otra cosa? Escríbenos por WhatsApp
+            </a>
           </div>
 
           {sku && (

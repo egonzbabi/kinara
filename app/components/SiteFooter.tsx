@@ -2,11 +2,14 @@ import { Link } from "react-router";
 import type { NavLinkItem } from "~/lib/nav-links";
 import { cn } from "~/lib/cn";
 import { INSTAGRAM_URL, TIKTOK_URL, FACEBOOK_URL } from "~/lib/seo";
+import { trackWhatsappClick } from "~/lib/analytics";
+import { GENERAL_MESSAGE, whatsappLink } from "~/lib/whatsapp";
 
 const HELP_LINKS: NavLinkItem[] = [
   { label: "Envíos y entregas", to: "/politica-de-envios" },
   { label: "Cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
   { label: "Contacto", to: "/contacto" },
+  { label: "WhatsApp", to: whatsappLink(GENERAL_MESSAGE) },
 ];
 
 export function SiteFooter({
@@ -111,12 +114,24 @@ export function SiteFooter({
               <ul className="flex flex-col gap-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}>
-                    <Link
-                      to={l.to}
-                      className="text-sm text-espresso/80 transition-colors hover:text-clay"
-                    >
-                      {l.label}
-                    </Link>
+                    {l.to.startsWith("https://") ? (
+                      <a
+                        href={l.to}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => trackWhatsappClick("footer")}
+                        className="text-sm text-espresso/80 transition-colors hover:text-clay"
+                      >
+                        {l.label}
+                      </a>
+                    ) : (
+                      <Link
+                        to={l.to}
+                        className="text-sm text-espresso/80 transition-colors hover:text-clay"
+                      >
+                        {l.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

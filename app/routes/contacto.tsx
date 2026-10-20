@@ -4,6 +4,8 @@ import { supabaseAdmin } from "~/lib/supabase.server";
 import { sendContactEmail, sendOwnerAlert } from "~/lib/resend.server";
 import { cn } from "~/lib/cn";
 import { seoMeta } from "~/lib/seo";
+import { trackWhatsappClick } from "~/lib/analytics";
+import { GENERAL_MESSAGE, whatsappLink } from "~/lib/whatsapp";
 
 export function meta(_: Route.MetaArgs) {
   return seoMeta({
@@ -77,6 +79,18 @@ export default function Contacto() {
         <p className="mt-2 max-w-[52ch] text-muted">
           ¿Tienes preguntas sobre un pedido, una prenda o un cambio? Escríbenos y te
           respondemos lo antes posible.
+        </p>
+        <p className="mt-2 text-[15px] text-muted">
+          ¿Prefieres WhatsApp?{" "}
+          <a
+            href={whatsappLink(GENERAL_MESSAGE)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackWhatsappClick("contacto")}
+            className="font-semibold text-clay-deep underline-offset-4 hover:underline"
+          >
+            Escríbenos aquí
+          </a>
         </p>
       </div>
 
