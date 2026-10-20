@@ -21,6 +21,7 @@ import { cn } from "~/lib/cn";
 import { seoMeta, absoluteUrl, RETURN_POLICY_SCHEMA } from "~/lib/seo";
 import { trackViewItem, trackWhatsappClick } from "~/lib/analytics";
 import { productMessage, whatsappLink } from "~/lib/whatsapp";
+import { WhatsappIcon } from "~/components/WhatsappIcon";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const product = await getProductBySlug(params.slug);
@@ -309,9 +310,10 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackWhatsappClick("producto")}
-              className="mt-3 inline-block text-[13px] font-semibold text-clay-deep underline-offset-4 hover:underline"
+              className="mt-3 inline-flex items-start gap-2 text-[13px] font-semibold text-clay-deep underline-offset-4 hover:underline"
             >
-              ¿Dudas de talla, envío o cualquier otra cosa? Escríbenos por WhatsApp
+              <WhatsappIcon className="mt-px h-4 w-4 shrink-0" />
+              <span>¿Dudas de talla, envío o cualquier otra cosa? Escríbenos por WhatsApp</span>
             </a>
           </div>
 

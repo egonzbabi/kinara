@@ -44,3 +44,4 @@ Cada clic se mide en GA4 (`contact`, `method: whatsapp`, `source`).
 ## Notas de progreso
 
 - 2026-10-20: implementada y verificada en local (producto a 375 px, footer, /contacto). Falta subir a producción (requiere aprobación). Nota: una primera versión solo-tallas se descartó antes de commit; la usuaria pidió canal general.
+- 2026-10-20: a petición de la usuaria se agregó el logo oficial de WhatsApp (`app/components/WhatsappIcon.tsx`, trazo de Simple Icons) en el enlace de producto, el de contacto y como cuarto ícono de redes del pie de página (se conserva el texto "WhatsApp" en Ayuda).

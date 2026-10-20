@@ -6,6 +6,7 @@ import { cn } from "~/lib/cn";
 import { seoMeta } from "~/lib/seo";
 import { trackWhatsappClick } from "~/lib/analytics";
 import { GENERAL_MESSAGE, whatsappLink } from "~/lib/whatsapp";
+import { WhatsappIcon } from "~/components/WhatsappIcon";
 
 export function meta(_: Route.MetaArgs) {
   return seoMeta({
@@ -87,8 +88,9 @@ export default function Contacto() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackWhatsappClick("contacto")}
-            className="font-semibold text-clay-deep underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-1.5 font-semibold text-clay-deep underline-offset-4 hover:underline"
           >
+            <WhatsappIcon className="h-4 w-4" />
             Escríbenos aquí
           </a>
         </p>
