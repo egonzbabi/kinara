@@ -356,6 +356,10 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
           <ul className="mt-5 flex flex-col gap-1.5 text-[13px] text-muted">
             <li>· Envío calculado al finalizar la compra</li>
             <li>
+              · Cambios de talla dentro de 5 días de recibir tu pedido (el envío del
+              cambio va por tu cuenta)
+            </li>
+            <li>
               ·{" "}
               <Link
                 to="/politica-de-cambios-y-devoluciones"
@@ -391,7 +395,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                   content: (
                     <p>
                       Envío calculado al finalizar la compra según tu
-                      dirección. Cambios solo por defecto de fábrica — consulta
+                      dirección. Cambios por talla o por defecto de fábrica — consulta
                       nuestra{" "}
                       <Link
                         to="/politica-de-cambios-y-devoluciones"

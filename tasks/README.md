@@ -185,5 +185,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 143 | [143-pagina-tiktok.md](143-pagina-tiktok.md) | in-progress | Página /tiktok (enlace en la bio) con las prendas de los videos |
 | 144 | [144-indexacion-paginas-por-tipo.md](144-indexacion-paginas-por-tipo.md) | in-progress | Ayudar a que Google indexe las páginas por tipo (enlaces internos + datos propios) |
 | 145 | [145-whatsapp-consultas.md](145-whatsapp-consultas.md) | done | WhatsApp para consultas (producto, pie de página y contacto) |
+| 146 | [146-cambios-de-talla-visibles.md](146-cambios-de-talla-visibles.md) | done | Hacer visible el cambio de talla en la página de producto |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.
