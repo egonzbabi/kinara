@@ -1,12 +1,20 @@
 import { Link } from "react-router";
 import { CATEGORY_TILES } from "~/data/categories";
 import { productImage, productSrcSet } from "~/lib/productImage";
+import { TILE_LANDING_SLUG } from "~/lib/shop-landings";
 
 // Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
 // "Image Transformations" de Supabase.
 const TILE_WIDTHS = [320, 640];
 
-export function CategoryTiles() {
+export function CategoryTiles({ availableLandings }: { availableLandings?: string[] }) {
+  // Si el tipo tiene página propia (con productos), la tarjeta lleva ahí; si no,
+  // al filtro de /tienda como antes (tarea 144).
+  const tileLink = (tipo: string) => {
+    const slug = TILE_LANDING_SLUG[tipo];
+    return slug && availableLandings?.includes(slug) ? `/tienda/${slug}` : `/tienda?tipo=${tipo}`;
+  };
+
   return (
     <section className="pad py-[clamp(48px,7vw,96px)]">
       <div className="reveal mb-8 flex items-end justify-between gap-6">
@@ -28,7 +36,7 @@ export function CategoryTiles() {
         {CATEGORY_TILES.map((tile, i) => (
           <Link
             key={tile.tipo}
-            to={`/tienda?tipo=${tile.tipo}`}
+            to={tileLink(tile.tipo)}
             className="reveal group relative block overflow-hidden rounded-2xl"
             style={{ transitionDelay: `${i * 80}ms` }}
           >

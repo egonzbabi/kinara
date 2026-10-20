@@ -10,6 +10,7 @@ import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { ComingSoonRail } from "~/components/ComingSoonRail";
 import { getAllProducts } from "~/lib/catalog";
+import { activeLandings } from "~/lib/shop-landings";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { seoMeta, SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, SOCIAL_PROFILES } from "~/lib/seo";
 
@@ -112,7 +113,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
 
       <WelcomeDiscountBanner />
       <TrustStrip />
-      <CategoryTiles />
+      <CategoryTiles availableLandings={activeLandings(products).map((l) => l.slug)} />
 
       {/* Ofertas */}
       {ofertas.length > 0 && (

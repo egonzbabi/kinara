@@ -5,7 +5,7 @@ import { getAllProducts } from "~/lib/catalog";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { productImage } from "~/lib/productImage";
 import { seoMeta, absoluteUrl } from "~/lib/seo";
-import { activeLandings, getLanding, landingProducts } from "~/lib/shop-landings";
+import { activeLandings, getLanding, landingFacts, landingProducts } from "~/lib/shop-landings";
 
 /**
  * Página propia por tipo de prenda (tarea 136, SEO): "Leggings deportivos
@@ -32,6 +32,7 @@ export async function loader({ params }: Route.LoaderArgs) {
       intro: landing.intro,
     },
     products,
+    facts: landingFacts(products),
     others: activeLandings(all)
       .filter((l) => l.slug !== landing.slug)
       .map((l) => ({ slug: l.slug, navLabel: l.navLabel })),
@@ -83,7 +84,7 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function TiendaTipo({ loaderData }: Route.ComponentProps) {
   useScrollReveal();
-  const { landing, products, others } = loaderData;
+  const { landing, products, facts, others } = loaderData;
 
   return (
     <div className="pad py-[clamp(28px,4vw,56px)]">
@@ -121,6 +122,13 @@ export default function TiendaTipo({ loaderData }: Route.ComponentProps) {
         <h2 className="sr-only">Productos</h2>
         <ProductGrid products={products} priorityCount={4} />
       </div>
+
+      {/* Datos reales de la colección (tarea 144): contenido propio y distinto en
+          cada página, calculado del catálogo. */}
+      <section className="mt-14 max-w-[70ch] border-t border-line pt-8">
+        <h2 className="label mb-3">Sobre esta colección</h2>
+        <p className="text-[15px] leading-relaxed text-muted">{facts}</p>
+      </section>
 
       {others.length > 0 && (
         <nav aria-label="Más tipos de prenda" className="mt-16 border-t border-line pt-8">

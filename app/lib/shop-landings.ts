@@ -1,4 +1,6 @@
 import type { Product } from "~/data/products";
+import { SIZE_ORDER } from "~/lib/catalog-constants";
+import { formatPrice } from "~/lib/formatPrice";
 
 /**
  * Páginas propias por tipo de prenda (tarea 136, SEO). Cada una es una página
@@ -110,4 +112,65 @@ export function landingProducts(landing: ShopLanding, all: Product[]): Product[]
 /** Páginas que sí tienen productos (las únicas que se enlazan y van al sitemap). */
 export function activeLandings(all: Product[]): ShopLanding[] {
   return SHOP_LANDINGS.filter((l) => landingProducts(l, all).length > 0);
+}
+
+/**
+ * Tarjetas "Encuentra lo tuyo" del inicio (tipo de `kind`) → página propia por
+ * tipo (tarea 144). Bottom y Vestido no tienen una sola página (Bottom agrupa
+ * leggings, pants, shorts y falda) y siguen apuntando al filtro de /tienda.
+ */
+export const TILE_LANDING_SLUG: Record<string, string> = {
+  Top: "tops-deportivos",
+  Chaqueta: "chamarras-y-sudaderas-deportivas",
+  Enterizo: "enterizos-deportivos",
+  Set: "conjuntos-deportivos",
+};
+
+/**
+ * Texto con datos reales de la colección (modelos, precios, tallas y colores),
+ * calculado del catálogo — sirve de contenido propio y distinto en cada página
+ * por tipo (tarea 144), sin inventar nada. Se actualiza solo con el catálogo.
+ */
+export function landingFacts(products: Product[]): string {
+  const n = products.length;
+  const prices = products.map((p) => p.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const priceText =
+    min === max
+      ? `con precio de ${formatPrice(min)} MXN`
+      : `con precios desde ${formatPrice(min)} hasta ${formatPrice(max)} MXN`;
+
+  const sizes = SIZE_ORDER.filter((s) => products.some((p) => p.sizes.includes(s)));
+  const sizeText = sizes.length > 1 ? `${sizes.slice(0, -1).join(", ")} y ${sizes.at(-1)}` : sizes[0];
+
+  // Un color puede estar escrito distinto en cada producto ("Palo De Rosa" /
+  // "Palo de Rosa", "Café" / "Cafe"): se agrupa sin mayúsculas ni acentos para
+  // no repetirlo, y se muestra con la primera forma que aparece.
+  const norm = (c: string) =>
+    c
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  const counts = new Map<string, { label: string; n: number }>();
+  for (const p of products)
+    for (const c of p.colors) {
+      const entry = counts.get(norm(c.name)) ?? { label: c.name.toLowerCase(), n: 0 };
+      entry.n += 1;
+      counts.set(norm(c.name), entry);
+    }
+  const topColors = [...counts.values()]
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 8)
+    .map((e) => e.label);
+  const colorText =
+    topColors.length > 1 ? `${topColors.slice(0, -1).join(", ")} y ${topColors.at(-1)}` : topColors[0];
+
+  return [
+    `${n} ${n === 1 ? "modelo" : "modelos"} ${priceText}.`,
+    sizeText ? `Tallas disponibles: ${sizeText}.` : null,
+    colorText ? `Colores disponibles: ${colorText}, entre otros.` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
