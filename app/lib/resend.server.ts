@@ -8,6 +8,7 @@ import {
   DISCOUNT_EXPIRY_DAYS,
 } from "./discount-constants";
 import { absoluteUrl } from "./seo";
+import { GENERAL_MESSAGE, whatsappLink } from "./whatsapp";
 
 /**
  * Envío de correo del formulario de contacto vía Resend. A propósito nunca
@@ -352,6 +353,182 @@ export async function sendOrderConfirmationEmail(params: {
       ...(process.env.CONTACT_EMAIL_TO ? { bcc: process.env.CONTACT_EMAIL_TO } : {}),
       subject: `Pedido confirmado · ${params.orderId}`,
       html: buildOrderConfirmationHtml(params),
+    }),
+  );
+}
+
+/**
+ * Correo "Tu pedido va en camino" (tarea 147): se manda solo al comprar la guía
+ * de envío, que es cuando nace el número de rastreo (el correo de confirmación
+ * sale al pagar, antes de que exista).
+ */
+export function buildOrderShippedHtml(params: {
+  orderId: string;
+  customerName: string;
+  carrier: string | null;
+  trackingNumber: string;
+  trackingUrl: string | null;
+  shippingDays: number | null;
+  shippingAddress: OrderShippingAddress | null;
+}): string {
+  const { orderId, customerName, carrier, trackingNumber, trackingUrl, shippingDays, shippingAddress } =
+    params;
+  const firstName = customerName.split(" ")[0] || customerName;
+  // Solo enlaces http(s): el botón nunca debe apuntar a otro tipo de URL.
+  const safeTrackingUrl = trackingUrl && /^https?:\/\//i.test(trackingUrl) ? trackingUrl : null;
+
+  const addressBlock = shippingAddress
+    ? `
+      <p style="margin:0;font-size:14px;line-height:1.6;color:${ESPRESSO};">
+        ${escapeHtml(shippingAddress.street1)}<br />
+        ${escapeHtml(shippingAddress.areaLevel3 || "")}${shippingAddress.areaLevel3 ? ", " : ""}${escapeHtml(shippingAddress.areaLevel2)}<br />
+        ${escapeHtml(shippingAddress.areaLevel1)}, C.P. ${escapeHtml(shippingAddress.postalCode)}
+      </p>`
+    : "";
+
+  const deliveryNote = shippingDays
+    ? `La entrega estimada es de ${shippingDays} día${shippingDays === 1 ? "" : "s"} hábil${shippingDays === 1 ? "" : "es"}${carrier ? `, con <strong>${escapeHtml(carrier)}</strong>` : ""}.`
+    : carrier
+      ? `Tu pedido viaja con <strong>${escapeHtml(carrier)}</strong>.`
+      : "";
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tu pedido va en camino · KINARA</title>
+  </head>
+  <body style="margin:0;padding:0;background:${SAND};font-family:Georgia,'Times New Roman',serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${SAND};padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:${BONE};border-radius:20px;overflow:hidden;">
+            <tr>
+              <td style="padding:40px 40px 24px;text-align:center;">
+                <span style="font-size:22px;letter-spacing:6px;color:${ESPRESSO};font-weight:600;">KINARA</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 40px;">
+                <hr style="border:none;border-top:1px solid ${LINE};margin:0;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:32px 40px 0;font-family:Georgia,'Times New Roman',serif;">
+                <h1 style="margin:0 0 8px;font-size:26px;color:${ESPRESSO};font-weight:500;">
+                  ¡Tu pedido va en camino, ${escapeHtml(firstName)}!
+                </h1>
+                <p style="margin:0;font-size:15px;line-height:1.6;color:${MUTED};font-family:Helvetica,Arial,sans-serif;">
+                  Ya entregamos tu pedido a la paquetería. Con tu número de rastreo puedes ver
+                  en todo momento dónde va.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 0;font-family:Helvetica,Arial,sans-serif;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${SAND};border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px 20px;">
+                      <p style="margin:0;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};">
+                        Número de pedido
+                      </p>
+                      <p style="margin:2px 0 0;font-size:16px;color:${ESPRESSO};font-weight:600;">${escapeHtml(orderId)}</p>
+                    </td>
+                    <td style="padding:16px 20px;text-align:right;">
+                      <p style="margin:0;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};">
+                        Número de rastreo
+                      </p>
+                      <p style="margin:2px 0 0;font-size:16px;color:${ESPRESSO};font-weight:600;">${escapeHtml(trackingNumber)}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            ${
+              safeTrackingUrl
+                ? `<tr>
+              <td style="padding:28px 40px 0;text-align:center;font-family:Helvetica,Arial,sans-serif;">
+                <a href="${escapeHtml(safeTrackingUrl)}" style="display:inline-block;background:${CLAY};color:${BONE};text-decoration:none;font-size:14px;font-weight:600;padding:14px 32px;border-radius:999px;">
+                  Rastrear mi pedido
+                </a>
+              </td>
+            </tr>`
+                : ""
+            }
+            ${
+              deliveryNote
+                ? `<tr>
+              <td style="padding:24px 40px 0;font-family:Helvetica,Arial,sans-serif;">
+                <p style="margin:0;font-size:14px;line-height:1.6;color:${MUTED};">${deliveryNote}</p>
+              </td>
+            </tr>`
+                : ""
+            }
+            ${
+              addressBlock
+                ? `<tr>
+              <td style="padding:24px 40px 0;font-family:Helvetica,Arial,sans-serif;">
+                <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:${MUTED};">
+                  Se envía a
+                </p>
+                ${addressBlock}
+              </td>
+            </tr>`
+                : ""
+            }
+            <tr>
+              <td style="padding:32px 40px 8px;text-align:center;font-family:Helvetica,Arial,sans-serif;">
+                <a href="${absoluteUrl("/tienda")}" style="display:inline-block;color:${CLAY};text-decoration:underline;font-size:14px;font-weight:600;">
+                  Seguir explorando
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 40px 32px;text-align:center;font-family:Helvetica,Arial,sans-serif;">
+                <p style="margin:0;font-size:12px;line-height:1.6;color:${MUTED};">
+                  ¿Dudas sobre tu pedido? Responde a este correo o
+                  <a href="${escapeHtml(whatsappLink(GENERAL_MESSAGE))}" style="color:${CLAY};">escríbenos por WhatsApp</a>.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
+export async function sendOrderShippedEmail(params: {
+  orderId: string;
+  customerName: string;
+  customerEmail: string;
+  carrier: string | null;
+  trackingNumber: string;
+  trackingUrl: string | null;
+  shippingDays: number | null;
+  shippingAddress: OrderShippingAddress | null;
+}): Promise<SendContactEmailResult> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return { sent: false, error: "RESEND_API_KEY no configurado" };
+  }
+  if (!params.customerEmail) {
+    return { sent: false, error: "El pedido no tiene correo de cliente" };
+  }
+
+  const from = process.env.CONTACT_EMAIL_FROM || "KINARA <onboarding@resend.dev>";
+  const resend = new Resend(apiKey);
+
+  return sendWithRetry(() =>
+    resend.emails.send({
+      from,
+      to: params.customerEmail,
+      ...(process.env.CONTACT_EMAIL_TO ? { bcc: process.env.CONTACT_EMAIL_TO } : {}),
+      subject: `Tu pedido va en camino · ${params.orderId}`,
+      html: buildOrderShippedHtml(params),
     }),
   );
 }

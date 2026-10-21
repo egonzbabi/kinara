@@ -352,3 +352,102 @@ export async function purchaseShipment(params: {
 
   return await pollShipment(shipmentId);
 }
+
+/**
+ * Resumen de un envío ya creado en la cuenta de Skydropx (tarea 147): sirve para
+ * encontrar la guía de un pedido aunque se haya generado a mano en
+ * pro.skydropx.com. Solo lectura — no cuesta ni cambia nada.
+ */
+export type SkydropxShipmentSummary = {
+  id: string;
+  carrierName: string | null;
+  serviceName: string | null;
+  createdAt: string;
+  estimatedDays: number | null;
+  recipient: {
+    name: string | null;
+    phone: string | null;
+    email: string | null;
+    postalCode: string | null;
+  } | null;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  labelUrl: string | null;
+  /** Estado del paquete según la paquetería (ej. "created"; el valor de entregado hay que confirmarlo en producción). */
+  trackingStatus: string | null;
+};
+
+type ShipmentListResponse = {
+  data: {
+    id: string;
+    attributes: {
+      carrier_name: string | null;
+      service_name: string | null;
+      workflow_status: string;
+      created_at: string;
+      estimated_delivery_days: number | null;
+      master_tracking_number: string | null;
+    };
+    relationships: {
+      packages?: { data: { id: string }[] };
+      address_to?: { data: { id: string } | null };
+    };
+  }[];
+  included?: {
+    id: string;
+    type: string;
+    attributes: Record<string, string | null>;
+  }[];
+  meta?: { next_page: number | null };
+};
+
+/** Envíos terminados (`success`) más recientes de la cuenta, con destinatario y rastreo. */
+export async function listRecentShipments(maxPages = 4): Promise<SkydropxShipmentSummary[]> {
+  const { baseUrl } = requireConfig();
+  const token = await getAccessToken();
+  const out: SkydropxShipmentSummary[] = [];
+
+  let page: number | null = 1;
+  for (let i = 0; i < maxPages && page; i++) {
+    const res: Response = await fetch(`${baseUrl}/api/v1/shipments?per_page=50&page=${page}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new Error(`Skydropx no pudo listar los envíos: ${res.status} ${await res.text()}`);
+    }
+    const body = (await res.json()) as ShipmentListResponse;
+    const included = body.included ?? [];
+
+    for (const s of body.data) {
+      if (s.attributes.workflow_status !== "success") continue;
+      const pkgIds = new Set((s.relationships.packages?.data ?? []).map((p) => p.id));
+      const pkg = included.find(
+        (r) => r.type === "package" && pkgIds.has(r.id) && r.attributes.tracking_number,
+      );
+      const addr = included.find(
+        (r) => r.type === "address" && r.id === s.relationships.address_to?.data?.id,
+      );
+      out.push({
+        id: s.id,
+        carrierName: s.attributes.carrier_name,
+        serviceName: s.attributes.service_name,
+        createdAt: s.attributes.created_at,
+        estimatedDays: s.attributes.estimated_delivery_days,
+        recipient: addr
+          ? {
+              name: addr.attributes.name ?? null,
+              phone: addr.attributes.phone ?? null,
+              email: addr.attributes.email ?? null,
+              postalCode: addr.attributes.postal_code ?? null,
+            }
+          : null,
+        trackingNumber: pkg?.attributes.tracking_number ?? s.attributes.master_tracking_number ?? null,
+        trackingUrl: pkg?.attributes.tracking_url_provider ?? null,
+        labelUrl: pkg?.attributes.label_url ?? null,
+        trackingStatus: pkg?.attributes.tracking_status ?? null,
+      });
+    }
+    page = body.meta?.next_page ?? null;
+  }
+  return out;
+}

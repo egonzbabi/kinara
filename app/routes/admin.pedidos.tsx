@@ -6,6 +6,9 @@ import {
   listAdminOrders,
   updateOrderStatus,
   buyShippingLabel,
+  registerManualTracking,
+  sendShippedEmailForOrder,
+  syncShipmentsForOrders,
   type AdminOrderListItem,
   type OrderStatus,
 } from "~/lib/admin-orders.server";
@@ -32,6 +35,14 @@ const STATUS_CLASSES: Record<OrderStatus, string> = {
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireAdmin(request);
+  // Con el plan gratis de Vercel el cron solo corre una vez al día (tarea 147),
+  // así que al abrir Pedidos también se revisa si ya hay guías que avisar. Nunca
+  // bloquea ni rompe la pantalla: tope de 8 s y cualquier error solo se registra.
+  // Si no hay pedidos pendientes no consulta Skydropx.
+  await Promise.race([
+    syncShipmentsForOrders().catch((err) => console.error("[pedidos] sync de guías:", err)),
+    new Promise((resolve) => setTimeout(resolve, 8000)),
+  ]);
   const orders = await listAdminOrders();
   return { orders };
 }
@@ -49,6 +60,39 @@ export async function action({ request }: Route.ActionArgs) {
     } catch (err) {
       return { ok: false, error: err instanceof Error ? err.message : "No se pudo comprar la guía." };
     }
+  }
+
+  if (intent === "find_label") {
+    try {
+      const [outcome] = await syncShipmentsForOrders(id);
+      if (!outcome) return { ok: false, error: "Este pedido ya tiene rastreo o no está en estado Procesando." };
+      if (outcome.result === "sent") return { ok: true };
+      if (outcome.result === "ambiguous") return { ok: false, error: outcome.detail };
+      if (outcome.result === "failed") return { ok: false, error: outcome.detail };
+      return {
+        ok: false,
+        error:
+          "No encontré una guía que coincida (nombre, código postal y teléfono o correo). Si ya la generaste, captura el rastreo a mano.",
+      };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : "No se pudo consultar Skydropx." };
+    }
+  }
+
+  if (intent === "manual_tracking") {
+    const result = await registerManualTracking(id, {
+      carrier: String(form.get("carrier") || ""),
+      trackingNumber: String(form.get("trackingNumber") || ""),
+      trackingUrl: String(form.get("trackingUrl") || ""),
+    });
+    return result.ok ? { ok: true } : { ok: false, error: result.error };
+  }
+
+  if (intent === "resend_shipped") {
+    const result = await sendShippedEmailForOrder(id);
+    return result.sent
+      ? { ok: true, message: "Correo enviado a la clienta." }
+      : { ok: false, error: result.error ?? "No se pudo enviar el correo." };
   }
 
   const status = String(form.get("status")) as OrderStatus;
@@ -238,6 +282,7 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
                   )}
                 </dd>
               </div>
+              <ResendShippedRow order={order} />
               {order.labelUrl && (
                 <div className="flex justify-between gap-4">
                   <dt className="shrink-0 text-muted">Guía</dt>
@@ -255,7 +300,15 @@ function OrderDetail({ order }: { order: AdminOrderListItem }) {
               )}
             </>
           ) : (
-            <BuyLabelRow order={order} />
+            <>
+              <BuyLabelRow order={order} />
+              {order.status === "processing" && (
+                <>
+                  <FindLabelRow order={order} />
+                  <ManualTrackingRow order={order} />
+                </>
+              )}
+            </>
           )}
         </dl>
       </section>
@@ -335,7 +388,7 @@ function BuyLabelRow({ order }: { order: AdminOrderListItem }) {
             onSubmit={(e) => {
               if (
                 !confirm(
-                  `Esto comprará una guía real con Skydropx (${order.shippingCarrier}) y tiene costo — se descuenta del saldo de tu cuenta de Skydropx. ¿Continuar?`,
+                  `Esto comprará una guía real con Skydropx (${order.shippingCarrier}) y tiene costo — se descuenta del saldo de tu cuenta de Skydropx. Al terminar se enviará a la clienta el correo con su rastreo. ¿Continuar?`,
                 )
               ) {
                 e.preventDefault();
@@ -360,6 +413,125 @@ function BuyLabelRow({ order }: { order: AdminOrderListItem }) {
         {fetcher.data?.error && (
           <p className="mt-1 text-[12px] text-clay">{fetcher.data.error}</p>
         )}
+      </dd>
+    </div>
+  );
+}
+
+const smallLink =
+  "text-sm font-medium text-clay underline decoration-clay/40 underline-offset-2 hover:decoration-clay disabled:opacity-50";
+
+/** Busca en Skydropx la guía de este pedido (también las hechas a mano) y avisa a la clienta. */
+function FindLabelRow({ order }: { order: AdminOrderListItem }) {
+  const fetcher = useFetcher<{ ok: boolean; error?: string }>();
+  const busy = fetcher.state !== "idle";
+  return (
+    <div className="flex justify-between gap-4">
+      <dt className="shrink-0 text-muted">¿Ya generaste la guía?</dt>
+      <dd className="text-right">
+        <fetcher.Form
+          method="post"
+          onSubmit={(e) => {
+            if (!confirm(`Si se encuentra la guía, se enviará el correo de "Tu pedido va en camino" a ${order.customerEmail}. ¿Continuar?`)) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <input type="hidden" name="intent" value="find_label" />
+          <input type="hidden" name="id" value={order.id} />
+          <button type="submit" disabled={busy} className={smallLink}>
+            {busy ? "Buscando…" : "Buscar guía en Skydropx y avisar a la clienta"}
+          </button>
+        </fetcher.Form>
+        <p className="mt-1 text-[12px] text-muted">
+          Se revisa solo cada cierto tiempo; este botón lo hace al momento.
+        </p>
+        {fetcher.data?.error && <p className="mt-1 text-[12px] text-clay">{fetcher.data.error}</p>}
+      </dd>
+    </div>
+  );
+}
+
+/** Captura de rastreo a mano (cuando la búsqueda no encuentra la guía). */
+function ManualTrackingRow({ order }: { order: AdminOrderListItem }) {
+  const fetcher = useFetcher<{ ok: boolean; error?: string }>();
+  const busy = fetcher.state !== "idle";
+  const inputClass =
+    "w-full rounded-md border border-line bg-white px-2 py-1.5 text-sm text-espresso";
+  return (
+    <div className="flex justify-between gap-4">
+      <dt className="shrink-0 text-muted">Rastreo a mano</dt>
+      <dd className="w-full max-w-[22rem] text-right">
+        <details>
+          <summary className={cn(smallLink, "cursor-pointer")}>Capturar rastreo y avisar</summary>
+          <fetcher.Form
+            method="post"
+            className="mt-2 space-y-2 text-left"
+            onSubmit={(e) => {
+              if (!confirm(`Se guardará el rastreo y se enviará el correo de "Tu pedido va en camino" a ${order.customerEmail}. ¿Continuar?`)) {
+                e.preventDefault();
+              }
+            }}
+          >
+            <input type="hidden" name="intent" value="manual_tracking" />
+            <input type="hidden" name="id" value={order.id} />
+            <input
+              name="carrier"
+              required
+              placeholder="Paquetería (ej. Estafeta)"
+              defaultValue={order.shippingCarrier ?? ""}
+              className={inputClass}
+              aria-label="Paquetería"
+            />
+            <input
+              name="trackingNumber"
+              required
+              placeholder="Número de rastreo"
+              className={inputClass}
+              aria-label="Número de rastreo"
+            />
+            <input
+              name="trackingUrl"
+              type="url"
+              placeholder="Enlace de rastreo (opcional, para el botón)"
+              className={inputClass}
+              aria-label="Enlace de rastreo"
+            />
+            <button type="submit" disabled={busy} className={smallLink}>
+              {busy ? "Guardando…" : "Guardar y enviar correo a la clienta"}
+            </button>
+            {fetcher.data?.error && <p className="text-[12px] text-clay">{fetcher.data.error}</p>}
+          </fetcher.Form>
+        </details>
+      </dd>
+    </div>
+  );
+}
+
+/** Reenvía el correo "Tu pedido va en camino" a la clienta. */
+function ResendShippedRow({ order }: { order: AdminOrderListItem }) {
+  const fetcher = useFetcher<{ ok: boolean; error?: string; message?: string }>();
+  const busy = fetcher.state !== "idle";
+  return (
+    <div className="flex justify-between gap-4">
+      <dt className="shrink-0 text-muted">Aviso a la clienta</dt>
+      <dd className="text-right">
+        <fetcher.Form
+          method="post"
+          onSubmit={(e) => {
+            if (!confirm(`Se enviará de nuevo el correo con el rastreo a ${order.customerEmail}. ¿Continuar?`)) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <input type="hidden" name="intent" value="resend_shipped" />
+          <input type="hidden" name="id" value={order.id} />
+          <button type="submit" disabled={busy} className={smallLink}>
+            {busy ? "Enviando…" : "Reenviar aviso por correo"}
+          </button>
+        </fetcher.Form>
+        {fetcher.data?.message && <p className="mt-1 text-[12px] text-sage">{fetcher.data.message}</p>}
+        {fetcher.data?.error && <p className="mt-1 text-[12px] text-clay">{fetcher.data.error}</p>}
       </dd>
     </div>
   );

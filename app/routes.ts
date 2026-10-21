@@ -44,6 +44,7 @@ export default [
   route("api/stripe-webhook", "routes/api.stripe-webhook.tsx"),
   route("api/create-paypal-order", "routes/api.create-paypal-order.tsx"),
   route("api/paypal-webhook", "routes/api.paypal-webhook.tsx"),
+  route("api/cron/sync-shipments", "routes/api.cron.sync-shipments.tsx"),
   route("checkout", "routes/checkout.tsx"),
   route("checkout/success", "routes/checkout.success.tsx"),
   route("checkout/cancelado", "routes/checkout.cancelado.tsx"),
