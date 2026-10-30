@@ -40,6 +40,7 @@ export default [
   route("api/create-checkout-session", "routes/api.create-checkout-session.tsx"),
   route("api/newsletter-signup", "routes/api.newsletter-signup.tsx"),
   route("api/shipping-quote", "routes/api.shipping-quote.tsx"),
+  route("api/cart-prices", "routes/api.cart-prices.tsx"),
   route("api/postal-code", "routes/api.postal-code.tsx"),
   route("api/stripe-webhook", "routes/api.stripe-webhook.tsx"),
   route("api/create-paypal-order", "routes/api.create-paypal-order.tsx"),

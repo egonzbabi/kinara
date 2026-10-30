@@ -1,17 +1,32 @@
 import { Link } from "react-router";
+import { isPromoActive, isPromoAnnounced, PROMO } from "~/lib/promo";
 
 type Message = { text: string; to?: string };
 
-const MESSAGES: Message[] = [
-  { text: "10% de descuento en tu primera compra — regístrate", to: "/#bienvenida" },
+const WELCOME_MESSAGE: Message = {
+  text: "10% de descuento en tu primera compra — regístrate",
+  to: "/#bienvenida",
+};
+
+// Promoción de temporada (tarea 148). Durante la promo el 10% de bienvenida no
+// se acepta, así que su mensaje se oculta para no prometer algo que no aplica.
+const PROMO_MESSAGE: Message = {
+  text: `${PROMO.name}: ${PROMO.percent}% de descuento en todo del ${PROMO.rangeLong}`,
+  to: "/tienda",
+};
+
+const OTHER_MESSAGES: Message[] = [
   { text: "Envío calculado al finalizar la compra" },
   { text: "Política de cambios y devoluciones", to: "/politica-de-cambios-y-devoluciones" },
   { text: "Tejidos cómodos · Hecho con cuidado" },
 ];
 
-export function AnnouncementBar() {
+export function AnnouncementBar({ now }: { now: number }) {
+  const messages = isPromoAnnounced(now)
+    ? [PROMO_MESSAGE, ...(isPromoActive(now) ? [] : [WELCOME_MESSAGE]), ...OTHER_MESSAGES]
+    : [WELCOME_MESSAGE, ...OTHER_MESSAGES];
   // Duplicated track for a seamless marquee (paused under prefers-reduced-motion).
-  const track = [...MESSAGES, ...MESSAGES, ...MESSAGES, ...MESSAGES];
+  const track = [...messages, ...messages, ...messages, ...messages];
   return (
     <div className="bg-espresso text-bone">
       <div className="flex overflow-hidden whitespace-nowrap py-2.5">

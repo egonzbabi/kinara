@@ -6,6 +6,7 @@ import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { seoMeta } from "~/lib/seo";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
+import { PROMO } from "~/lib/promo";
 import {
   TIKTOK_AUTO_LIMIT,
   TIKTOK_FEATURED_SLUGS,
@@ -48,6 +49,8 @@ export async function loader() {
       name: p.name,
       price: p.price,
       compareAt: p.compareAt ?? null,
+      onPromo: p.onPromo ?? false,
+      promoPreviewPrice: p.promoPreviewPrice ?? null,
       image: p.gallery[0],
     })),
   };
@@ -114,6 +117,16 @@ export default function Tiktok({ loaderData }: Route.ComponentProps) {
                         </span>
                       )}
                     </p>
+                    {p.onPromo && (
+                      <p className="mt-1 text-[13px] font-semibold text-clay">
+                        {PROMO.name} −{PROMO.percent}%
+                      </p>
+                    )}
+                    {p.promoPreviewPrice !== null && (
+                      <p className="mt-1 text-[13px] font-semibold text-clay">
+                        {PROMO.name}: {formatPrice(p.promoPreviewPrice)}
+                      </p>
+                    )}
                     <span className="mt-2 inline-block text-[13px] font-semibold text-clay-deep underline-offset-4 group-hover:underline">
                       Comprar →
                     </span>

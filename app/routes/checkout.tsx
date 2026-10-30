@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useRouteLoaderData } from "react-router";
 import type { Route } from "./+types/checkout";
 import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { cn } from "~/lib/cn";
 import { seoMeta } from "~/lib/seo";
 import { trackBeginCheckout } from "~/lib/analytics";
+import { isPromoActive, PROMO } from "~/lib/promo";
 import { PayPalButton } from "~/components/PayPalButton";
 
 // noindex: página transitoria y específica del carrito de cada visitante,
@@ -65,7 +66,7 @@ const labelClass = "text-sm font-medium text-espresso";
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined;
 
 export default function Checkout() {
-  const { items, subtotal, hydrated } = useCart();
+  const { items, subtotal, hydrated, reprice } = useCart();
   const navigate = useNavigate();
 
   const [address, setAddress] = useState<Address>(EMPTY_ADDRESS);
@@ -83,10 +84,43 @@ export default function Checkout() {
   const [payError, setPayError] = useState<string | null>(null);
   const [paypalError, setPaypalError] = useState<string | null>(null);
   const [discountCode, setDiscountCode] = useState("");
+  // Promoción de temporada (tarea 148): con la hora del servidor (root) para que
+  // el HTML y la hidratación coincidan. Mientras dura, el código de bienvenida
+  // no se acepta, así que el campo se reemplaza por un aviso.
+  const rootData = useRouteLoaderData("root") as { now?: number } | undefined;
+  const promoActive = isPromoActive(rootData?.now ?? Date.now());
+  const appliedCode = promoActive ? "" : discountCode.trim();
+  const [pricesUpdated, setPricesUpdated] = useState(false);
 
   useEffect(() => {
     if (hydrated && items.length === 0) navigate("/tienda");
   }, [hydrated, items.length, navigate]);
+
+  // Precios vigentes (tarea 148): si empezó o terminó una promoción mientras el
+  // producto estaba en el carrito, se actualiza el precio guardado antes de que
+  // la clienta vea un total distinto al que se le va a cobrar. Una sola vez por
+  // visita; si la consulta falla, el servidor igual cobra el precio correcto.
+  const repriceChecked = useRef(false);
+  useEffect(() => {
+    if (!hydrated || items.length === 0 || repriceChecked.current) return;
+    repriceChecked.current = true;
+    const productIds = Array.from(new Set(items.map((i) => i.productId)));
+    fetch("/api/cart-prices", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productIds }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { prices?: Record<string, number> } | null) => {
+        const prices = data?.prices;
+        if (!prices) return;
+        if (items.some((i) => prices[i.productId] !== undefined && prices[i.productId] !== i.price)) {
+          reprice(prices);
+          setPricesUpdated(true);
+        }
+      })
+      .catch(() => {});
+  }, [hydrated, items, reprice]);
 
   // GA4 begin_checkout (tarea 004) — una sola vez por visita a esta página
   // (no en cada re-render al cambiar cantidades/dirección), y solo cuando ya
@@ -198,7 +232,7 @@ export default function Checkout() {
             serviceCode: selectedRate.serviceCode,
             total: selectedRate.total,
           },
-          discountCode: discountCode.trim() || undefined,
+          discountCode: appliedCode || undefined,
         }),
       });
       const data = await res.json();
@@ -222,6 +256,11 @@ export default function Checkout() {
           {items.length} {items.length === 1 ? "artículo" : "artículos"} · Subtotal{" "}
           {formatPrice(subtotal)}
         </p>
+        {pricesUpdated && (
+          <p role="status" className="mt-1 text-sm text-muted">
+            Actualizamos los precios de tu carrito a los vigentes.
+          </p>
+        )}
       </div>
 
       <section className="rounded-xl bg-bone p-5">
@@ -405,15 +444,24 @@ export default function Checkout() {
             ))}
           </div>
 
-          <div className="mt-5 max-w-xs">
-            <label className={labelClass}>¿Tienes un código de descuento?</label>
-            <input
-              value={discountCode}
-              onChange={(e) => setDiscountCode(e.target.value)}
-              placeholder="ej. KINARA10-A3F9K2"
-              className={cn(inputClass, "font-mono uppercase")}
-            />
-          </div>
+          {promoActive ? (
+            <p className="mt-5 max-w-md rounded-lg bg-clay/10 px-4 py-3 text-sm text-espresso">
+              <span className="font-semibold">
+                {PROMO.name}: {PROMO.percent}% de descuento ya aplicado en tus productos.
+              </span>{" "}
+              No se suma con códigos de descuento.
+            </p>
+          ) : (
+            <div className="mt-5 max-w-xs">
+              <label className={labelClass}>¿Tienes un código de descuento?</label>
+              <input
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value)}
+                placeholder="ej. KINARA10-A3F9K2"
+                className={cn(inputClass, "font-mono uppercase")}
+              />
+            </div>
+          )}
 
           <button
             onClick={onPay}
@@ -443,7 +491,7 @@ export default function Checkout() {
                   serviceCode: selectedRate.serviceCode,
                   total: selectedRate.total,
                 }}
-                discountCode={discountCode}
+                discountCode={appliedCode}
                 onError={setPaypalError}
               />
               {paypalError && (

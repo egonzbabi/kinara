@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import type { Product, ColorOption } from "~/data/products";
 import { SIZE_ORDER, ACCESSORY_SIZE, VALID_BADGES as VALID_BADGES_LIST } from "./catalog-constants";
+import { applyPromo, promoPreviewPrice } from "./promo";
 
 // Orden en el que se evalúan/muestran las tallas disponibles de un producto —
 // las de ropa primero, "Única" (accesorios) al final (tarea 081).
@@ -69,14 +70,20 @@ function mapRow(row: ProductRow): Product {
   const hasColorPhotos = Object.keys(colorImages).length > 0;
   const colors = Array.from(colorMap.values());
 
+  // Promoción de temporada (tarea 148): mientras la ventana está activa, el
+  // precio mostrado baja y el normal pasa a tachado. La base no se toca.
+  const shown = applyPromo(row.price, row.compare_at);
+
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     category: row.category,
     kind: row.kind,
-    price: row.price,
-    compareAt: row.compare_at ?? undefined,
+    price: shown.price,
+    compareAt: shown.compareAt,
+    onPromo: shown.promoted || undefined,
+    promoPreviewPrice: promoPreviewPrice(row.price, row.compare_at),
     colors,
     sizes,
     gallery: genericImages.length > 0 ? genericImages : ["/productos/placeholder.png"],

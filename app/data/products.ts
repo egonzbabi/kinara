@@ -13,6 +13,10 @@ export type Product = {
   kind: string;
   price: number;
   compareAt?: number;
+  /** Verdadero mientras la promoción de temporada (tarea 148) baja este precio. */
+  onPromo?: boolean;
+  /** Precio que tendrá en la promoción de temporada, mostrado de forma anticipada (tarea 148). */
+  promoPreviewPrice?: number;
   colors: ColorOption[];
   sizes: string[];
   gallery: string[];

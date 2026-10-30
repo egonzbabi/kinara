@@ -29,10 +29,13 @@ import { activeLandings } from "~/lib/shop-landings";
 // vista del admin.
 export async function loader({ request }: Route.LoaderArgs) {
   if (new URL(request.url).pathname.startsWith("/admin")) {
-    return { navLinks: [], typePages: [] };
+    return { navLinks: [], typePages: [], now: Date.now() };
   }
   const products = await getAllProducts();
   return {
+    // Hora del servidor para la barra de anuncios (tarea 148): así el HTML y la
+    // hidratación coinciden aunque la promoción empiece o termine justo ahora.
+    now: Date.now(),
     navLinks: buildShopNavLinks(products),
     // Páginas por tipo de prenda (tarea 136) para el pie de página — solo las
     // que tienen productos; "para mujer" se quita del texto del enlace.
@@ -133,7 +136,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
 
   return (
     <CartProvider>
-      <AnnouncementBar />
+      <AnnouncementBar now={loaderData.now} />
       <SiteNav links={loaderData.navLinks} />
       <main id="contenido">
         <Outlet />

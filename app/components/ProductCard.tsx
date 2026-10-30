@@ -6,6 +6,7 @@ import { formatPrice } from "~/lib/formatPrice";
 import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
 import { getColorFamily } from "~/lib/colorFamilies";
+import { PROMO } from "~/lib/promo";
 
 // Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
 // "Image Transformations" de Supabase.
@@ -146,6 +147,33 @@ export function ProductCard({
                 hover ? "opacity-100" : "opacity-0",
               )}
             />
+          )}
+
+          {/* Marca de la promoción de temporada (tarea 148): arriba a la derecha de
+              la foto. Para no encimarse con la etiqueta de siempre (Nuevo,
+              Best-seller) en tarjetas angostas: las fechas van abreviadas por
+              debajo de `xl` y, en celular, baja debajo de esa etiqueta. */}
+          {(product.onPromo || product.promoPreviewPrice !== undefined) && (
+            <span
+              className={cn(
+                "absolute right-3 rounded-2xl bg-clay px-2 py-1 text-center text-[11px] font-semibold leading-tight tracking-wide text-bone shadow-sm sm:top-3 sm:px-2.5",
+                displayBadge ? "top-[46px]" : "top-3",
+              )}
+            >
+              {product.onPromo ? (
+                `${PROMO.name} −${PROMO.percent}%`
+              ) : (
+                <>
+                  {PROMO.name}
+                  <span className="block text-[10px] font-medium xl:hidden">
+                    {PROMO.rangeShortCompact}
+                  </span>
+                  <span className="hidden text-[10px] font-medium xl:block">
+                    {PROMO.rangeShort}
+                  </span>
+                </>
+              )}
+            </span>
           )}
 
           {displayBadge && (
@@ -307,7 +335,7 @@ export function ProductCard({
         {/* Color dots — decorativos para vista, con equivalente de texto para
             lector de pantalla (no tenían ninguno: ni aria-label individual
             ni alternativa agrupada, tarea 005). */}
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1">
           <span className="sr-only">
             Colores disponibles: {product.colors.map((c) => c.name).join(", ")}
           </span>
@@ -320,6 +348,18 @@ export function ProductCard({
               style={{ background: c.hex }}
             />
           ))}
+          {/* Precio de la promoción de temporada (tarea 148) en esta fila y no en
+              la del precio: ahí le quitaba espacio al nombre del producto. */}
+          {product.promoPreviewPrice !== undefined && (
+            <span className="ml-auto text-[13px] font-semibold text-clay">
+              {PROMO.name}: {formatPrice(product.promoPreviewPrice)}
+            </span>
+          )}
+          {product.onPromo && (
+            <span className="ml-auto text-[13px] font-semibold text-clay">
+              Precio {PROMO.name}
+            </span>
+          )}
         </div>
       </Link>
     </article>

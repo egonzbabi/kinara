@@ -1,6 +1,7 @@
 import type { Route } from "./+types/feed.xml";
 import { getAllProducts } from "~/lib/catalog";
 import { SITE_URL, SITE_NAME } from "~/lib/seo";
+import { PROMO, promoPrice } from "~/lib/promo";
 import type { Product } from "~/data/products";
 
 // Google Merchant Center (tarea 132) lee este feed una vez al día para
@@ -112,6 +113,14 @@ function buildItems(product: Product): string[] {
 
   const link = `${SITE_URL}/producto/${product.slug}`;
   const onSale = product.compareAt !== undefined && product.compareAt > product.price;
+  // Promoción de temporada (tarea 148): se manda a Merchant con su ventana de
+  // fechas desde unos días antes, para que Google ya la tenga cuando empiece y
+  // la apague sola al terminar (si el feed la dejara fija, Google vería un
+  // precio distinto al de la página y rechazaría los productos).
+  const promoUpcoming =
+    !product.onPromo && product.compareAt === undefined && Date.now() < Date.parse(PROMO.endsAt);
+  const regularPrice = product.onPromo || onSale ? product.compareAt! : product.price;
+  const salePrice = promoUpcoming ? promoPrice(product.price) : onSale ? product.price : null;
   const description = product.description.trim() || product.name;
   const items: string[] = [];
 
@@ -143,8 +152,11 @@ function buildItems(product: Product): string[] {
         tag("image_link", mainImage),
         ...extraImages.map((url) => tag("additional_image_link", url)),
         tag("availability", stock > 0 ? "in_stock" : "out_of_stock"),
-        tag("price", mxn(onSale ? product.compareAt! : product.price)),
-        onSale ? tag("sale_price", mxn(product.price)) : "",
+        tag("price", mxn(regularPrice)),
+        salePrice !== null ? tag("sale_price", mxn(salePrice)) : "",
+        product.onPromo || promoUpcoming
+          ? tag("sale_price_effective_date", PROMO.feedWindow)
+          : "",
         tag("brand", SITE_NAME),
         tag("condition", "new"),
         tag("identifier_exists", "no"),

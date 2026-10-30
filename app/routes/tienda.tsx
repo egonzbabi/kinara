@@ -141,7 +141,8 @@ export default function Tienda({ loaderData }: Route.ComponentProps) {
         p.colors.some((c) => colors.includes(getColorFamily(c.name))),
       );
     if (types.length) list = list.filter((p) => types.includes(p.kind));
-    if (onlyOnSale) list = list.filter((p) => p.isOnSale);
+    // Incluye los de la promoción de temporada (tarea 148), no solo los ya marcados en oferta.
+    if (onlyOnSale) list = list.filter((p) => p.isOnSale || p.onPromo);
     if (q.trim()) {
       const needle = normalize(q);
       list = list.filter(

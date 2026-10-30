@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -38,6 +39,8 @@ type CartCtx = {
   open: () => void;
   close: () => void;
   add: (payload: AddPayload) => void;
+  /** Actualiza el precio de las líneas con el precio vigente (por productId). */
+  reprice: (prices: Record<string, number>) => void;
   remove: (key: string) => void;
   setQty: (key: string, qty: number) => void;
   clear: () => void;
@@ -89,9 +92,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setHydrated(true);
   }, []);
 
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-
   const add = useCallback((payload: AddPayload) => {
     const key = lineKey(payload);
     const qty = payload.qty ?? 1;
@@ -142,6 +142,52 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const reprice = useCallback((prices: Record<string, number>) => {
+    setItems((prev) => {
+      if (!prev.some((i) => prices[i.productId] !== undefined && prices[i.productId] !== i.price)) {
+        return prev;
+      }
+      const next = prev.map((i) => {
+        const price = prices[i.productId];
+        return price === undefined || price === i.price ? i : { ...i, price };
+      });
+      writeStoredCart(next);
+      return next;
+    });
+  }, []);
+
+  // Precios vigentes (tarea 148): el carrito guarda el precio de cuando se
+  // agregó el producto; si empezó o terminó una promoción desde entonces, el
+  // carrito (cajón y /checkout) mostraría un precio que ya no es el real. Se
+  // consulta al hidratar y cada vez que se abre el cajón; el cobro igual se
+  // recalcula siempre en el servidor. Si la consulta falla, se deja como está.
+  const itemsRef = useRef<CartItem[]>([]);
+  itemsRef.current = items;
+  const refreshPrices = useCallback(() => {
+    const productIds = Array.from(new Set(itemsRef.current.map((i) => i.productId)));
+    if (productIds.length === 0) return;
+    fetch("/api/cart-prices", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productIds }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { prices?: Record<string, number> } | null) => {
+        if (data?.prices) reprice(data.prices);
+      })
+      .catch(() => {});
+  }, [reprice]);
+
+  useEffect(() => {
+    if (hydrated) refreshPrices();
+  }, [hydrated, refreshPrices]);
+
+  const open = useCallback(() => {
+    setIsOpen(true);
+    refreshPrices();
+  }, [refreshPrices]);
+  const close = useCallback(() => setIsOpen(false), []);
+
   const clear = useCallback(() => {
     setItems([]);
     writeStoredCart([]);
@@ -150,8 +196,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartCtx>(() => {
     const count = items.reduce((n, i) => n + i.qty, 0);
     const subtotal = items.reduce((n, i) => n + i.price * i.qty, 0);
-    return { items, count, subtotal, hydrated, isOpen, open, close, add, remove, setQty, clear };
-  }, [items, hydrated, isOpen, open, close, add, remove, setQty, clear]);
+    return { items, count, subtotal, hydrated, isOpen, open, close, add, remove, setQty, reprice, clear };
+  }, [items, hydrated, isOpen, open, close, add, remove, setQty, reprice, clear]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

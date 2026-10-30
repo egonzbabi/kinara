@@ -22,6 +22,7 @@ import { seoMeta, absoluteUrl, RETURN_POLICY_SCHEMA } from "~/lib/seo";
 import { trackViewItem, trackWhatsappClick } from "~/lib/analytics";
 import { productMessage, whatsappLink } from "~/lib/whatsapp";
 import { WhatsappIcon } from "~/components/WhatsappIcon";
+import { PROMO } from "~/lib/promo";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const product = await getProductBySlug(params.slug);
@@ -228,6 +229,25 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               </span>
             )}
           </div>
+          {/* Aviso anticipado de la promoción de temporada (tarea 148): solo
+              entre el anuncio y el inicio, y solo si el producto participa. */}
+          {product.promoPreviewPrice !== undefined && (
+            <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <span className="rounded-full bg-clay px-2.5 py-1 text-[11px] font-semibold tracking-wide text-bone">
+                {PROMO.name} −{PROMO.percent}%
+              </span>
+              <span className="text-base font-semibold text-clay">
+                Del {PROMO.rangeLong}: {formatPrice(product.promoPreviewPrice)}
+              </span>
+            </p>
+          )}
+          {product.onPromo && (
+            <p className="mt-2">
+              <span className="rounded-full bg-clay px-2.5 py-1 text-[11px] font-semibold tracking-wide text-bone">
+                {PROMO.name} −{PROMO.percent}% · hasta el {PROMO.endLabel}
+              </span>
+            </p>
+          )}
 
           <p className="mt-5 max-w-[52ch] leading-relaxed text-espresso/90">
             {product.description}

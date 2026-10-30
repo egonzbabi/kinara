@@ -4,6 +4,7 @@ import { getShippingRates, type ShippingAddress } from "~/lib/skydropx.server";
 import { validateDiscountCode } from "~/lib/discount-signups.server";
 import { DISCOUNT_MIN_SUBTOTAL_MXN } from "~/lib/discount-constants";
 import { formatPrice } from "~/lib/formatPrice";
+import { applyPromo, isPromoActive, PROMO, PROMO_CHECKOUT_GRACE_MS } from "~/lib/promo";
 import type { CartItem } from "~/context/CartContext";
 
 interface ChosenShipping {
@@ -80,7 +81,7 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
   const productIds = Array.from(new Set(items.map((i) => i.productId)));
   const { data: products, error: productsError } = await supabaseAdmin
     .from("products")
-    .select("id, name, price")
+    .select("id, name, price, compare_at")
     .in("id", productIds);
   if (productsError) {
     console.error("[checkout] error consultando products:", productsError);
@@ -129,6 +130,15 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
       continue;
     }
 
+    // Precio con promoción de temporada (tarea 148), calculado aquí en el
+    // servidor — con un margen al cierre para quien vio el precio en caché.
+    const { price: unitPrice } = applyPromo(
+      product.price,
+      product.compare_at,
+      Date.now(),
+      PROMO_CHECKOUT_GRACE_MS,
+    );
+
     trustedItems.push({
       productId: item.productId,
       productName: product.name,
@@ -136,9 +146,9 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
       colorName: item.color,
       size: item.size,
       quantity: item.qty,
-      price: product.price,
+      price: unitPrice,
     });
-    subtotal += product.price * item.qty;
+    subtotal += unitPrice * item.qty;
   }
 
   if (missing.length > 0) {
@@ -194,6 +204,15 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
   let discountApplies = false;
   const discountCode = body.discountCode?.trim();
   if (discountCode) {
+    // Los descuentos no se suman (tarea 148): durante la promoción de temporada
+    // el código de bienvenida no se acepta; vuelve a servir al terminar.
+    if (isPromoActive(Date.now(), PROMO_CHECKOUT_GRACE_MS)) {
+      return {
+        ok: false,
+        status: 400,
+        error: `El código de bienvenida no se suma a la promoción de ${PROMO.name}. Quítalo para continuar; te sigue sirviendo después de la promoción.`,
+      };
+    }
     if (subtotal < DISCOUNT_MIN_SUBTOTAL_MXN) {
       return {
         ok: false,

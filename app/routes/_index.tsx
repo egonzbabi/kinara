@@ -7,6 +7,8 @@ import { CategoryTiles } from "~/components/CategoryTiles";
 import { ProductGrid } from "~/components/ProductGrid";
 import { EditorialSplit } from "~/components/EditorialSplit";
 import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
+import { BuenFinBand, BuenFinStrip } from "~/components/BuenFinBand";
+import { isPromoActive, isPromoAnnounced } from "~/lib/promo";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { ComingSoonRail } from "~/components/ComingSoonRail";
 import { getAllProducts } from "~/lib/catalog";
@@ -67,12 +69,13 @@ export function headers(_: Route.HeadersArgs) {
 
 export async function loader() {
   const products = await getAllProducts();
-  return { products };
+  // Hora del servidor para la banda de Buen Fin (tarea 148).
+  return { products, now: Date.now() };
 }
 
 export default function Index({ loaderData }: Route.ComponentProps) {
   useScrollReveal();
-  const { products } = loaderData;
+  const { products, now } = loaderData;
 
   // Enlaces del footer/menú a secciones del home por #hash (ej. "Lo nuevo",
   // "Próximamente") — igual que "/#bienvenida" (ver WelcomeDiscountBanner),
@@ -98,7 +101,10 @@ export default function Index({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
+      {isPromoAnnounced(now) && <BuenFinStrip now={now} />}
       <Hero />
+
+      {isPromoAnnounced(now) && <BuenFinBand now={now} />}
 
       {/* Mensaje de marca en texto visible (tarea 142): Google arma el
           fragmento del resultado con el texto de la página, y sin esta frase
@@ -111,7 +117,9 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </p>
       </section>
 
-      <WelcomeDiscountBanner />
+      {/* Durante la promoción de temporada (tarea 148) el código de bienvenida no
+          se acepta, así que se oculta para no prometer algo que no aplica. */}
+      {!isPromoActive(now) && <WelcomeDiscountBanner />}
       <TrustStrip />
       <CategoryTiles availableLandings={activeLandings(products).map((l) => l.slug)} />
 
