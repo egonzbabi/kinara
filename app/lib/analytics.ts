@@ -106,6 +106,26 @@ export function trackBeginCheckout(items: GA4Item[], value: number) {
   });
 }
 
+// Pasos intermedios del checkout (tarea 149): sin estos dos, el embudo de GA4
+// mostraba 0% en "Add delivery" y "Add payment" aunque no fuera dato real.
+export function trackAddShippingInfo(items: GA4Item[], value: number, shippingTier: string) {
+  trackEvent("add_shipping_info", {
+    currency: "MXN",
+    value,
+    shipping_tier: shippingTier,
+    items: items.map(toGaItem),
+  });
+}
+
+export function trackAddPaymentInfo(items: GA4Item[], value: number, paymentType: string) {
+  trackEvent("add_payment_info", {
+    currency: "MXN",
+    value,
+    payment_type: paymentType,
+    items: items.map(toGaItem),
+  });
+}
+
 export function trackPurchase(params: {
   transactionId: string;
   value: number;

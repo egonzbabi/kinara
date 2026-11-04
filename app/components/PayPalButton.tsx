@@ -60,16 +60,19 @@ export function PayPalButton({
   shipping,
   discountCode,
   onError,
+  onStart,
 }: {
   items: CartItem[];
   address: Address;
   shipping: ChosenShipping;
   discountCode: string;
   onError: (message: string) => void;
+  /** Se llama al iniciar el pago con PayPal (medición del embudo, tarea 149). */
+  onStart?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const stateRef = useRef({ items, address, shipping, discountCode });
-  stateRef.current = { items, address, shipping, discountCode };
+  const stateRef = useRef({ items, address, shipping, discountCode, onStart });
+  stateRef.current = { items, address, shipping, discountCode, onStart };
 
   useEffect(() => {
     const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID as string | undefined;
@@ -87,6 +90,7 @@ export function PayPalButton({
           style: { layout: "horizontal", color: "gold", label: "paypal", height: 48 },
           createOrder: async () => {
             const current = stateRef.current;
+            current.onStart?.();
             const res = await fetch("/api/create-paypal-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },

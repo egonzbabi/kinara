@@ -188,5 +188,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 146 | [146-cambios-de-talla-visibles.md](146-cambios-de-talla-visibles.md) | done | Hacer visible el cambio de talla en la página de producto |
 | 147 | [147-correo-pedido-enviado-rastreo.md](147-correo-pedido-enviado-rastreo.md) | in-progress | Correo automático 'Tu pedido va en camino' con botón de rastreo al comprar la guía |
 | 148 | [148-promocion-buen-fin-30.md](148-promocion-buen-fin-30.md) | in-progress | Promoción Buen Fin: 30% automático del 10 al 17 de noviembre de 2026 |
+| 149 | [149-checkout-total-visible-y-envios.md](149-checkout-total-visible-y-envios.md) | done | Checkout: total visible, lista de envíos más corta y eventos de GA4 de envío/pago |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

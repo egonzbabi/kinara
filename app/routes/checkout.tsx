@@ -5,7 +5,7 @@ import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { cn } from "~/lib/cn";
 import { seoMeta } from "~/lib/seo";
-import { trackBeginCheckout } from "~/lib/analytics";
+import { trackAddPaymentInfo, trackAddShippingInfo, trackBeginCheckout } from "~/lib/analytics";
 import { isPromoActive, PROMO } from "~/lib/promo";
 import { PayPalButton } from "~/components/PayPalButton";
 
@@ -56,6 +56,10 @@ type PostalCodeLookup =
   | { found: true; estado: string; municipio: string; colonias: string[] }
   | { found: false };
 
+// En celular, 12 tarifas obligan a bajar mucho para llegar al botón de pago
+// (tarea 149): se ven las más baratas y el resto queda en "Ver más opciones".
+const VISIBLE_RATES = 3;
+
 const inputClass =
   "mt-1.5 w-full rounded-lg border border-line bg-bone px-3 py-2.5 text-sm text-espresso focus:border-clay focus:outline-none";
 const labelClass = "text-sm font-medium text-espresso";
@@ -79,6 +83,8 @@ export default function Checkout() {
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [showAllRates, setShowAllRates] = useState(false);
+  const ratesSectionRef = useRef<HTMLElement>(null);
 
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
@@ -187,6 +193,22 @@ export default function Checkout() {
     (field) => !address[field].trim(),
   );
 
+  // GA4 add_shipping_info / add_payment_info (tarea 149): una vez por visita,
+  // para completar el embudo (begin_checkout → envío → pago → compra).
+  const gaItems = items.map((i) => ({
+    id: i.productId,
+    name: i.name,
+    price: i.price,
+    quantity: i.qty,
+  }));
+  const shippingInfoFired = useRef(false);
+  const paymentInfoFired = useRef(false);
+  const fireAddPaymentInfo = (paymentType: string) => {
+    if (paymentInfoFired.current) return;
+    paymentInfoFired.current = true;
+    trackAddPaymentInfo(gaItems, subtotal, paymentType);
+  };
+
   const onQuote = async () => {
     if (missingFields.length > 0) {
       setAttempted(true);
@@ -204,6 +226,15 @@ export default function Checkout() {
       if (data.rates) {
         setRates(data.rates);
         setSelectedCode(data.rates[0]?.serviceCode ?? null);
+        setShowAllRates(false);
+        if (data.rates.length > 0 && !shippingInfoFired.current) {
+          shippingInfoFired.current = true;
+          trackAddShippingInfo(
+            gaItems,
+            subtotal,
+            `${data.rates[0].providerDisplayName} · ${data.rates[0].serviceName}`,
+          );
+        }
       } else {
         setQuoteError(data.error || "No se pudo cotizar el envío. Intenta de nuevo.");
       }
@@ -216,8 +247,30 @@ export default function Checkout() {
 
   const selectedRate = rates?.find((r) => r.serviceCode === selectedCode) ?? null;
 
+  // Solo las más baratas (las tarifas llegan ordenadas por precio); la elegida
+  // siempre se queda a la vista aunque no esté entre las primeras.
+  const visibleRates =
+    rates && !showAllRates
+      ? rates.filter((r, i) => i < VISIBLE_RATES || r.serviceCode === selectedCode)
+      : rates;
+  const hiddenRatesCount = rates && visibleRates ? rates.length - visibleRates.length : 0;
+  const orderTotal = subtotal + (selectedRate?.total ?? 0);
+
+  // En celular las tarifas aparecen debajo del formulario, fuera de pantalla:
+  // al cotizar se baja solas hasta ahí para que no parezca que no pasó nada.
+  const hasRates = !!rates && rates.length > 0;
+  useEffect(() => {
+    if (!hasRates) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    ratesSectionRef.current?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [hasRates]);
+
   const onPay = async () => {
     if (!selectedRate) return;
+    fireAddPaymentInfo("card_oxxo");
     setPayLoading(true);
     setPayError(null);
     try {
@@ -408,10 +461,10 @@ export default function Checkout() {
       </section>
 
       {rates && rates.length > 0 && (
-        <section className="rounded-xl bg-bone p-5">
+        <section ref={ratesSectionRef} className="scroll-mt-4 rounded-xl bg-bone p-5">
           <h2 className="font-display text-lg text-espresso">Método de envío</h2>
           <div className="mt-4 flex flex-col gap-2">
-            {rates.map((rate) => (
+            {(visibleRates ?? rates).map((rate) => (
               <label
                 key={rate.serviceCode}
                 className={cn(
@@ -443,6 +496,16 @@ export default function Checkout() {
               </label>
             ))}
           </div>
+          {rates.length > VISIBLE_RATES && (
+            <button
+              type="button"
+              onClick={() => setShowAllRates((v) => !v)}
+              aria-expanded={showAllRates}
+              className="mt-3 text-sm font-medium text-espresso underline underline-offset-4 hover:text-clay"
+            >
+              {showAllRates ? "Ver menos opciones" : `Ver más opciones (${hiddenRatesCount})`}
+            </button>
+          )}
 
           {promoActive ? (
             <p className="mt-5 max-w-md rounded-lg bg-clay/10 px-4 py-3 text-sm text-espresso">
@@ -463,12 +526,40 @@ export default function Checkout() {
             </div>
           )}
 
+          {selectedRate && (
+            <div className="mt-5 max-w-sm border-t border-line pt-4">
+              <dl aria-live="polite" className="flex flex-col gap-1.5 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted">Subtotal</dt>
+                  <dd>{formatPrice(subtotal)}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted">Envío · {selectedRate.providerDisplayName}</dt>
+                  <dd>{formatPrice(selectedRate.total)}</dd>
+                </div>
+                <div className="mt-1.5 flex justify-between gap-4 border-t border-line pt-2.5 text-base font-medium text-espresso">
+                  <dt>Total</dt>
+                  <dd>{formatPrice(orderTotal)}</dd>
+                </div>
+              </dl>
+              {appliedCode && (
+                <p className="mt-2 text-[13px] text-muted">
+                  Tu código de descuento se aplica en el siguiente paso.
+                </p>
+              )}
+            </div>
+          )}
+
           <button
             onClick={onPay}
             disabled={!selectedRate || payLoading}
             className="btn btn-clay mt-5 w-full sm:w-auto"
           >
-            {payLoading ? "Redirigiendo…" : "Pagar con tarjeta u OXXO"}
+            {payLoading
+              ? "Redirigiendo…"
+              : selectedRate && !appliedCode
+                ? `Pagar ${formatPrice(orderTotal)} con tarjeta u OXXO`
+                : "Pagar con tarjeta u OXXO"}
           </button>
           {payError && (
             <p className="mt-2 rounded-lg bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">
@@ -493,6 +584,7 @@ export default function Checkout() {
                 }}
                 discountCode={appliedCode}
                 onError={setPaypalError}
+                onStart={() => fireAddPaymentInfo("paypal")}
               />
               {paypalError && (
                 <p className="mt-2 rounded-lg bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">
