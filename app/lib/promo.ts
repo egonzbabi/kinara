@@ -14,7 +14,7 @@ export const PROMO = {
   startsAt: "2026-11-10T00:00:00-06:00",
   endsAt: "2026-11-18T00:00:00-06:00",
   // La barra de anuncios avisa unos días antes de que empiece.
-  announceFrom: "2026-11-05T00:00:00-06:00",
+  announceFrom: "2026-11-04T00:00:00-06:00",
   // Textos de las fechas que se muestran en el sitio (un solo lugar: si cambian
   // las fechas de arriba, cambian aquí también).
   rangeShort: "10 al 17 de nov",
