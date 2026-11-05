@@ -1,0 +1,25 @@
+# Tarea 147: revisa en Skydropx si hay guías nuevas y avisa a las clientas.
+# Vercel (plan gratuito) solo corre su cron una vez al día; esta tarea llama a
+# la misma ruta cada 15 minutos. Cada llamada solo consulta Skydropx si hay
+# pedidos esperando guía. Si la ruta falla, GitHub avisa por correo.
+name: Revisar guías de envío
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Llamar a /api/cron/sync-shipments
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl --fail --silent --show-error --max-time 120 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            https://www.kinarafit.com.mx/api/cron/sync-shipments
