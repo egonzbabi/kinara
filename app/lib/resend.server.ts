@@ -196,7 +196,7 @@ function buildOrderConfirmationHtml(params: {
   const shippingNote =
     shippingCarrier && shippingDays
       ? `Se enviará por <strong>${escapeHtml(shippingCarrier)}</strong>, con entrega estimada en ${shippingDays} día${shippingDays === 1 ? "" : "s"} hábil${shippingDays === 1 ? "" : "es"}.`
-      : "Te avisaremos por correo en cuanto tu pedido salga, con su número de rastreo.";
+      : "Tu número de rastreo llegará en el correo de envío.";
 
   return `
 <!DOCTYPE html>
@@ -227,9 +227,32 @@ function buildOrderConfirmationHtml(params: {
                   Gracias por tu compra, ${escapeHtml(firstName)}.
                 </h1>
                 <p style="margin:0;font-size:15px;line-height:1.6;color:${MUTED};font-family:Helvetica,Arial,sans-serif;">
-                  Ya recibimos tu pedido y lo estamos preparando con cuidado. En cuanto salga
-                  de nuestras manos, te avisamos.
+                  Recibimos tu pedido y ya lo estamos preparando con mucho cuidado. Cuando
+                  salga de nuestras manos y vaya en camino, te enviaremos otro correo con tu
+                  número de rastreo.
                 </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 40px 0;font-family:Helvetica,Arial,sans-serif;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="28" valign="top" style="padding:0 12px 14px 0;">
+                      <div style="width:24px;height:24px;line-height:24px;border-radius:12px;background:${CLAY};color:${BONE};text-align:center;font-size:12px;font-weight:700;">1</div>
+                    </td>
+                    <td valign="top" style="padding:2px 0 14px;font-size:14px;line-height:1.5;color:${ESPRESSO};">
+                      <strong>Recibimos tu pedido.</strong> Lo estamos preparando.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="28" valign="top" style="padding:0 12px 0 0;">
+                      <div style="width:22px;height:22px;line-height:22px;border-radius:12px;border:1px solid ${MUTED};color:${MUTED};text-align:center;font-size:12px;font-weight:700;">2</div>
+                    </td>
+                    <td valign="top" style="padding:2px 0 0;font-size:14px;line-height:1.5;color:${MUTED};">
+                      <strong style="color:${ESPRESSO};">Va en camino.</strong> Te avisamos por correo con tu número de rastreo.
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
