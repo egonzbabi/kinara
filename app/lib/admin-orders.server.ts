@@ -316,6 +316,30 @@ export type ShipmentSyncOutcome = {
  */
 export const AUTO_SHIPPED_NOTICE_FROM = "2026-10-20T06:00:00.000Z";
 
+/**
+ * Guarda el estatus de rastreo que devuelve Skydropx solo cuando cambia respecto
+ * al último guardado del pedido. Nunca interrumpe la revisión: si falla, solo se
+ * registra el error.
+ */
+async function logShipmentStatus(orderId: string, shipmentId: string, status: string): Promise<void> {
+  try {
+    const { data: last } = await supabaseAdmin
+      .from("shipment_status_log")
+      .select("tracking_status")
+      .eq("order_id", orderId)
+      .order("seen_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (last?.tracking_status === status) return;
+    const { error } = await supabaseAdmin
+      .from("shipment_status_log")
+      .insert({ order_id: orderId, skydropx_shipment_id: shipmentId, tracking_status: status });
+    if (error) console.error(`[envío] No se pudo guardar el estatus de ${orderId}: ${error.message}`);
+  } catch (err) {
+    console.error(`[envío] No se pudo guardar el estatus de ${orderId}:`, err);
+  }
+}
+
 export async function syncShipmentsForOrders(orderId?: string): Promise<ShipmentSyncOutcome[]> {
   let query = supabaseAdmin
     .from("orders")
@@ -359,6 +383,9 @@ export async function syncShipmentsForOrders(orderId?: string): Promise<Shipment
 
   for (const order of inTransit ?? []) {
     const shipment = shipments.find((sh) => sh.id === order.skydropx_shipment_id);
+    if (shipment?.trackingStatus && order.skydropx_shipment_id) {
+      await logShipmentStatus(order.id, order.skydropx_shipment_id, shipment.trackingStatus);
+    }
     if (shipment?.trackingStatus && /^delivered$/i.test(shipment.trackingStatus)) {
       const { error: upErr } = await supabaseAdmin
         .from("orders")

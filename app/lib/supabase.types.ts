@@ -140,6 +140,21 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["pending_checkouts"]["Insert"]>;
         Relationships: [];
       };
+      shipment_status_log: {
+        Row: {
+          id: string;
+          order_id: string;
+          skydropx_shipment_id: string;
+          tracking_status: string;
+          seen_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["shipment_status_log"]["Row"], "id" | "seen_at"> & {
+          id?: string;
+          seen_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["shipment_status_log"]["Insert"]>;
+        Relationships: [];
+      };
       postal_codes: {
         Row: {
           id: number;
