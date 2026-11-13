@@ -4,7 +4,8 @@ import { syncShipmentsForOrders } from "~/lib/admin-orders.server";
 /**
  * Proceso automático (tarea 147): lo llama el cron de Vercel. Busca en Skydropx
  * la guía de los pedidos recientes que aún no tienen rastreo y, si hay UNA sola
- * coincidencia estricta, guarda el rastreo y avisa a la clienta por correo.
+ * coincidencia estricta, la guarda en el pedido. El correo "va en camino" sale
+ * después, cuando Skydropx reporta que la paquetería ya recogió el paquete.
  *
  * Protegido con `CRON_SECRET`: Vercel lo manda solo como `Authorization: Bearer …`
  * cuando la variable existe. Sin la variable configurada responde 503 y no hace
@@ -27,6 +28,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       ok: true,
       checked: outcomes.length,
       sent: count("sent"),
+      linked: count("linked"),
       delivered: count("delivered"),
       noMatch: count("no_match"),
       ambiguous: outcomes.filter((o) => o.result === "ambiguous").map((o) => o.orderId),

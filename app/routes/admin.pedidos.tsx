@@ -66,7 +66,7 @@ export async function action({ request }: Route.ActionArgs) {
     try {
       const [outcome] = await syncShipmentsForOrders(id);
       if (!outcome) return { ok: false, error: "Este pedido ya tiene rastreo o no está en estado Procesando." };
-      if (outcome.result === "sent") return { ok: true };
+      if (outcome.result === "sent" || outcome.result === "linked") return { ok: true };
       if (outcome.result === "ambiguous") return { ok: false, error: outcome.detail };
       if (outcome.result === "failed") return { ok: false, error: outcome.detail };
       return {
@@ -388,7 +388,7 @@ function BuyLabelRow({ order }: { order: AdminOrderListItem }) {
             onSubmit={(e) => {
               if (
                 !confirm(
-                  `Esto comprará una guía real con Skydropx (${order.shippingCarrier}) y tiene costo — se descuenta del saldo de tu cuenta de Skydropx. Al terminar se enviará a la clienta el correo con su rastreo. ¿Continuar?`,
+                  `Esto comprará una guía real con Skydropx (${order.shippingCarrier}) y tiene costo — se descuenta del saldo de tu cuenta de Skydropx. El correo "va en camino" le llegará a la clienta solo, cuando la paquetería recoja el paquete. ¿Continuar?`,
                 )
               ) {
                 e.preventDefault();
@@ -421,7 +421,7 @@ function BuyLabelRow({ order }: { order: AdminOrderListItem }) {
 const smallLink =
   "text-sm font-medium text-clay underline decoration-clay/40 underline-offset-2 hover:decoration-clay disabled:opacity-50";
 
-/** Busca en Skydropx la guía de este pedido (también las hechas a mano) y avisa a la clienta. */
+/** Busca en Skydropx la guía de este pedido (también las hechas a mano) y la vincula; el aviso sale cuando la paquetería la recoja. */
 function FindLabelRow({ order }: { order: AdminOrderListItem }) {
   const fetcher = useFetcher<{ ok: boolean; error?: string }>();
   const busy = fetcher.state !== "idle";
@@ -432,7 +432,7 @@ function FindLabelRow({ order }: { order: AdminOrderListItem }) {
         <fetcher.Form
           method="post"
           onSubmit={(e) => {
-            if (!confirm(`Si se encuentra la guía, se enviará el correo de "Tu pedido va en camino" a ${order.customerEmail}. ¿Continuar?`)) {
+            if (!confirm(`Si se encuentra la guía, se guardará en el pedido. El correo de "Tu pedido va en camino" le llegará a ${order.customerEmail} cuando la paquetería recoja el paquete. ¿Continuar?`)) {
               e.preventDefault();
             }
           }}
@@ -440,7 +440,7 @@ function FindLabelRow({ order }: { order: AdminOrderListItem }) {
           <input type="hidden" name="intent" value="find_label" />
           <input type="hidden" name="id" value={order.id} />
           <button type="submit" disabled={busy} className={smallLink}>
-            {busy ? "Buscando…" : "Buscar guía en Skydropx y avisar a la clienta"}
+            {busy ? "Buscando…" : "Buscar guía en Skydropx"}
           </button>
         </fetcher.Form>
         <p className="mt-1 text-[12px] text-muted">

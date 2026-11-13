@@ -381,9 +381,9 @@ export async function sendOrderConfirmationEmail(params: {
 }
 
 /**
- * Correo "Tu pedido va en camino" (tarea 147): se manda solo al comprar la guía
- * de envío, que es cuando nace el número de rastreo (el correo de confirmación
- * sale al pagar, antes de que exista).
+ * Correo "Tu pedido va en camino" (tarea 147, segunda fase): se manda cuando
+ * Skydropx reporta que la paquetería ya recogió el paquete (el correo de
+ * confirmación, primera fase, sale al pagar, antes de que exista el rastreo).
  */
 export function buildOrderShippedHtml(params: {
   orderId: string;

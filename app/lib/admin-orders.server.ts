@@ -51,7 +51,7 @@ export type AdminOrderListItem = {
 const ORDER_SELECT =
   "id, customer_name, customer_email, customer_phone, items, subtotal, shipping_fee, total, currency, status, shipping_address, shipping_carrier, shipping_days, shipping_provider_name, shipping_service_code, skydropx_shipment_id, tracking_number, tracking_url, label_url, stripe_session_id, payment_provider, paypal_order_id, discount_code, created_at";
 
-function mapOrder(o: OrderRow): AdminOrderListItem {
+function mapOrder(o: Omit<OrderRow, "shipped_notice_sent_at">): AdminOrderListItem {
   return {
     id: o.id,
     customerName: o.customer_name,
@@ -102,7 +102,7 @@ export async function updateOrderStatus(id: string, status: OrderStatus): Promis
  * tenga `shipping_provider_name`/`shipping_service_code` guardados (pedidos de
  * antes de esta función no los tienen y no se pueden comprar así).
  */
-export async function buyShippingLabel(orderId: string): Promise<{ emailSent: boolean }> {
+export async function buyShippingLabel(orderId: string): Promise<void> {
   const { data: order, error } = await supabaseAdmin
     .from("orders")
     .select(ORDER_SELECT)
@@ -153,16 +153,13 @@ export async function buyShippingLabel(orderId: string): Promise<{ emailSent: bo
     throw new Error(`La guía se compró pero no se pudo guardar en el pedido: ${updateError.message}`);
   }
 
-  // Aviso automático a la clienta (tarea 147). La guía ya está comprada y
-  // guardada: si el correo falla NO se revierte nada — el admin puede
-  // reenviarlo desde el pedido ("Reenviar aviso por correo").
-  const email = await sendShippedEmailForOrder(orderId);
-  if (!email.sent) console.error(`[envío] No se pudo avisar al cliente del pedido ${orderId}: ${email.error}`);
-  return { emailSent: email.sent };
+  // Sin correo aquí (tarea 147): "va en camino" solo es cierto cuando la
+  // paquetería ya tiene el paquete. `syncShipmentsForOrders` lo manda cuando
+  // Skydropx reporta que lo recogió.
 }
 
 const TRACKING_COLUMNS =
-  "id, customer_name, customer_email, customer_phone, shipping_address, shipping_carrier, shipping_days, tracking_number, tracking_url, created_at, status";
+  "id, customer_name, customer_email, customer_phone, shipping_address, shipping_carrier, shipping_days, tracking_number, tracking_url, created_at, status, shipped_notice_sent_at";
 
 type ShippedEmailOrder = Pick<
   OrderRow,
@@ -177,6 +174,7 @@ type ShippedEmailOrder = Pick<
   | "tracking_url"
   | "created_at"
   | "status"
+  | "shipped_notice_sent_at"
 >;
 
 function sendShippedEmailFor(
@@ -215,7 +213,42 @@ export async function sendShippedEmailForOrder(orderId: string) {
   if (error || !order) return { sent: false, error: `No se encontró el pedido ${orderId}.` };
   if (!order.tracking_number) return { sent: false, error: "El pedido todavía no tiene número de rastreo." };
   if (order.status === "cancelled") return { sent: false, error: "El pedido está cancelado." };
-  return sendShippedEmailFor(order as ShippedEmailOrder);
+  const result = await sendShippedEmailFor(order as ShippedEmailOrder);
+  // Si ya se mandó a mano, el proceso automático no debe repetirlo al recoger el paquete.
+  if (result.sent && !order.shipped_notice_sent_at) {
+    await supabaseAdmin
+      .from("orders")
+      .update({ shipped_notice_sent_at: new Date().toISOString() })
+      .eq("id", orderId)
+      .is("shipped_notice_sent_at", null);
+  }
+  return result;
+}
+
+/**
+ * Manda el aviso "va en camino" UNA sola vez: primero reclama el pedido (solo si
+ * `shipped_notice_sent_at` sigue vacío, así dos procesos a la vez no avisan doble),
+ * luego envía el correo y, si falla, libera el pedido para reintentar.
+ */
+async function claimAndSendShippedNotice(orderId: string): Promise<{ sent: boolean; error?: string }> {
+  const { data: claimed, error } = await supabaseAdmin
+    .from("orders")
+    .update({ shipped_notice_sent_at: new Date().toISOString() })
+    .eq("id", orderId)
+    .eq("status", "shipped")
+    .not("tracking_number", "is", null)
+    .is("shipped_notice_sent_at", null)
+    .select(TRACKING_COLUMNS)
+    .maybeSingle();
+  if (error) return { sent: false, error: error.message };
+  if (!claimed) return { sent: false };
+
+  const email = await sendShippedEmailFor(claimed as ShippedEmailOrder);
+  if (!email.sent) {
+    await supabaseAdmin.from("orders").update({ shipped_notice_sent_at: null }).eq("id", orderId);
+    return { sent: false, error: email.error ?? "error desconocido" };
+  }
+  return { sent: true };
 }
 
 /**
@@ -235,11 +268,18 @@ export async function registerManualTracking(
   if (trackingUrl && !/^https?:\/\//i.test(trackingUrl)) {
     return { ok: false, error: "El enlace de rastreo debe empezar con http:// o https://." };
   }
-  return claimAndNotify(orderId, {
-    tracking_number: trackingNumber,
-    tracking_url: trackingUrl || null,
-    shipping_carrier: carrier,
-  });
+  // Rastreo capturado a mano (otra paquetería): no hay estatus de Skydropx que
+  // esperar, así que aquí el aviso sale al guardarlo, como la usuaria lo pide.
+  return claimAndNotify(
+    orderId,
+    {
+      tracking_number: trackingNumber,
+      tracking_url: trackingUrl || null,
+      shipping_carrier: carrier,
+    },
+    undefined,
+    true,
+  );
 }
 
 /**
@@ -257,12 +297,19 @@ async function claimAndNotify(
     skydropx_shipment_id?: string | null;
   },
   shippingDays?: number | null,
+  notifyNow = false,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { data: claimed, error } = await supabaseAdmin
     .from("orders")
-    // Rastreo guardado + aviso = el pedido pasa de Procesando a Enviado. Solo se
-    // toca un pedido que sigue en Procesando (nunca uno entregado o cancelado).
-    .update({ ...fields, status: "shipped" })
+    // Rastreo guardado = el pedido pasa de Procesando a Enviado. Solo se toca un
+    // pedido que sigue en Procesando (nunca uno entregado o cancelado). El aviso
+    // sale ahora (`notifyNow`, rastreo a mano) o después, cuando Skydropx reporte
+    // que la paquetería recogió el paquete (ver `syncShipmentsForOrders`).
+    .update({
+      ...fields,
+      status: "shipped",
+      ...(notifyNow ? { shipped_notice_sent_at: new Date().toISOString() } : {}),
+    })
     .eq("id", orderId)
     .eq("status", "processing")
     .is("tracking_number", null)
@@ -273,6 +320,8 @@ async function claimAndNotify(
     return { ok: false, error: "El pedido ya tiene rastreo o ya no está en estado Procesando." };
   }
 
+  if (!notifyNow) return { ok: true };
+
   const email = await sendShippedEmailFor(claimed as ShippedEmailOrder, { shippingDays });
   if (!email.sent) {
     await supabaseAdmin
@@ -282,6 +331,7 @@ async function claimAndNotify(
         tracking_url: null,
         label_url: null,
         skydropx_shipment_id: null,
+        shipped_notice_sent_at: null,
         status: "processing",
       })
       .eq("id", orderId)
@@ -296,7 +346,7 @@ async function claimAndNotify(
 
 export type ShipmentSyncOutcome = {
   orderId: string;
-  result: "sent" | "delivered" | "no_match" | "ambiguous" | "failed";
+  result: "sent" | "linked" | "delivered" | "no_match" | "ambiguous" | "failed";
   detail?: string;
 };
 
@@ -315,6 +365,13 @@ export type ShipmentSyncOutcome = {
  * lo pide a mano desde el admin (con confirmación).
  */
 export const AUTO_SHIPPED_NOTICE_FROM = "2026-10-20T06:00:00.000Z";
+
+/**
+ * Estatus de Skydropx que indican que la paquetería YA tiene el paquete (el
+ * primero que se ve es `in_transit`; antes de eso la guía está en `created`).
+ * No incluye `delivered`: un "va en camino" después de la entrega no tiene sentido.
+ */
+const PICKED_UP_STATUS = /^(in_transit|picked_up|out_for_delivery)$/i;
 
 /**
  * Guarda el estatus de rastreo que devuelve Skydropx solo cuando cambia respecto
@@ -359,10 +416,10 @@ export async function syncShipmentsForOrders(orderId?: string): Promise<Shipment
   // Pedidos "Enviado" con guía de Skydropx, para pasarlos a "Entregado" cuando la
   // paquetería lo reporte. Mismo candado de fecha que el aviso.
   const { data: inTransit } = orderId
-    ? { data: [] as { id: string; skydropx_shipment_id: string | null }[] }
+    ? { data: [] as { id: string; skydropx_shipment_id: string | null; shipped_notice_sent_at: string | null }[] }
     : await supabaseAdmin
         .from("orders")
-        .select("id, skydropx_shipment_id")
+        .select("id, skydropx_shipment_id, shipped_notice_sent_at")
         .eq("status", "shipped")
         .not("skydropx_shipment_id", "is", null)
         .gte("created_at", AUTO_SHIPPED_NOTICE_FROM);
@@ -397,6 +454,11 @@ export async function syncShipmentsForOrders(orderId?: string): Promise<Shipment
           ? { orderId: order.id, result: "failed", detail: upErr.message }
           : { orderId: order.id, result: "delivered" },
       );
+    } else if (!order.shipped_notice_sent_at && shipment?.trackingStatus && PICKED_UP_STATUS.test(shipment.trackingStatus)) {
+      // La paquetería ya tiene el paquete: ahora sí es cierto "va en camino".
+      const notice = await claimAndSendShippedNotice(order.id);
+      if (notice.sent) outcomes.push({ orderId: order.id, result: "sent" });
+      else if (notice.error) outcomes.push({ orderId: order.id, result: "failed", detail: notice.error });
     }
   }
 
@@ -443,7 +505,7 @@ export async function syncShipmentsForOrders(orderId?: string): Promise<Shipment
     if (done.ok) {
       used.shipmentIds.add(s.id);
       used.trackingNumbers.add(s.trackingNumber!);
-      outcomes.push({ orderId: order.id, result: "sent" });
+      outcomes.push({ orderId: order.id, result: "linked" });
     } else {
       outcomes.push({ orderId: order.id, result: "failed", detail: done.error });
     }

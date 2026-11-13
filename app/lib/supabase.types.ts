@@ -115,12 +115,14 @@ export type Database = {
           paypal_order_id: string | null;
           discount_code: string | null;
           created_at: string;
+          shipped_notice_sent_at: string | null;
         };
         Insert: Omit<
           Database["public"]["Tables"]["orders"]["Row"],
-          "created_at" | "status" | "payment_provider"
+          "created_at" | "status" | "payment_provider" | "shipped_notice_sent_at"
         > & {
           created_at?: string;
+          shipped_notice_sent_at?: string | null;
           status?: Database["public"]["Tables"]["orders"]["Row"]["status"];
           payment_provider?: Database["public"]["Tables"]["orders"]["Row"]["payment_provider"];
         };
