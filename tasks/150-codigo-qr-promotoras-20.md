@@ -1,7 +1,7 @@
 ---
 id: 150
-title: "Código QR con 20% de descuento por promotora (desde el 18 de noviembre de 2026)"
-status: in-progress
+title: "Códigos de descuento por promotora con QR y porcentaje variable (desde el 18 de noviembre de 2026)"
+status: done
 ---
 
 ## Contexto
@@ -47,15 +47,21 @@ Un enlace/QR por promotora que lleve a la tienda con el código ya cargado en `/
 - [x] El código de bienvenida sigue funcionando igual (10%, mínimo $799).
 - [x] PayPal cobra el mismo total que Stripe.
 - [x] Entrar con `?codigo=...` deja el código escrito en `/checkout`.
-- [ ] Tras pagar, el código guardado se borra (`clearSavedCode` en `checkout.success.tsx`; no se probó de punta a punta porque el webhook no llega a localhost).
+- [ ] Tras pagar, el código guardado se borra (`clearSavedCode` en `checkout.success.tsx`). **No verificado de punta a punta** (el webhook no llega a localhost): se confirma observando el primer pedido real con código. Tarea cerrada con este punto como seguimiento.
 - [x] En `/checkout`, con el código escrito y el correo puesto, aparece "Código aplicado: 20%", la fila de descuento y el total ya rebajado; si el código no sirve, el motivo en rojo. El total mostrado coincide con el de Stripe/PayPal.
 - [x] Carrito lateral: con código de promotora guardado muestra el aviso "se aplicará al pagar"; sin código o con código de bienvenida no muestra nada (escritorio y 375 px).
 - [x] Typecheck sin errores.
-- [ ] `/admin/promotoras`: crear un identificador, editar el nombre, apagar/encender, copiar enlace, ver y descargar el QR (probar con la tabla ya creada).
+- [x] `/admin/promotoras`: crear una promotora con su porcentaje y nombre, y el QR escaneado en el teléfono de la usuaria (creó `KINARA20-ANA01` y `KINARA25-ANA02`; ya borrados como pruebas).
+- [ ] `/admin/promotoras`: apagar/encender, copiar enlace y descargar el QR en PNG. **Sin confirmación explícita de la usuaria**; el código de esas acciones está tipado y compila, pero no se observó su resultado.
 
 ## Verificación de requisitos anteriores
 
-- Pendiente de revisar contra `REQUISITOS.md` al cerrar.
+- Descuento y precios siguen calculándose solo en el servidor, en un único lugar (`validateCheckout` + `resolveDiscount`), compartido por Stripe y PayPal: verificado leyendo el flujo y con pagos de prueba en ambos.
+- El código de bienvenida (10%, primera compra, mínimo $799) sigue igual: probado con un alta temporal.
+- Los descuentos no se suman con la promoción de temporada: probado el 17 de nov (Buen Fin) con el reloj real.
+- El envío no se rebaja nunca: verificado en Stripe y PayPal.
+- Cambios visuales: solo los autorizados por la usuaria (mensaje y fila de descuento en `/checkout`, aviso con el monto en el carrito).
+- Subido a producción el 2026-11-19 (commit `300b4a8`); `/api/validate-code` y `/checkout` verificados en `www.kinarafit.com.mx`.
 
 ## Notas de progreso
 
@@ -68,3 +74,4 @@ Un enlace/QR por promotora que lleve a la tienda con el código ya cargado en `/
 - 2026-11-19 (3): a petición de la usuaria, (a) el carrito muestra el descuento aplicable en pesos en lugar de "tu código" (nuevo `previewPromoterDiscount`; `/api/validate-code` acepta peticiones sin correo solo para códigos de promotora) y (b) el porcentaje es variable por promotora: campo "Descuento (%)" al crear (1–90, por defecto 20), el código queda `KINARA<%>-ID`, la fila muestra su porcentaje, y se quitó el 20 fijo del código. Probado con códigos temporales de 30% y 5% (ya borrados) y con el `KINARA20-ANA01` de la usuaria; typecheck limpio. Pendiente: que la usuaria cree un código desde el formulario nuevo, ver el aviso del carrito en pantalla, y "sí súbelo".
 - 2026-11-19 (4): a petición de la usuaria, la pantalla de Stripe ahora desglosa el descuento (antes se veía el producto ya rebajado). `api.create-checkout-session.tsx` manda cada producto a precio completo, un cupón de monto fijo (`amount_off`, nombre = el código) por lo descontado, y el envío como `shipping_options` (Stripe no rebaja los envíos con cupones). Probado en modo test: sin código $1,948; con KINARA20-ANA01 y 2 × $899 → subtotal $1,798, descuento −$359.60, envío $150, total $1,588.40 (igual que antes); carrito mixto $2,437.40; se vio en la pantalla de Stripe. El webhook no lee las líneas de la sesión (usa `metadata`), así que no cambia. Cada pago con código crea un cupón de un solo uso en Stripe (no estorba).
 - 2026-11-19 (5): PayPal igualado a Stripe: `api.create-paypal-order.tsx` manda los productos a precio completo y el descuento en `breakdown.discount` (`createPaypalOrder` recibe `discountCents`). Verificado contra PayPal sandbox leyendo la orden creada: sin código $1,948.00; KINARA20-ANA01 con 2 × $899 → items $1,798, envío $150, descuento $359.60, total $1,588.40; carrito mixto $2,437.40 — los mismos totales que Stripe. No se probó aprobar y capturar un pago en sandbox (requiere el login de una cuenta compradora de prueba); el total que se guarda en `pending_checkouts` no cambió.
+- 2026-11-19 (6): **tarea cerrada** a petición de la usuaria. Subida a producción (commit `300b4a8`); tabla de promotoras vacía (las de prueba se borraron), lista para crear las reales. Seguimiento: observar en el primer pedido real con código que el código guardado se borre al pagar y que `/admin/promotoras` muestre sus ventas; confirmar apagar/encender, copiar enlace y descargar QR.
