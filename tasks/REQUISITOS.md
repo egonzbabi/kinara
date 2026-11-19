@@ -97,3 +97,4 @@ Formato de cada entrada: `- [ ] Requisito — (origen: tarea NNN)`
 ---
 
 _Vacío por ahora — se va llenando a medida que se completan tareas y se definen estándares concretos._
+- [x] En `/checkout`, una tarifa de envío se identifica siempre por `providerName` + `serviceCode` (`rateKey` en `checkout.tsx`), nunca solo por `serviceCode`: varios transportistas comparten el mismo código (Imile/DHL `express`, Afimex/DHL `standard`) y la tarifa mostrada como elegida debe ser la que se cobra. — (origen: tarea 151)

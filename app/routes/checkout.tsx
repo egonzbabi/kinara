@@ -58,6 +58,12 @@ type Rate = {
   days: number | null;
 };
 
+/** Una tarifa se identifica por transportista + servicio: varios transportistas
+ * comparten el mismo `serviceCode` (ej. Imile y DHL "express"), así que el
+ * código solo no basta para saber cuál eligió la clienta. */
+const rateKey = (r: Pick<Rate, "providerName" | "serviceCode">) =>
+  `${r.providerName}|${r.serviceCode}`;
+
 type PostalCodeLookup =
   | { found: true; estado: string; municipio: string; colonias: string[] }
   | { found: false };
@@ -86,7 +92,7 @@ export default function Checkout() {
   const [cpLoading, setCpLoading] = useState(false);
 
   const [rates, setRates] = useState<Rate[] | null>(null);
-  const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
   const [showAllRates, setShowAllRates] = useState(false);
@@ -246,7 +252,7 @@ export default function Checkout() {
   const updateField = (field: keyof Address, value: string) => {
     setAddress((prev) => ({ ...prev, [field]: value }));
     setRates(null);
-    setSelectedCode(null);
+    setSelectedKey(null);
   };
   const setField =
     (field: keyof Address) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -288,7 +294,7 @@ export default function Checkout() {
       const data = await res.json();
       if (data.rates) {
         setRates(data.rates);
-        setSelectedCode(data.rates[0]?.serviceCode ?? null);
+        setSelectedKey(data.rates[0] ? rateKey(data.rates[0]) : null);
         setShowAllRates(false);
         if (data.rates.length > 0 && !shippingInfoFired.current) {
           shippingInfoFired.current = true;
@@ -308,13 +314,13 @@ export default function Checkout() {
     }
   };
 
-  const selectedRate = rates?.find((r) => r.serviceCode === selectedCode) ?? null;
+  const selectedRate = rates?.find((r) => rateKey(r) === selectedKey) ?? null;
 
   // Solo las más baratas (las tarifas llegan ordenadas por precio); la elegida
   // siempre se queda a la vista aunque no esté entre las primeras.
   const visibleRates =
     rates && !showAllRates
-      ? rates.filter((r, i) => i < VISIBLE_RATES || r.serviceCode === selectedCode)
+      ? rates.filter((r, i) => i < VISIBLE_RATES || rateKey(r) === selectedKey)
       : rates;
   const hiddenRatesCount = rates && visibleRates ? rates.length - visibleRates.length : 0;
   const discountAmount = codePreview.status === "valid" ? codePreview.discount : 0;
@@ -530,10 +536,10 @@ export default function Checkout() {
           <div className="mt-4 flex flex-col gap-2">
             {(visibleRates ?? rates).map((rate) => (
               <label
-                key={rate.serviceCode}
+                key={rateKey(rate)}
                 className={cn(
                   "flex cursor-pointer items-center justify-between gap-3 rounded-lg border px-4 py-3",
-                  selectedCode === rate.serviceCode
+                  selectedKey === rateKey(rate)
                     ? "border-espresso bg-espresso/5"
                     : "border-line hover:border-espresso",
                 )}
@@ -542,8 +548,8 @@ export default function Checkout() {
                   <input
                     type="radio"
                     name="shipping-rate"
-                    checked={selectedCode === rate.serviceCode}
-                    onChange={() => setSelectedCode(rate.serviceCode)}
+                    checked={selectedKey === rateKey(rate)}
+                    onChange={() => setSelectedKey(rateKey(rate))}
                   />
                   <span>
                     <span className="block text-sm font-medium text-espresso">
