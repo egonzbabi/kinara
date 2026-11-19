@@ -189,5 +189,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 147 | [147-correo-pedido-enviado-rastreo.md](147-correo-pedido-enviado-rastreo.md) | in-progress | Correo automático 'Tu pedido va en camino' con botón de rastreo al comprar la guía |
 | 148 | [148-promocion-buen-fin-30.md](148-promocion-buen-fin-30.md) | in-progress | Promoción Buen Fin: 30% automático del 10 al 17 de noviembre de 2026 |
 | 149 | [149-checkout-total-visible-y-envios.md](149-checkout-total-visible-y-envios.md) | done | Checkout: total visible, lista de envíos más corta y eventos de GA4 de envío/pago |
+| 150 | [150-codigo-qr-promotoras-20.md](150-codigo-qr-promotoras-20.md) | in-progress | Código QR con 20% de descuento por promotora, desde el 18 de nov de 2026 |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

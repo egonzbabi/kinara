@@ -16,6 +16,7 @@ import { SiteNav } from "~/components/SiteNav";
 import { SiteFooter } from "~/components/SiteFooter";
 import { CartDrawer } from "~/components/CartDrawer";
 import { CookieConsentBanner } from "~/components/CookieConsentBanner";
+import { PromoCodeCapture } from "~/components/PromoCodeCapture";
 import { GA_MEASUREMENT_ID } from "~/lib/analytics";
 import { getAllProducts } from "~/lib/catalog";
 import { buildShopNavLinks } from "~/lib/nav-links";
@@ -144,6 +145,7 @@ export default function App({ loaderData }: Route.ComponentProps) {
       <SiteFooter links={loaderData.navLinks} typePages={loaderData.typePages} />
       <CartDrawer />
       <CookieConsentBanner />
+      <PromoCodeCapture />
     </CartProvider>
   );
 }

@@ -56,6 +56,17 @@ export function AdminSidebar() {
             Registros
           </NavLink>
           <NavLink
+            to="/admin/promotoras"
+            className={({ isActive }) =>
+              cn(
+                "block rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive ? "bg-clay/10 text-clay" : "text-espresso hover:bg-sand",
+              )
+            }
+          >
+            Promotoras
+          </NavLink>
+          <NavLink
             to="/admin/inventario"
             className={({ isActive }) =>
               cn(

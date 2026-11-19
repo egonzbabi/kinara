@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useCart, type CartItem } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
@@ -6,12 +6,47 @@ import { productImage } from "~/lib/productImage";
 import { Button, LinkButton } from "./Button";
 import { cn } from "~/lib/cn";
 import { useFocusTrap } from "~/hooks/useFocusTrap";
+import { readSavedCode } from "~/lib/promo-code-storage";
 
 export function CartDrawer() {
   const { items, subtotal, count, isOpen, close, remove, setQty } = useCart();
   const panelRef = useRef<HTMLElement>(null);
+  // Descuento del código de promotora guardado al entrar por su enlace/QR
+  // (tarea 150). Es una vista previa calculada por el servidor sin pedir el
+  // correo; se cobra en /checkout, donde además se revisa "una vez por correo".
+  const [promo, setPromo] = useState<{ percent: number; discount: number } | null>(null);
 
   useFocusTrap(isOpen, panelRef, close);
+
+  useEffect(() => {
+    const code = readSavedCode();
+    if (!isOpen || items.length === 0 || !code) {
+      setPromo(null);
+      return;
+    }
+    const controller = new AbortController();
+    fetch("/api/validate-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        code,
+        items: items.map((i) => ({ productId: i.productId, qty: i.qty })),
+      }),
+    })
+      .then((res) => res.json())
+      .then((data: { valid?: boolean; percent?: number; discount?: number }) => {
+        setPromo(
+          data.valid && data.percent && data.discount
+            ? { percent: data.percent, discount: data.discount }
+            : null,
+        );
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setPromo(null);
+      });
+    return () => controller.abort();
+  }, [isOpen, items]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -103,6 +138,14 @@ export function CartDrawer() {
             <p className="mb-4 text-[12px] text-muted">
               Impuestos incluidos. Envío calculado al pagar.
             </p>
+            {promo && (
+              <p className="mb-4 rounded-lg bg-bone px-3 py-2 text-[12px] text-espresso">
+                <span className="font-medium">
+                  Descuento de {promo.percent}%: −{formatPrice(promo.discount)}
+                </span>{" "}
+                en los productos sin precio tachado. Se aplica al pagar.
+              </p>
+            )}
             <LinkButton to="/checkout" variant="clay" full size="lg" onClick={close}>
               Finalizar compra
             </LinkButton>

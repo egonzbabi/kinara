@@ -21,6 +21,7 @@ export default [
   route("admin", "routes/admin.login.tsx"),
   route("admin/logout", "routes/admin.logout.tsx"),
   route("admin/upload", "routes/admin.upload.tsx"),
+  route("admin/promotoras/qr", "routes/admin.promotoras.qr.tsx"),
   layout("routes/admin.layout.tsx", [
     route("admin/productos", "routes/admin.productos.tsx"),
     route("admin/productos/nuevo", "routes/admin.productos.nuevo.tsx"),
@@ -29,6 +30,7 @@ export default [
     route("admin/pedidos", "routes/admin.pedidos.tsx"),
     route("admin/mensajes", "routes/admin.mensajes.tsx"),
     route("admin/registros", "routes/admin.registros.tsx"),
+    route("admin/promotoras", "routes/admin.promotoras.tsx"),
     route("admin/inventario", "routes/admin.inventario.tsx"),
     route("admin/inventario/excel", "routes/admin.inventario.excel.tsx"),
     route("admin/inventario/pdf", "routes/admin.inventario.pdf.tsx"),
@@ -41,6 +43,7 @@ export default [
   route("api/newsletter-signup", "routes/api.newsletter-signup.tsx"),
   route("api/shipping-quote", "routes/api.shipping-quote.tsx"),
   route("api/cart-prices", "routes/api.cart-prices.tsx"),
+  route("api/validate-code", "routes/api.validate-code.tsx"),
   route("api/postal-code", "routes/api.postal-code.tsx"),
   route("api/stripe-webhook", "routes/api.stripe-webhook.tsx"),
   route("api/create-paypal-order", "routes/api.create-paypal-order.tsx"),

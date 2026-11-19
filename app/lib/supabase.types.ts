@@ -277,6 +277,24 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["discount_signups"]["Insert"]>;
         Relationships: [];
       };
+      promoter_codes: {
+        Row: {
+          code: string;
+          promoter_name: string;
+          percent: number;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          code: string;
+          promoter_name: string;
+          percent?: number;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["promoter_codes"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

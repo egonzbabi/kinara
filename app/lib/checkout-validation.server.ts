@@ -1,10 +1,8 @@
 import { supabaseAdmin } from "~/lib/supabase.server";
 import { estimateParcel, SHIPPING_FEE_MXN } from "~/lib/shipping";
 import { getShippingRates, type ShippingAddress } from "~/lib/skydropx.server";
-import { validateDiscountCode } from "~/lib/discount-signups.server";
-import { DISCOUNT_MIN_SUBTOTAL_MXN } from "~/lib/discount-constants";
-import { formatPrice } from "~/lib/formatPrice";
-import { applyPromo, isPromoActive, PROMO, PROMO_CHECKOUT_GRACE_MS } from "~/lib/promo";
+import { resolveDiscount } from "~/lib/discount-resolution.server";
+import { applyPromo, isPromoEligible, PROMO_CHECKOUT_GRACE_MS } from "~/lib/promo";
 import type { CartItem } from "~/context/CartContext";
 
 interface ChosenShipping {
@@ -40,6 +38,10 @@ export interface ValidatedCheckout {
   shippingServiceCode: string | null;
   discountApplies: boolean;
   discountCode: string | null;
+  /** Lo que se cobra por unidad (en centavos), en el mismo orden que
+   * `trustedItems`, ya con el descuento del código aplicado — Stripe y PayPal
+   * usan esto, no recalculan el descuento por su lado. */
+  unitAmountCents: number[];
 }
 
 export type ValidationResult =
@@ -112,6 +114,9 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
   const missing: string[] = [];
   const outOfStock: string[] = [];
   const trustedItems: TrustedItem[] = [];
+  // En el mismo orden que trustedItems: si el producto puede llevar el
+  // descuento de un código de promotora (los que ya tienen precio tachado, no).
+  const codeEligible: boolean[] = [];
   let subtotal = 0;
 
   for (const item of items) {
@@ -148,6 +153,7 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
       quantity: item.qty,
       price: unitPrice,
     });
+    codeEligible.push(isPromoEligible(product.compare_at));
     subtotal += unitPrice * item.qty;
   }
 
@@ -197,33 +203,27 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
     shippingServiceCode = match.serviceCode;
   }
 
-  // ── Código de descuento de bienvenida: se valida aquí (correo, primera
-  // compra, código sin usar/vencido) contra el subtotal de PRODUCTOS que ya se
-  // recalculó arriba — nunca contra lo que mande el cliente, ni contra el total
-  // con envío incluido (ver tarea 070).
+  // ── Código de descuento: se valida aquí (correo, uso, vigencia) contra el
+  // subtotal de PRODUCTOS que ya se recalculó arriba — nunca contra lo que
+  // mande el cliente, ni contra el total con envío incluido (ver tarea 070).
+  // La regla (bienvenida 10% o promotora 20%) vive en `resolveDiscount`.
   let discountApplies = false;
+  let unitAmountCents = trustedItems.map((i) => Math.round(i.price * 100));
   const discountCode = body.discountCode?.trim();
   if (discountCode) {
-    // Los descuentos no se suman (tarea 148): durante la promoción de temporada
-    // el código de bienvenida no se acepta; vuelve a servir al terminar.
-    if (isPromoActive(Date.now(), PROMO_CHECKOUT_GRACE_MS)) {
-      return {
-        ok: false,
-        status: 400,
-        error: `El código de bienvenida no se suma a la promoción de ${PROMO.name}. Quítalo para continuar; te sigue sirviendo después de la promoción.`,
-      };
+    const resolution = await resolveDiscount({
+      code: discountCode,
+      email: address.email,
+      lines: trustedItems.map((i, idx) => ({
+        price: i.price,
+        qty: i.quantity,
+        codeEligible: codeEligible[idx],
+      })),
+    });
+    if (!resolution.ok) {
+      return { ok: false, status: 400, error: resolution.error };
     }
-    if (subtotal < DISCOUNT_MIN_SUBTOTAL_MXN) {
-      return {
-        ok: false,
-        status: 400,
-        error: `Ese código requiere una compra mínima de ${formatPrice(DISCOUNT_MIN_SUBTOTAL_MXN)} en productos, sin contar el envío.`,
-      };
-    }
-    const validation = await validateDiscountCode(discountCode, address.email);
-    if (!validation.valid) {
-      return { ok: false, status: 400, error: validation.error };
-    }
+    unitAmountCents = resolution.unitAmountCents;
     discountApplies = true;
   }
 
@@ -239,6 +239,7 @@ export async function validateCheckout(body: CheckoutRequest): Promise<Validatio
       shippingServiceCode,
       discountApplies,
       discountCode: discountApplies && discountCode ? discountCode.toUpperCase() : null,
+      unitAmountCents,
     },
   };
 }

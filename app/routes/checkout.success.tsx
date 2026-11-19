@@ -14,6 +14,7 @@ import { useCart } from "~/context/CartContext";
 import { formatPrice } from "~/lib/formatPrice";
 import { seoMeta } from "~/lib/seo";
 import { trackPurchase } from "~/lib/analytics";
+import { clearSavedCode } from "~/lib/promo-code-storage";
 
 // noindex: confirmación específica de un pedido, no contenido a posicionar.
 export function meta(_: Route.MetaArgs) {
@@ -95,6 +96,7 @@ export default function CheckoutSuccess({ loaderData }: Route.ComponentProps) {
   useEffect(() => {
     if (loaderData.status !== "paid") return;
     clear();
+    clearSavedCode(); // el código de promotora ya se usó
     // GA4 purchase (tarea 004) — el único lugar del sitio donde se confirma
     // un pago real, ya verificado server-side contra Stripe (loader de
     // arriba) antes de llegar aquí.

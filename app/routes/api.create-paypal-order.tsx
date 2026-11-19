@@ -2,7 +2,6 @@ import type { Route } from "./+types/api.create-paypal-order";
 import { validateCheckout, type CheckoutRequest } from "~/lib/checkout-validation.server";
 import { createPaypalOrder } from "~/lib/paypal.server";
 import { createPendingCheckout } from "~/lib/orders.server";
-import { DISCOUNT_PERCENT } from "~/lib/discount-constants";
 import { formatPrice } from "~/lib/formatPrice";
 import { sendOwnerAlert } from "~/lib/resend.server";
 
@@ -30,22 +29,26 @@ export async function action({ request }: Route.ActionArgs) {
     shippingDays,
     shippingProviderName,
     shippingServiceCode,
-    discountApplies,
     discountCode,
+    unitAmountCents,
   } = result.data;
 
-  // Mismo criterio que Stripe (ver api.create-checkout-session.tsx): el 10%
-  // de bienvenida se descuenta directo en cada línea de producto, el envío
-  // siempre va a precio completo.
-  const discountFactor = discountApplies ? 1 - DISCOUNT_PERCENT / 100 : 1;
+  // Mismo criterio que Stripe (ver api.create-checkout-session.tsx): los
+  // productos van a precio completo y el descuento del código se muestra
+  // aparte (`breakdown.discount`); el envío siempre va a precio completo. El
+  // total es el mismo que da `unitAmountCents` por línea.
   const paypalItems = trustedItems.map((i) => ({
     name: `${i.productName} · ${i.colorName} · Talla ${i.size}`,
-    unitAmountCents: Math.round(i.price * 100 * discountFactor),
+    unitAmountCents: Math.round(i.price * 100),
     quantity: i.quantity,
   }));
   const itemTotalCents = paypalItems.reduce((n, i) => n + i.unitAmountCents * i.quantity, 0);
+  const discountCents = trustedItems.reduce(
+    (n, i, idx) => n + i.quantity * (paypalItems[idx].unitAmountCents - unitAmountCents[idx]),
+    0,
+  );
   const shippingFeeCents = Math.round(shippingFee * 100);
-  const totalCents = itemTotalCents + shippingFeeCents;
+  const totalCents = itemTotalCents - discountCents + shippingFeeCents;
 
   const pendingCheckoutId = await createPendingCheckout({
     items: trustedItems.map((i) => ({
@@ -76,6 +79,7 @@ export async function action({ request }: Route.ActionArgs) {
       pendingCheckoutId,
       items: paypalItems,
       shippingFeeCents,
+      discountCents,
       totalCents,
     });
     return Response.json({ id: orderId });

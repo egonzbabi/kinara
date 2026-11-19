@@ -8,6 +8,7 @@ import { seoMeta } from "~/lib/seo";
 import { trackAddPaymentInfo, trackAddShippingInfo, trackBeginCheckout } from "~/lib/analytics";
 import { isPromoActive, PROMO } from "~/lib/promo";
 import { PayPalButton } from "~/components/PayPalButton";
+import { readSavedCode } from "~/lib/promo-code-storage";
 
 // noindex: página transitoria y específica del carrito de cada visitante,
 // no contenido a posicionar (tarea 003, SEO técnico).
@@ -19,6 +20,11 @@ export function meta(_: Route.MetaArgs) {
     noindex: true,
   });
 }
+
+type CodePreview =
+  | { status: "idle" | "checking" }
+  | { status: "valid"; percent: number; discount: number }
+  | { status: "invalid"; error: string };
 
 type Address = {
   name: string;
@@ -97,6 +103,63 @@ export default function Checkout() {
   const promoActive = isPromoActive(rootData?.now ?? Date.now());
   const appliedCode = promoActive ? "" : discountCode.trim();
   const [pricesUpdated, setPricesUpdated] = useState(false);
+
+  // Código que llegó por el QR/enlace de una promotora (tarea 150): se escribe
+  // solo en el campo, sin pisar lo que la clienta ya haya tecleado.
+  useEffect(() => {
+    const saved = readSavedCode();
+    if (saved) setDiscountCode((current) => current || saved);
+  }, []);
+
+  // Vista previa del descuento (tarea 150): el servidor dice si el código sirve
+  // y cuánto descuenta, con la misma regla con la que después cobra. Necesita el
+  // correo porque cada código se limita por correo.
+  const [codePreview, setCodePreview] = useState<CodePreview>({ status: "idle" });
+  const emailOk = /^\S+@\S+\.\S+$/.test(address.email.trim());
+  const itemsKey = items.map((i) => `${i.productId}:${i.qty}`).join(",");
+  useEffect(() => {
+    if (!appliedCode || !emailOk || items.length === 0) {
+      setCodePreview({ status: "idle" });
+      return;
+    }
+    setCodePreview({ status: "checking" });
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      fetch("/api/validate-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          code: appliedCode,
+          email: address.email.trim(),
+          items: items.map((i) => ({ productId: i.productId, qty: i.qty })),
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then(
+          (
+            data:
+              | { valid: true; percent: number; discount: number }
+              | { valid: false; error: string }
+              | null,
+          ) => {
+            if (!data) return setCodePreview({ status: "idle" });
+            setCodePreview(
+              data.valid
+                ? { status: "valid", percent: data.percent, discount: data.discount }
+                : { status: "invalid", error: data.error },
+            );
+          },
+        )
+        .catch(() => {});
+    }, 500);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+    // `items` entra por itemsKey: solo importan producto y cantidad.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appliedCode, address.email, emailOk, itemsKey]);
 
   useEffect(() => {
     if (hydrated && items.length === 0) navigate("/tienda");
@@ -254,7 +317,8 @@ export default function Checkout() {
       ? rates.filter((r, i) => i < VISIBLE_RATES || r.serviceCode === selectedCode)
       : rates;
   const hiddenRatesCount = rates && visibleRates ? rates.length - visibleRates.length : 0;
-  const orderTotal = subtotal + (selectedRate?.total ?? 0);
+  const discountAmount = codePreview.status === "valid" ? codePreview.discount : 0;
+  const orderTotal = subtotal - discountAmount + (selectedRate?.total ?? 0);
 
   // En celular las tarifas aparecen debajo del formulario, fuera de pantalla:
   // al cotizar se baja solas hasta ahí para que no parezca que no pasó nada.
@@ -523,6 +587,32 @@ export default function Checkout() {
                 placeholder="ej. KINARA10-A3F9K2"
                 className={cn(inputClass, "font-mono uppercase")}
               />
+              {appliedCode && codePreview.status === "checking" && (
+                <p className="mt-2 text-[13px] text-muted" aria-live="polite">
+                  Verificando tu código…
+                </p>
+              )}
+              {codePreview.status === "valid" && (
+                <p
+                  className="mt-2 rounded-lg bg-clay/10 px-3 py-2 text-[13px] text-espresso"
+                  aria-live="polite"
+                >
+                  <span className="font-semibold">
+                    Código aplicado: {codePreview.percent}% de descuento
+                  </span>{" "}
+                  en tus productos, sin contar el envío.
+                </p>
+              )}
+              {codePreview.status === "invalid" && (
+                <p className="mt-2 text-[13px] text-clay" role="alert">
+                  {codePreview.error}
+                </p>
+              )}
+              {appliedCode && codePreview.status === "idle" && !emailOk && (
+                <p className="mt-2 text-[13px] text-muted">
+                  Escribe tu correo arriba para verificar tu código.
+                </p>
+              )}
             </div>
           )}
 
@@ -533,6 +623,12 @@ export default function Checkout() {
                   <dt className="text-muted">Subtotal</dt>
                   <dd>{formatPrice(subtotal)}</dd>
                 </div>
+                {codePreview.status === "valid" && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted">Descuento ({appliedCode.toUpperCase()})</dt>
+                    <dd>−{formatPrice(codePreview.discount)}</dd>
+                  </div>
+                )}
                 <div className="flex justify-between gap-4">
                   <dt className="text-muted">Envío · {selectedRate.providerDisplayName}</dt>
                   <dd>{formatPrice(selectedRate.total)}</dd>
@@ -542,7 +638,7 @@ export default function Checkout() {
                   <dd>{formatPrice(orderTotal)}</dd>
                 </div>
               </dl>
-              {appliedCode && (
+              {appliedCode && codePreview.status === "idle" && (
                 <p className="mt-2 text-[13px] text-muted">
                   Tu código de descuento se aplica en el siguiente paso.
                 </p>
@@ -557,7 +653,7 @@ export default function Checkout() {
           >
             {payLoading
               ? "Redirigiendo…"
-              : selectedRate && !appliedCode
+              : selectedRate && (!appliedCode || codePreview.status === "valid")
                 ? `Pagar ${formatPrice(orderTotal)} con tarjeta u OXXO`
                 : "Pagar con tarjeta u OXXO"}
           </button>

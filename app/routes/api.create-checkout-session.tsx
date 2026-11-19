@@ -2,7 +2,6 @@ import type { Route } from "./+types/api.create-checkout-session";
 import { getStripe } from "~/lib/stripe.server";
 import { chunkMetadata } from "~/lib/orders.server";
 import { validateCheckout, type CheckoutRequest } from "~/lib/checkout-validation.server";
-import { DISCOUNT_PERCENT } from "~/lib/discount-constants";
 import { formatPrice } from "~/lib/formatPrice";
 import { sendOwnerAlert } from "~/lib/resend.server";
 
@@ -30,8 +29,8 @@ export async function action({ request }: Route.ActionArgs) {
     shippingDays,
     shippingProviderName,
     shippingServiceCode,
-    discountApplies,
     discountCode,
+    unitAmountCents,
   } = result.data;
 
   const itemsJson = JSON.stringify(trustedItems);
@@ -48,12 +47,18 @@ export async function action({ request }: Route.ActionArgs) {
     discount_code: discountCode ?? "",
   };
 
-  // El 10% de bienvenida aplica solo al precio de los productos, nunca al
-  // envío (el copy del sitio ya dice "en productos, sin contar el envío") —
-  // por eso se descuenta directo en cada line_item de producto en vez de usar
-  // un coupon de Stripe a nivel de sesión, que descontaría todas las líneas
-  // por igual, incluida la de envío que se agrega más abajo.
-  const discountFactor = discountApplies ? 1 - DISCOUNT_PERCENT / 100 : 1;
+  // El descuento del código (bienvenida o promotora) aplica solo a los
+  // productos, nunca al envío. `validateCheckout` ya calculó cuánto le toca a
+  // cada línea (`unitAmountCents`, con el precio ya rebajado). Para que Stripe
+  // lo muestre desglosado ("Descuento (CÓDIGO) −$X") se manda así: cada
+  // producto a su precio completo, un cupón de monto fijo por el total
+  // descontado, y el envío como `shipping_options` — Stripe no aplica los
+  // cupones a los envíos, así que no se rebajan. El total cobrado es el mismo.
+  const fullUnitCents = trustedItems.map((i) => Math.round(i.price * 100));
+  const discountCents = trustedItems.reduce(
+    (n, i, idx) => n + i.quantity * (fullUnitCents[idx] - unitAmountCents[idx]),
+    0,
+  );
 
   const line_items: Array<{
     price_data: {
@@ -62,30 +67,43 @@ export async function action({ request }: Route.ActionArgs) {
       unit_amount: number;
     };
     quantity: number;
-  }> = trustedItems.map((i) => ({
+  }> = trustedItems.map((i, idx) => ({
     price_data: {
       currency: "mxn",
       product_data: { name: `${i.productName} · ${i.colorName} · Talla ${i.size}` },
-      unit_amount: Math.round(i.price * 100 * discountFactor),
+      unit_amount: fullUnitCents[idx],
     },
     quantity: i.quantity,
   }));
-  line_items.push({
-    price_data: {
-      currency: "mxn",
-      product_data: { name: `Envío · ${shippingCarrier}` },
-      unit_amount: Math.round(shippingFee * 100),
-    },
-    quantity: 1,
-  });
 
   const origin = new URL(request.url).origin;
 
   try {
     const stripe = getStripe();
+    let discounts: Array<{ coupon: string }> | undefined;
+    if (discountCents > 0) {
+      const coupon = await stripe.coupons.create({
+        amount_off: discountCents,
+        currency: "mxn",
+        duration: "once",
+        // Es la etiqueta que ve la clienta en la pantalla de Stripe (máx. 40).
+        name: (discountCode ?? "Descuento").slice(0, 40),
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items,
+      ...(discounts ? { discounts } : {}),
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: { amount: Math.round(shippingFee * 100), currency: "mxn" },
+            display_name: `Envío · ${shippingCarrier}`,
+          },
+        },
+      ],
       payment_method_types: ["card", "oxxo"],
       customer_email: body.address.email,
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,

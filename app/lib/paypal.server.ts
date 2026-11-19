@@ -69,8 +69,13 @@ export interface PaypalOrderItem {
 
 export interface CreatePaypalOrderParams {
   pendingCheckoutId: string;
+  /** Productos a su precio completo (sin el descuento del código). */
   items: PaypalOrderItem[];
   shippingFeeCents: number;
+  /** Descuento total del código, en centavos (0 = sin descuento). PayPal lo
+   * muestra aparte; el envío nunca lleva descuento. */
+  discountCents?: number;
+  /** items − descuento + envío. */
   totalCents: number;
 }
 
@@ -82,6 +87,7 @@ export interface CreatePaypalOrderParams {
  */
 export async function createPaypalOrder(params: CreatePaypalOrderParams): Promise<string> {
   const itemTotalCents = params.items.reduce((n, i) => n + i.unitAmountCents * i.quantity, 0);
+  const discountCents = params.discountCents ?? 0;
 
   const data = (await paypalFetch("/v2/checkout/orders", {
     method: "POST",
@@ -96,6 +102,9 @@ export async function createPaypalOrder(params: CreatePaypalOrderParams): Promis
             breakdown: {
               item_total: { currency_code: "MXN", value: centsToAmount(itemTotalCents) },
               shipping: { currency_code: "MXN", value: centsToAmount(params.shippingFeeCents) },
+              ...(discountCents > 0
+                ? { discount: { currency_code: "MXN", value: centsToAmount(discountCents) } }
+                : {}),
             },
           },
           items: params.items.map((i) => ({
