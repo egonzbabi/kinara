@@ -13,6 +13,7 @@ La usuaria quiere ofrecer 20% de descuento a partir del 18 de nov de 2026 (el d�
 3. Solo productos sin precio tachado (`compare_at` nulo), igual que el Buen Fin. Nunca en el envío.
 4. Un código por promotora (para medir cuántas ventas trae cada una): `KINARA<descuento>-IDENTIFICADOR` (ej. `KINARA20-ANA`). **El porcentaje es variable por promotora (decisión del 2026-11-19):** se elige al crear el código en `/admin/promotoras` y queda escrito en el código; no se edita después (otro porcentaje = código nuevo y se apaga el anterior). La usuaria no tiene nombres todavía: da de alta identificadores desde `/admin/promotoras` y llena el nombre cuando lo tenga (el nombre es opcional y editable).
 5. No se suma con el Buen Fin (hasta el 17 de nov) ni con el código de bienvenida (un solo campo de código).
+6. Decisión del 2026-11-23: en compras distintas sí se permite usar ambos (el de bienvenida en la primera compra y, después, uno de promotora; cada uno una vez por correo). Nunca se suman en la misma compra. El caso inverso (promotora primero y bienvenida después) ya lo bloquea "solo para tu primera compra". La usuaria prefirió dejarlo así, sin bloquearlo.
 
 ## Objetivo
 
