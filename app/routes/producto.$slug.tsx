@@ -96,8 +96,14 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
     });
   }, [product.id, product.name, product.price, product.kind]);
 
+  // La página abre con un color ya elegido (tarea 153): el mismo cuyas fotos
+  // se ven al entrar, para que las tallas muestren de inmediato cuáles están
+  // agotadas EN ESE COLOR. Es el primer color con tallas disponibles (si el
+  // primero está agotado se salta al siguiente; la foto sigue a la selección).
   const [color, setColor] = useState<string | null>(
-    product.colors.length <= 1 ? (product.colors[0]?.name ?? "Único") : null,
+    () =>
+      (product.colors.find((c) => !isColorSoldOut(product, c.name)) ?? product.colors[0])?.name ??
+      "Único",
   );
   const [size, setSize] = useState<string | null>(
     product.sizes.length === 1 ? product.sizes[0] : null,
@@ -396,13 +402,15 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                     : allInCart
                   ? "Ya tienes todas las unidades disponibles"
                   : missingSelection
-                  ? "Selecciona color y talla"
+                  ? color
+                    ? "Selecciona tu talla"
+                    : "Selecciona color y talla"
                   : `Añadir al carrito de compras · ${formatPrice(product.price)}`}
             </Button>
           </div>
           {attempted && missingSelection && !colorSoldOut && !productSoldOut && (
             <p className="mt-2 text-[13px] font-medium text-clay">
-              Selecciona color y talla para continuar.
+              {color ? "Selecciona tu talla para continuar." : "Selecciona color y talla para continuar."}
             </p>
           )}
           {attempted && !missingSelection && selectedOutOfStock && !colorSoldOut && (
