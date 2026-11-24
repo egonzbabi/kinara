@@ -51,6 +51,7 @@ function mapRow(row: ProductRow): Product {
   }
 
   const sizes = ALL_SIZES.filter((s) => (stockBySize.get(s) ?? 0) > 0);
+  const listedSizes = ALL_SIZES.filter((s) => stockBySize.has(s));
 
   const genericImages = row.product_images
     .filter((img) => img.color_name === null)
@@ -86,6 +87,7 @@ function mapRow(row: ProductRow): Product {
     promoPreviewPrice: promoPreviewPrice(row.price, row.compare_at),
     colors,
     sizes,
+    listedSizes,
     gallery: genericImages.length > 0 ? genericImages : ["/productos/placeholder.png"],
     colorImages: hasColorPhotos ? colorImages : undefined,
     colorGallery: hasColorPhotos ? colorGallery : undefined,

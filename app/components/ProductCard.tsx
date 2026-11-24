@@ -7,7 +7,7 @@ import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
 import { getColorFamily } from "~/lib/colorFamilies";
 import { PROMO } from "~/lib/promo";
-import { isColorSoldOut, isProductSoldOut } from "~/lib/availability";
+import { isColorSoldOut, isProductSoldOut, isSizeSoldOut } from "~/lib/availability";
 
 // Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
 // "Image Transformations" de Supabase.
@@ -82,6 +82,7 @@ export function ProductCard({
   const productSoldOut = isProductSoldOut(product);
   const colorSoldOut = Boolean(color) && isColorSoldOut(product, color!);
   const unavailable = productSoldOut || colorSoldOut;
+  const soldOutSizes = product.listedSizes.filter((s) => isSizeSoldOut(product, s, color));
   const displayBadge = productSoldOut ? "Agotado" : (forceBadge ?? product.badge);
 
   const resetQuickAdd = () => {
@@ -264,15 +265,15 @@ export function ProductCard({
                   </div>
                 )}
 
-                {product.sizes.length > 1 && (
+                {product.listedSizes.length > 1 && (
                   <div
                     className={cn(
                       "mt-2 flex flex-wrap gap-1 rounded-lg",
                       attempted && !size && "outline outline-2 outline-offset-2 outline-clay",
                     )}
                   >
-                    {product.sizes.map((s) => {
-                      const outOfStock = Boolean(color) && stockFor(color!, s) <= 0;
+                    {product.listedSizes.map((s) => {
+                      const outOfStock = isSizeSoldOut(product, s, color);
                       return (
                         <button
                           key={s}
@@ -282,7 +283,8 @@ export function ProductCard({
                           }}
                           disabled={outOfStock}
                           aria-pressed={size === s}
-                          title={outOfStock ? `Agotado en ${color}` : undefined}
+                          title={outOfStock ? (color ? `Agotado en ${color}` : "Agotado") : undefined}
+                          aria-label={outOfStock ? `Talla ${s} — Agotado` : undefined}
                           className={cn(
                             "min-w-7 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
                             outOfStock
@@ -297,6 +299,11 @@ export function ProductCard({
                       );
                     })}
                   </div>
+                )}
+                {!unavailable && soldOutSizes.length > 0 && (
+                  <p className="mt-1.5 text-[11px] font-medium text-clay-deep">
+                    Agotado: {soldOutSizes.join(", ")}
+                  </p>
                 )}
 
                 <button

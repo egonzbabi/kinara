@@ -12,6 +12,22 @@ export function isColorSoldOut(product: Pick<Product, "stockByVariant">, colorNa
   return true;
 }
 
+/**
+ * Una talla está agotada: sin stock en el color elegido o, si aún no hay color
+ * elegido, sin stock en ningún color.
+ */
+export function isSizeSoldOut(
+  product: Pick<Product, "stockByVariant">,
+  size: string,
+  colorName: string | null,
+): boolean {
+  if (colorName) return (product.stockByVariant[`${colorName}|${size}`] ?? 0) <= 0;
+  const suffix = `|${size}`;
+  return !Object.entries(product.stockByVariant).some(
+    ([key, stock]) => key.endsWith(suffix) && stock > 0,
+  );
+}
+
 /** El producto está agotado cuando todos sus colores lo están. */
 export function isProductSoldOut(product: Pick<Product, "stockByVariant" | "colors">): boolean {
   if (product.colors.length === 0) return false;

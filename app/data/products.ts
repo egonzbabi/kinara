@@ -19,6 +19,8 @@ export type Product = {
   promoPreviewPrice?: number;
   colors: ColorOption[];
   sizes: string[];
+  /** Todas las tallas que existen para el producto, tengan stock o no (tarea 153): las agotadas se muestran marcadas "Agotado". */
+  listedSizes: string[];
   gallery: string[];
   /** Foto principal por color (nombre de color -> URL), cuando existe. Ver tasks/009-fotos-por-color.md. */
   colorImages?: Record<string, string>;

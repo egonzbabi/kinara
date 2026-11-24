@@ -23,7 +23,7 @@ import { trackViewItem, trackWhatsappClick } from "~/lib/analytics";
 import { productMessage, whatsappLink } from "~/lib/whatsapp";
 import { WhatsappIcon } from "~/components/WhatsappIcon";
 import { PROMO } from "~/lib/promo";
-import { isColorSoldOut, isProductSoldOut } from "~/lib/availability";
+import { isColorSoldOut, isProductSoldOut, isSizeSoldOut } from "~/lib/availability";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const product = await getProductBySlug(params.slug);
@@ -322,25 +322,29 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                 attempted && !size && !colorSoldOut && !productSoldOut && "outline outline-2 outline-offset-4 outline-clay",
               )}
             >
-              {product.sizes.map((s) => {
-                const outOfStock = Boolean(color) && stockFor(color!, s) <= 0;
+              {product.listedSizes.map((s) => {
+                const outOfStock = isSizeSoldOut(product, s, color);
                 return (
                   <button
                     key={s}
                     onClick={() => !outOfStock && setSize(s)}
                     disabled={outOfStock}
                     aria-pressed={size === s}
-                    title={outOfStock ? `Agotado en ${color}` : undefined}
+                    title={outOfStock ? (color ? `Agotado en ${color}` : "Agotado") : undefined}
+                    aria-label={outOfStock ? `Talla ${s} — Agotado` : undefined}
                     className={cn(
-                      "min-w-12 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
+                      "flex min-w-12 flex-col items-center justify-center rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
                       outOfStock
-                        ? "cursor-not-allowed border-line text-muted/50 line-through"
+                        ? "cursor-not-allowed border-line text-muted/60"
                         : size === s
                           ? "border-espresso bg-espresso text-bone"
                           : "border-line hover:border-espresso",
                     )}
                   >
-                    {s}
+                    <span className={cn(outOfStock && "line-through")}>{s}</span>
+                    {outOfStock && (
+                      <span className="text-[10px] font-semibold text-clay-deep">Agotado</span>
+                    )}
                   </button>
                 );
               })}
