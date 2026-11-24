@@ -295,6 +295,28 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["promoter_codes"]["Insert"]>;
         Relationships: [];
       };
+      coming_soon_items: {
+        Row: {
+          id: string;
+          name: string;
+          image_url: string | null;
+          image_base: string | null;
+          position: number;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          image_url?: string | null;
+          image_base?: string | null;
+          position?: number;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["coming_soon_items"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

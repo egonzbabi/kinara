@@ -31,6 +31,7 @@ export default [
     route("admin/mensajes", "routes/admin.mensajes.tsx"),
     route("admin/registros", "routes/admin.registros.tsx"),
     route("admin/promotoras", "routes/admin.promotoras.tsx"),
+    route("admin/proximamente", "routes/admin.proximamente.tsx"),
     route("admin/inventario", "routes/admin.inventario.tsx"),
     route("admin/inventario/excel", "routes/admin.inventario.excel.tsx"),
     route("admin/inventario/pdf", "routes/admin.inventario.pdf.tsx"),

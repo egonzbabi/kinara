@@ -191,5 +191,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 149 | [149-checkout-total-visible-y-envios.md](149-checkout-total-visible-y-envios.md) | done | Checkout: total visible, lista de envíos más corta y eventos de GA4 de envío/pago |
 | 150 | [150-codigo-qr-promotoras-20.md](150-codigo-qr-promotoras-20.md) | done | Códigos de descuento por promotora con QR y porcentaje variable, desde el 18 de nov de 2026 |
 | 151 | [151-checkout-tarifa-envio-por-transportista.md](151-checkout-tarifa-envio-por-transportista.md) | done | Checkout: la tarifa de envío elegida se identifica por transportista + servicio (DHL vs Imile) |
+| 152 | [152-proximamente-desde-admin.md](152-proximamente-desde-admin.md) | in-progress | Próximamente administrable desde el admin, con vista ampliada y paso a producto |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

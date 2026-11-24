@@ -12,6 +12,7 @@ import { isPromoActive, isPromoAnnounced } from "~/lib/promo";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { ComingSoonRail } from "~/components/ComingSoonRail";
 import { getAllProducts } from "~/lib/catalog";
+import { getComingSoonItems } from "~/lib/coming-soon";
 import { activeLandings } from "~/lib/shop-landings";
 import { useScrollReveal } from "~/hooks/useScrollReveal";
 import { seoMeta, SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, SOCIAL_PROFILES } from "~/lib/seo";
@@ -68,14 +69,14 @@ export function headers(_: Route.HeadersArgs) {
 }
 
 export async function loader() {
-  const products = await getAllProducts();
+  const [products, comingSoon] = await Promise.all([getAllProducts(), getComingSoonItems()]);
   // Hora del servidor para la banda de Buen Fin (tarea 148).
-  return { products, now: Date.now() };
+  return { products, comingSoon, now: Date.now() };
 }
 
 export default function Index({ loaderData }: Route.ComponentProps) {
   useScrollReveal();
-  const { products, now } = loaderData;
+  const { products, comingSoon, now } = loaderData;
 
   // Enlaces del footer/menú a secciones del home por #hash (ej. "Lo nuevo",
   // "Próximamente") — igual que "/#bienvenida" (ver WelcomeDiscountBanner),
@@ -144,7 +145,7 @@ export default function Index({ loaderData }: Route.ComponentProps) {
         </section>
       )}
 
-      <ComingSoonRail />
+      <ComingSoonRail items={comingSoon} />
 
       {/* Lo nuevo */}
       <section id="lo-nuevo" className="pad py-[clamp(48px,7vw,96px)]">

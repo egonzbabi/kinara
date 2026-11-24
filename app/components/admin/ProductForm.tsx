@@ -25,6 +25,9 @@ type Props = {
   product: AdminProductInput | null;
   productId?: string;
   error?: string;
+  /** Si el producto se está dando de alta a partir de una prenda de
+   * "Próximamente" (tarea 152): al guardarlo, esa prenda se quita de allí. */
+  comingSoonId?: string;
 };
 
 /** Tallas que se muestran para un color: las 4 de ropa, o solo "Única" para
@@ -201,7 +204,7 @@ async function compressImageIfNeeded(file: File): Promise<File> {
   });
 }
 
-async function uploadImage(
+export async function uploadImage(
   file: File,
   productId: string,
   kind: "generic" | "color",
@@ -229,7 +232,7 @@ async function uploadImage(
   return data.url;
 }
 
-export function ProductForm({ product, productId, error }: Props) {
+export function ProductForm({ product, productId, error, comingSoonId }: Props) {
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
   // Un producto ya existente no puede cambiar sus existencias desde aquí — solo
@@ -264,7 +267,7 @@ export function ProductForm({ product, productId, error }: Props) {
     () => product?.colors.some((c) => c.sizes.some((s) => s.size === ACCESSORY_SIZE)) ?? false,
   );
   const [kind, setKind] = useState(product?.kind ?? "");
-  const [price, setPrice] = useState(product?.price?.toString() ?? "");
+  const [price, setPrice] = useState(product?.price ? product.price.toString() : "");
   const [compareAt, setCompareAt] = useState(product?.compareAt?.toString() ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
   const [materials, setMaterials] = useState(product?.materials ?? "");
@@ -280,9 +283,9 @@ export function ProductForm({ product, productId, error }: Props) {
   // campos separados. Si se marca más de una, gana en este orden: Nuevo, Best-seller, Oferta.
   const badge = isNew ? "Nuevo" : isBestseller ? "Best-seller" : isOnSale ? "Oferta" : "";
   const [colors, setColors] = useState<AdminColorInput[]>(
-    product?.colors.map((c) => ({ ...c, sizes: sizesFor(c.sizes, singleSize) })) ?? [
-      emptyColor(singleSize),
-    ],
+    product && product.colors.length > 0
+      ? product.colors.map((c) => ({ ...c, sizes: sizesFor(c.sizes, singleSize) }))
+      : [emptyColor(singleSize)],
   );
   // Si se marca/desmarca "Talla única", re-arma las tallas de cada color al
   // molde correspondiente (4 tallas <-> solo "Única") — sin esto, cambiar el
@@ -568,6 +571,7 @@ export function ProductForm({ product, productId, error }: Props) {
     <form method="post" className="flex flex-col gap-8">
       <input type="hidden" name="colors_json" value={JSON.stringify(colors)} />
       <input type="hidden" name="gallery_json" value={JSON.stringify(gallery)} />
+      {comingSoonId && <input type="hidden" name="comingSoonId" value={comingSoonId} />}
 
       {(error || uploadError) && (
         <p className="rounded-lg bg-clay/10 px-4 py-3 text-sm text-clay" role="alert">

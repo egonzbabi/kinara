@@ -11,6 +11,7 @@ const TITLES: Record<string, string> = {
   "/admin/mensajes": "Mensajes",
   "/admin/registros": "Registros",
   "/admin/promotoras": "Promotoras",
+  "/admin/proximamente": "Próximamente",
   "/admin/inventario": "Inventario",
   "/admin/inventario/movimientos": "Movimientos de inventario",
   "/admin/inventario/conteo": "Conteo físico · Inventario",
