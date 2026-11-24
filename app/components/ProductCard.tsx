@@ -7,6 +7,7 @@ import { productImage, productSrcSet } from "~/lib/productImage";
 import { cn } from "~/lib/cn";
 import { getColorFamily } from "~/lib/colorFamilies";
 import { PROMO } from "~/lib/promo";
+import { isColorSoldOut, isProductSoldOut } from "~/lib/availability";
 
 // Solo 2 anchos (antes 3) — ver nota en ProductGallery.tsx sobre la cuota de
 // "Image Transformations" de Supabase.
@@ -76,7 +77,12 @@ export function ProductCard({
     (familyColorWithPhoto && product.colorImages?.[familyColorWithPhoto.name]) ||
     product.gallery[0];
   const hasSecond = product.gallery.length > 1;
-  const displayBadge = forceBadge ?? product.badge;
+  // Agotado por color (tarea 153): el color elegido no tiene tallas, o el
+  // producto completo no tiene stock en ningún color.
+  const productSoldOut = isProductSoldOut(product);
+  const colorSoldOut = Boolean(color) && isColorSoldOut(product, color!);
+  const unavailable = productSoldOut || colorSoldOut;
+  const displayBadge = productSoldOut ? "Agotado" : (forceBadge ?? product.badge);
 
   const resetQuickAdd = () => {
     setQuickAddOpen(false);
@@ -92,6 +98,7 @@ export function ProductCard({
 
   const confirmQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (unavailable) return;
     if (!color || !size || stockFor(color, size) <= 0) {
       setAttempted(true);
       return;
@@ -205,7 +212,8 @@ export function ProductCard({
               <div className="rounded-xl bg-sand/95 p-3 backdrop-blur">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[11px] font-medium text-muted">
-                    {color ?? "Elige color"} · {size ?? "Elige talla"}
+                    {color ?? "Elige color"} ·{" "}
+                    {unavailable ? "Agotado" : (size ?? "Elige talla")}
                   </span>
                   <button
                     onClick={(e) => {
@@ -233,17 +241,25 @@ export function ProductCard({
                           e.preventDefault();
                           setColor(c.name);
                         }}
-                        title={c.name}
-                        aria-label={c.name}
+                        title={isColorSoldOut(product, c.name) ? `${c.name} — Agotado` : c.name}
+                        aria-label={isColorSoldOut(product, c.name) ? `${c.name} — Agotado` : c.name}
                         aria-pressed={color === c.name}
                         className={cn(
-                          "h-6 w-6 rounded-full border transition-transform",
+                          "relative h-6 w-6 overflow-hidden rounded-full border transition-transform",
                           color === c.name
                             ? "ring-2 ring-espresso ring-offset-1 ring-offset-sand"
                             : "border-line hover:scale-110",
+                          isColorSoldOut(product, c.name) && "opacity-60",
                         )}
                         style={{ background: c.hex }}
-                      />
+                      >
+                        {isColorSoldOut(product, c.name) && (
+                          <span
+                            aria-hidden
+                            className="absolute left-1/2 top-[-2px] h-[calc(100%+4px)] w-[2px] -translate-x-1/2 rotate-45 bg-espresso shadow-[0_0_0_1px_var(--color-bone)]"
+                          />
+                        )}
+                      </button>
                     ))}
                   </div>
                 )}
@@ -287,12 +303,16 @@ export function ProductCard({
                   onClick={confirmQuickAdd}
                   className={cn(
                     "mt-2.5 w-full rounded-full py-2 text-[12px] font-semibold transition-colors",
-                    (color && size && stockFor(color, size) <= 0) || allInCart
+                    unavailable || (color && size && stockFor(color, size) <= 0) || allInCart
                       ? "cursor-not-allowed bg-line text-muted"
                       : "bg-espresso text-bone hover:bg-clay",
                   )}
                 >
-                  {color && size && stockFor(color, size) <= 0
+                  {productSoldOut
+                    ? "Agotado"
+                    : colorSoldOut
+                      ? "Agotado en este color"
+                      : color && size && stockFor(color, size) <= 0
                     ? "Agotado en esta combinación"
                     : allInCart
                       ? "Ya tienes todas las disponibles"

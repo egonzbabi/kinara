@@ -23,6 +23,7 @@ import { trackViewItem, trackWhatsappClick } from "~/lib/analytics";
 import { productMessage, whatsappLink } from "~/lib/whatsapp";
 import { WhatsappIcon } from "~/components/WhatsappIcon";
 import { PROMO } from "~/lib/promo";
+import { isColorSoldOut, isProductSoldOut } from "~/lib/availability";
 
 export async function loader({ params }: Route.LoaderArgs) {
   const product = await getProductBySlug(params.slug);
@@ -116,7 +117,12 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
     if (color && size && stockFor(color, size) <= 0) setSize(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [color]);
-  const selectedOutOfStock = Boolean(color && size && stockFor(color, size) <= 0);
+  // Agotado por color (tarea 153): el color elegido no tiene ninguna talla
+  // disponible, o el producto completo ya no tiene stock en ningún color.
+  const colorSoldOut = Boolean(color) && isColorSoldOut(product, color!);
+  const productSoldOut = isProductSoldOut(product);
+  const selectedOutOfStock =
+    colorSoldOut || Boolean(color && size && stockFor(color, size) <= 0);
   // Ya hay en el carrito todas las unidades disponibles de esta combinación.
   const allInCart =
     Boolean(color && size) &&
@@ -259,30 +265,44 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               Color:{" "}
               <span className="text-muted">
                 {color ?? "Selecciona un color"}
+                {colorSoldOut && <span className="font-semibold text-clay-deep"> · Agotado</span>}
               </span>
             </p>
             <div
               className={cn(
                 "mt-2.5 flex flex-wrap gap-2.5 rounded-lg",
-                attempted && !color && "outline outline-2 outline-offset-4 outline-clay",
+                attempted && !color && !productSoldOut && "outline outline-2 outline-offset-4 outline-clay",
               )}
             >
-              {product.colors.map((c) => (
-                <button
-                  key={c.name}
-                  onClick={() => setColor(c.name)}
-                  title={c.name}
-                  aria-label={c.name}
-                  aria-pressed={color === c.name}
-                  className={cn(
-                    "h-8 w-8 rounded-full border transition-transform",
-                    color === c.name
-                      ? "ring-2 ring-espresso ring-offset-2 ring-offset-sand"
-                      : "border-line hover:scale-110",
-                  )}
-                  style={{ background: c.hex }}
-                />
-              ))}
+              {product.colors.map((c) => {
+                const soldOut = isColorSoldOut(product, c.name);
+                const label = soldOut ? `${c.name} — Agotado` : c.name;
+                return (
+                  <button
+                    key={c.name}
+                    onClick={() => setColor(c.name)}
+                    title={label}
+                    aria-label={label}
+                    aria-pressed={color === c.name}
+                    className={cn(
+                      "relative h-8 w-8 overflow-hidden rounded-full border transition-transform",
+                      color === c.name
+                        ? "ring-2 ring-espresso ring-offset-2 ring-offset-sand"
+                        : "border-line hover:scale-110",
+                      soldOut && "opacity-60",
+                    )}
+                    style={{ background: c.hex }}
+                  >
+                    {/* Línea diagonal: color agotado (no depende solo del color). */}
+                    {soldOut && (
+                      <span
+                        aria-hidden
+                        className="absolute left-1/2 top-[-2px] h-[calc(100%+4px)] w-[2px] -translate-x-1/2 rotate-45 bg-espresso shadow-[0_0_0_1px_var(--color-bone)]"
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -299,7 +319,7 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
             <div
               className={cn(
                 "mt-2.5 flex flex-wrap gap-2 rounded-lg",
-                attempted && !size && "outline outline-2 outline-offset-4 outline-clay",
+                attempted && !size && !colorSoldOut && !productSoldOut && "outline outline-2 outline-offset-4 outline-clay",
               )}
             >
               {product.sizes.map((s) => {
@@ -325,6 +345,13 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
                 );
               })}
             </div>
+            {(colorSoldOut || productSoldOut) && (
+              <p role="status" className="mt-3 text-[13px] font-semibold text-clay-deep">
+                {productSoldOut
+                  ? "Agotado: por ahora no hay tallas disponibles de este producto."
+                  : `Agotado en ${color}: no hay tallas disponibles en este color. Elige otro color.`}
+              </p>
+            )}
             <a
               href={whatsappLink(productMessage(product.name, color))}
               target="_blank"
@@ -350,24 +377,31 @@ export default function ProductDetail({ loaderData }: Route.ComponentProps) {
               size="lg"
               full
               onClick={onAdd}
-              aria-disabled={missingSelection || selectedOutOfStock || allInCart}
-              className={cn((missingSelection || selectedOutOfStock || allInCart) && "is-inactive")}
+              aria-disabled={missingSelection || selectedOutOfStock || allInCart || productSoldOut}
+              className={cn(
+                (missingSelection || selectedOutOfStock || allInCart || productSoldOut) &&
+                  "is-inactive",
+              )}
             >
-              {selectedOutOfStock
-                ? "Agotado en esta combinación"
-                : allInCart
+              {productSoldOut
+                ? "Agotado"
+                : colorSoldOut
+                  ? "Agotado en este color"
+                  : selectedOutOfStock
+                    ? "Agotado en esta combinación"
+                    : allInCart
                   ? "Ya tienes todas las unidades disponibles"
                   : missingSelection
                   ? "Selecciona color y talla"
                   : `Añadir al carrito de compras · ${formatPrice(product.price)}`}
             </Button>
           </div>
-          {attempted && missingSelection && (
+          {attempted && missingSelection && !colorSoldOut && !productSoldOut && (
             <p className="mt-2 text-[13px] font-medium text-clay">
               Selecciona color y talla para continuar.
             </p>
           )}
-          {attempted && !missingSelection && selectedOutOfStock && (
+          {attempted && !missingSelection && selectedOutOfStock && !colorSoldOut && (
             <p className="mt-2 text-[13px] font-medium text-clay">
               Esa combinación de color y talla está agotada.
             </p>
