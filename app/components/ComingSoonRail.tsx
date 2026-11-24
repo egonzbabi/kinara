@@ -37,7 +37,9 @@ export function ComingSoonRail({ items }: { items: ComingSoonItem[] }) {
         onPointerDown={(e) => {
           pressX.current = e.clientX;
         }}
-        className="no-scrollbar flex cursor-grab snap-x snap-mandatory gap-4 overflow-x-auto px-[clamp(20px,5vw,80px)] pb-2"
+        // scroll-px = mismo margen que px: sin él, el imán (snap-start) pega la
+        // primera foto al borde de la pantalla en cuanto el navegador re-alinea.
+        className="no-scrollbar flex cursor-grab snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-[clamp(20px,5vw,80px)] px-[clamp(20px,5vw,80px)] pb-2"
       >
         {items.map((item, index) => (
           <article
