@@ -46,6 +46,16 @@
      donde se usa) — apenas debajo del 4.5:1 de AA. Este tono llega a
      ~4.53:1 sobre sand (y ~5.17:1 sobre bone), cambio casi imperceptible. */
   --color-muted: #6d6356; /* secondary text */
+  /* Promoción de temporada (tarea 154): solo para los banners de Black Friday
+     / Cyber Monday (autorizado puntualmente por la usuaria, 2026-11-24).
+     Versión clara y luminosa, a propósito lo opuesto al Buen Fin (fondo
+     oscuro): champaña/crema con texto espresso (~13:1) y tinta dorada oscura
+     para rótulos pequeños (~5.4:1 sobre champaña). El dorado claro es solo
+     decorativo (destellos, bordes). */
+  --color-champagne: #f6e3b4;
+  --color-champagne-light: #fff7e0;
+  --color-gold: #c9962f;
+  --color-gold-ink: #7a5314;
   --color-line: rgb(43 33 24 / 0.14);
   --color-line-strong: rgb(43 33 24 / 0.24);
 
@@ -63,6 +73,8 @@
 
   /* Motion */
   --animate-marquee: marquee 55s linear infinite;
+  --animate-twinkle: twinkle 2.2s ease-in-out infinite;
+  --animate-shine: shine 2.8s ease-in-out infinite alternate;
 }
 
 @layer base {
@@ -217,6 +229,29 @@
     animation:
       bounce-in 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both,
       bounce-loop 1.8s ease-in-out 0.9s infinite;
+  }
+
+  /* Haz de luz que va y vuelve sin pausa por los banners de promoción (tarea 154). */
+  @keyframes shine {
+    0% {
+      transform: translateX(-130%) skewX(-18deg);
+    }
+    100% {
+      transform: translateX(520%) skewX(-18deg);
+    }
+  }
+
+  /* Destellos de los banners de promoción (tarea 154). */
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.25;
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
   }
 
   @keyframes marquee {

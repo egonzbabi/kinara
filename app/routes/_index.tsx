@@ -7,7 +7,7 @@ import { CategoryTiles } from "~/components/CategoryTiles";
 import { ProductGrid } from "~/components/ProductGrid";
 import { EditorialSplit } from "~/components/EditorialSplit";
 import { WelcomeDiscountBanner } from "~/components/WelcomeDiscountBanner";
-import { BuenFinBand, BuenFinStrip } from "~/components/BuenFinBand";
+import { PromoBand, PromoStrip } from "~/components/PromoBand";
 import { isPromoActive, isPromoAnnounced } from "~/lib/promo";
 import { BestsellerRail } from "~/components/BestsellerRail";
 import { ComingSoonRail } from "~/components/ComingSoonRail";
@@ -70,7 +70,7 @@ export function headers(_: Route.HeadersArgs) {
 
 export async function loader() {
   const [products, comingSoon] = await Promise.all([getAllProducts(), getComingSoonItems()]);
-  // Hora del servidor para la banda de Buen Fin (tarea 148).
+  // Hora del servidor para la banda de la promoción de temporada (tareas 148 y 154).
   return { products, comingSoon, now: Date.now() };
 }
 
@@ -102,10 +102,10 @@ export default function Index({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      {isPromoAnnounced(now) && <BuenFinStrip now={now} />}
+      {isPromoAnnounced(now) && <PromoStrip now={now} />}
       <Hero />
 
-      {isPromoAnnounced(now) && <BuenFinBand now={now} />}
+      {isPromoAnnounced(now) && <PromoBand now={now} />}
 
       {/* Mensaje de marca en texto visible (tarea 142): Google arma el
           fragmento del resultado con el texto de la página, y sin esta frase

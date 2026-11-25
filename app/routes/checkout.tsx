@@ -580,7 +580,7 @@ export default function Checkout() {
           {promoActive ? (
             <p className="mt-5 max-w-md rounded-lg bg-clay/10 px-4 py-3 text-sm text-espresso">
               <span className="font-semibold">
-                {PROMO.name}: {PROMO.percent}% de descuento ya aplicado en tus productos.
+                {PROMO.fullName}: {PROMO.percent}% de descuento ya aplicado en tus productos.
               </span>{" "}
               No se suma con códigos de descuento.
             </p>

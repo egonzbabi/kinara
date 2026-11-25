@@ -193,5 +193,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 151 | [151-checkout-tarifa-envio-por-transportista.md](151-checkout-tarifa-envio-por-transportista.md) | done | Checkout: la tarifa de envío elegida se identifica por transportista + servicio (DHL vs Imile) |
 | 152 | [152-proximamente-desde-admin.md](152-proximamente-desde-admin.md) | done | Próximamente administrable desde el admin, con vista ampliada y paso a producto |
 | 153 | [153-agotado-por-color.md](153-agotado-por-color.md) | in-progress | Mostrar 'Agotado' cuando un color no tiene tallas disponibles |
+| 154 | [154-promocion-black-friday-cyber-monday.md](154-promocion-black-friday-cyber-monday.md) | in-progress | Promoción Black Friday y Cyber Monday: 30% automático del 27 al 30 de noviembre de 2026 |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

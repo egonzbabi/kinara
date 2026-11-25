@@ -24,7 +24,7 @@ export type DiscountResolution =
     }
   | { ok: false; error: string };
 
-const PROMO_ACTIVE_ERROR = `Los códigos de descuento no se suman a la promoción de ${PROMO.name}. Quítalo para continuar; te sigue sirviendo después de la promoción.`;
+const PROMO_ACTIVE_ERROR = `Los códigos de descuento no se suman a la promoción de ${PROMO.fullName}. Quítalo para continuar; te sigue sirviendo después de la promoción.`;
 const ALL_ON_SALE_ERROR = "Los productos de tu carrito ya están en oferta y no suman este código.";
 
 /** Aplica `percent` solo a las líneas elegibles. Un solo lugar para el redondeo
