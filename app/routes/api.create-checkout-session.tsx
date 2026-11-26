@@ -105,6 +105,11 @@ export async function action({ request }: Route.ActionArgs) {
         },
       ],
       payment_method_types: ["card", "oxxo"],
+      // Meses sin intereses (tarea 155): Stripe muestra los planes solo si la
+      // tarjeta es de crédito emitida en México y el total pasa el mínimo del
+      // plan. Los plazos disponibles y sus mínimos se controlan en el Dashboard
+      // de Stripe (Configuración → Métodos de pago → Meses sin intereses).
+      payment_method_options: { card: { installments: { enabled: true } } },
       customer_email: body.address.email,
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout/cancelado`,
