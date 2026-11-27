@@ -195,5 +195,6 @@ Ninguna tarea se marca `done` solo por cumplir sus propios criterios de aceptaci
 | 153 | [153-agotado-por-color.md](153-agotado-por-color.md) | in-progress | Mostrar 'Agotado' cuando un color no tiene tallas disponibles |
 | 154 | [154-promocion-black-friday-cyber-monday.md](154-promocion-black-friday-cyber-monday.md) | in-progress | Promoción Black Friday y Cyber Monday: 30% automático del 27 al 30 de noviembre de 2026 |
 | 155 | [155-meses-sin-intereses.md](155-meses-sin-intereses.md) | in-progress | Meses sin intereses (3 MSI) en el pago con tarjeta |
+| 156 | [156-qr-promotoras-con-texto.md](156-qr-promotoras-con-texto.md) | in-progress | QR de promotoras con la marca KINARA y el texto «Descuento exclusivo para las clientas de…» |
 
 Sin orden fijo — se ejecutan según se indique. La tarea 004 tiene un prerrequisito a cargo del usuario (crear la property de GA4) antes de poder implementarse.

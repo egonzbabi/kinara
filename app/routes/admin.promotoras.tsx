@@ -15,6 +15,7 @@ import {
 } from "~/lib/discount-constants";
 import { formatPrice } from "~/lib/formatPrice";
 import { cn } from "~/lib/cn";
+import { buildPromoterCard } from "~/lib/promoter-card";
 
 export function meta(_: Route.MetaArgs) {
   return [{ title: "Promotoras · Admin · KINARA" }];
@@ -135,8 +136,34 @@ function PromoterRow({ p }: { p: Route.ComponentProps["loaderData"]["promoters"]
   const toggle = useFetcher<ActionResult>();
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const [cardState, setCardState] = useState<"idle" | "working" | "error">("idle");
 
   const active = toggle.formData ? toggle.formData.get("active") === "true" : p.active;
+
+  // Tarjeta con la marca, "Descuento exclusivo para las clientas de <nombre>" y
+  // el QR (tarea 156). Se arma aquí en el navegador y se descarga como PNG.
+  async function downloadCard() {
+    setCardState("working");
+    try {
+      const blob = await buildPromoterCard({
+        name: p.name,
+        percent: p.percent,
+        code: p.code,
+        qrSvg: p.qrSvg,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `qr-${p.code.toLowerCase()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setCardState("idle");
+    } catch {
+      setCardState("error");
+    }
+  }
 
   async function copyLink() {
     try {
@@ -207,13 +234,14 @@ function PromoterRow({ p }: { p: Route.ComponentProps["loaderData"]["promoters"]
         >
           {showQr ? "Ocultar QR" : "Ver QR"}
         </button>
-        <a
-          href={`/admin/promotoras/qr?code=${encodeURIComponent(p.code)}`}
-          download
+        <button
+          type="button"
+          onClick={downloadCard}
+          disabled={cardState === "working"}
           className="btn btn-outline"
         >
-          Descargar QR
-        </a>
+          {cardState === "working" ? "Preparando…" : "Descargar QR"}
+        </button>
         <toggle.Form method="post" className="ml-auto">
           <input type="hidden" name="intent" value="toggle" />
           <input type="hidden" name="code" value={p.code} />
@@ -230,6 +258,12 @@ function PromoterRow({ p }: { p: Route.ComponentProps["loaderData"]["promoters"]
           </button>
         </toggle.Form>
       </div>
+
+      {cardState === "error" && (
+        <p className="mt-2 text-[13px] text-clay" role="alert">
+          No se pudo crear la imagen. Intenta de nuevo o usa otro navegador.
+        </p>
+      )}
 
       {showQr && (
         <div className="mt-4 flex flex-wrap items-center gap-4">
